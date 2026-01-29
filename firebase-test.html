@@ -1,0 +1,177 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Firebase Test - Survivor 50</title>
+    <style>
+        body {
+            font-family: system-ui, -apple-system, sans-serif;
+            max-width: 800px;
+            margin: 50px auto;
+            padding: 20px;
+            background: #f5f5f5;
+        }
+        .test-box {
+            background: white;
+            padding: 20px;
+            margin: 10px 0;
+            border-radius: 10px;
+            border-left: 4px solid #ccc;
+        }
+        .success { border-left-color: #22c55e; }
+        .error { border-left-color: #ef4444; }
+        .pending { border-left-color: #f59e0b; }
+        h1 { color: #333; }
+        code { 
+            background: #eee; 
+            padding: 2px 6px; 
+            border-radius: 3px;
+            font-size: 14px;
+        }
+        button {
+            background: #f97316;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 16px;
+            margin-top: 10px;
+        }
+        button:hover { background: #ea580c; }
+    </style>
+</head>
+<body>
+    <h1>🔥 Firebase Connection Test</h1>
+    <p>This page will test if Firebase is set up correctly.</p>
+    
+    <div id="test-1" class="test-box pending">
+        <h3>Test 1: Firebase SDK Loading</h3>
+        <p id="test-1-result">Checking...</p>
+    </div>
+    
+    <div id="test-2" class="test-box pending">
+        <h3>Test 2: Firebase Initialization</h3>
+        <p id="test-2-result">Waiting...</p>
+    </div>
+    
+    <div id="test-3" class="test-box pending">
+        <h3>Test 3: Database Connection</h3>
+        <p id="test-3-result">Waiting...</p>
+    </div>
+    
+    <div id="test-4" class="test-box pending">
+        <h3>Test 4: Write Test</h3>
+        <p id="test-4-result">Waiting...</p>
+        <button id="write-test" style="display:none;">Test Write to Database</button>
+    </div>
+    
+    <div id="console" class="test-box">
+        <h3>Console Messages:</h3>
+        <div id="console-output" style="font-family: monospace; font-size: 12px;"></div>
+    </div>
+    
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-database-compat.js"></script>
+    
+    <script>
+        const log = (msg) => {
+            const output = document.getElementById('console-output');
+            output.innerHTML += `<div>${new Date().toLocaleTimeString()}: ${msg}</div>`;
+            console.log(msg);
+        };
+        
+        const setTest = (num, status, message) => {
+            const box = document.getElementById(`test-${num}`);
+            const result = document.getElementById(`test-${num}-result`);
+            box.className = `test-box ${status}`;
+            result.innerHTML = message;
+        };
+        
+        // Test 1: Check if Firebase SDK loaded
+        setTimeout(() => {
+            if (typeof firebase !== 'undefined') {
+                setTest(1, 'success', '✅ Firebase SDK loaded successfully!');
+                log('Firebase SDK: OK');
+                runTest2();
+            } else {
+                setTest(1, 'error', '❌ Firebase SDK failed to load. Check your internet connection.');
+                log('Firebase SDK: FAILED');
+            }
+        }, 1000);
+        
+        // Test 2: Initialize Firebase
+        function runTest2() {
+            try {
+                const firebaseConfig = {
+                    apiKey: "AIzaSyAls1zpuUGgNx7xhlpCjF4bDEXp8qfxQ3A",
+                    authDomain: "survivorfantasy-cc908.firebaseapp.com",
+                    databaseURL: "https://survivorfantasy-cc908-default-rtdb.firebaseio.com",
+                    projectId: "survivorfantasy-cc908",
+                    storageBucket: "survivorfantasy-cc908.firebasestorage.app",
+                    messagingSenderId: "401357232113",
+                    appId: "1:401357232113:web:a9980c49bde38ff981d650"
+                };
+                
+                firebase.initializeApp(firebaseConfig);
+                setTest(2, 'success', '✅ Firebase initialized successfully!');
+                log('Firebase Init: OK');
+                log('Database URL: ' + firebaseConfig.databaseURL);
+                runTest3();
+            } catch (error) {
+                setTest(2, 'error', `❌ Error: ${error.message}`);
+                log('Firebase Init: FAILED - ' + error.message);
+            }
+        }
+        
+        // Test 3: Connect to Database
+        function runTest3() {
+            try {
+                const database = firebase.database();
+                const testRef = database.ref('connection-test');
+                
+                testRef.on('value', (snapshot) => {
+                    setTest(3, 'success', '✅ Connected to Realtime Database!');
+                    log('Database Connection: OK');
+                    document.getElementById('write-test').style.display = 'block';
+                });
+                
+                setTimeout(() => {
+                    const currentTest = document.getElementById('test-3');
+                    if (currentTest.className.includes('pending')) {
+                        setTest(3, 'error', '❌ Connection timeout. Check database rules.');
+                        log('Database Connection: TIMEOUT');
+                    }
+                }, 5000);
+                
+            } catch (error) {
+                setTest(3, 'error', `❌ Error: ${error.message}`);
+                log('Database Connection: FAILED - ' + error.message);
+            }
+        }
+        
+        // Test 4: Write Test
+        document.getElementById('write-test').addEventListener('click', function() {
+            try {
+                const database = firebase.database();
+                const timestamp = Date.now();
+                
+                database.ref('test-write').set({
+                    message: 'Test from Survivor 50 Fantasy League',
+                    timestamp: timestamp
+                }).then(() => {
+                    setTest(4, 'success', '✅ Write successful! Database is working perfectly. <br><br><strong>Your site is ready to go! 🎉</strong>');
+                    log('Write Test: SUCCESS');
+                }).catch((error) => {
+                    setTest(4, 'error', `❌ Write failed: ${error.message}<br>Check your database security rules.`);
+                    log('Write Test: FAILED - ' + error.message);
+                });
+            } catch (error) {
+                setTest(4, 'error', `❌ Error: ${error.message}`);
+                log('Write Test: ERROR - ' + error.message);
+            }
+        });
+    </script>
+</body>
+</html>
