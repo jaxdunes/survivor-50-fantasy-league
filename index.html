@@ -55,15 +55,28 @@
     <script>
     // ===== FIREBASE CONFIGURATION =====
     // Replace these values with your Firebase project config
-    const firebaseConfig = {
-        apiKey: "YOUR_API_KEY_HERE",
-        authDomain: "YOUR_AUTH_DOMAIN_HERE",
-        databaseURL: "YOUR_DATABASE_URL_HERE",
-        projectId: "YOUR_PROJECT_ID_HERE",
-        storageBucket: "YOUR_STORAGE_BUCKET_HERE",
-        messagingSenderId: "YOUR_MESSAGING_SENDER_ID_HERE",
-        appId: "YOUR_APP_ID_HERE"
-    };
+  // Import the functions you need from the SDKs you need
+import { initializeApp } from "firebase/app";
+import { getAnalytics } from "firebase/analytics";
+// TODO: Add SDKs for Firebase products that you want to use
+// https://firebase.google.com/docs/web/setup#available-libraries
+
+// Your web app's Firebase configuration
+// For Firebase JS SDK v7.20.0 and later, measurementId is optional
+const firebaseConfig = {
+  apiKey: "AIzaSyAls1zpuUGgNx7xhlpCjF4bDEXp8qfxQ3A",
+  authDomain: "survivorfantasy-cc908.firebaseapp.com",
+  databaseURL: "https://survivorfantasy-cc908-default-rtdb.firebaseio.com",
+  projectId: "survivorfantasy-cc908",
+  storageBucket: "survivorfantasy-cc908.firebasestorage.app",
+  messagingSenderId: "401357232113",
+  appId: "1:401357232113:web:a9980c49bde38ff981d650",
+  measurementId: "G-1NGE8NBSXS"
+};
+
+// Initialize Firebase
+const app = initializeApp(firebaseConfig);
+const analytics = getAnalytics(app);
     
     // Initialize Firebase
     let database;
