@@ -1,0 +1,558 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Survivor 50 Fantasy League</title>
+    <script src="https://cdn.jsdelivr.net/npm/react@18.2.0/umd/react.production.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/react-dom@18.2.0/umd/react-dom.production.min.js"></script>
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <!-- Firebase SDK -->
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-database-compat.js"></script>
+    
+    <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Playfair+Display:wght@700&display=swap" rel="stylesheet">
+    <style>
+        body { margin: 0; padding: 0; font-family: system-ui, -apple-system, sans-serif; }
+        #root { min-height: 100vh; }
+        .grey-ombre-bg {
+            background: linear-gradient(135deg, #f5f5f5 0%, #9e9e9e 50%, #424242 100%);
+            min-height: 100vh;
+        }
+        .modal-backdrop {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.5);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 1000;
+            padding: 20px;
+        }
+        .modal-content {
+            background: white;
+            border-radius: 20px;
+            max-width: 900px;
+            max-height: 90vh;
+            overflow-y: auto;
+            width: 100%;
+        }
+    </style>
+</head>
+<body>
+    <div id="root">
+        <div style="display: flex; justify-content: center; align-items: center; min-height: 100vh; font-size: 24px; color: #f97316; font-weight: bold;">
+            🔥 Loading Survivor 50...
+        </div>
+    </div>
+    
+    <script src="https://unpkg.com/lucide@latest"></script>
+    
+    <script>
+    // ===== FIREBASE CONFIGURATION =====
+    // Replace these values with your Firebase project config
+    const firebaseConfig = {
+        apiKey: "YOUR_API_KEY_HERE",
+        authDomain: "YOUR_AUTH_DOMAIN_HERE",
+        databaseURL: "YOUR_DATABASE_URL_HERE",
+        projectId: "YOUR_PROJECT_ID_HERE",
+        storageBucket: "YOUR_STORAGE_BUCKET_HERE",
+        messagingSenderId: "YOUR_MESSAGING_SENDER_ID_HERE",
+        appId: "YOUR_APP_ID_HERE"
+    };
+    
+    // Initialize Firebase
+    let database;
+    let firebaseInitialized = false;
+    
+    try {
+        firebase.initializeApp(firebaseConfig);
+        database = firebase.database();
+        firebaseInitialized = true;
+        console.log('🔥 Firebase initialized successfully!');
+    } catch (error) {
+        console.error('Firebase initialization error:', error);
+        console.log('⚠️ Running in local mode. Please add your Firebase config.');
+    }
+    
+    window.addEventListener('load', function() {
+        setTimeout(function() {
+            initializeApp();
+        }, 500);
+    });
+    
+    function initializeApp() {
+        const { createElement: h, useState, useMemo, Fragment, useEffect } = React;
+        
+        const createIcon = (svgContent) => {
+            return (props) => h('svg', {
+                width: props.size || 24,
+                height: props.size || 24,
+                viewBox: '0 0 24 24',
+                fill: 'none',
+                stroke: 'currentColor',
+                strokeWidth: 2,
+                strokeLinecap: 'round',
+                strokeLinejoin: 'round',
+                dangerouslySetInnerHTML: { __html: svgContent }
+            });
+        };
+        
+        const Icons = {
+            Users: createIcon('<path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"></path><circle cx="9" cy="7" r="4"></circle><path d="M22 21v-2a4 4 0 0 0-3-3.87"></path><path d="M16 3.13a4 4 0 0 1 0 7.75"></path>'),
+            Trophy: createIcon('<path d="M6 9H4.5a2.5 2.5 0 0 1 0-5H6"></path><path d="M18 9h1.5a2.5 2.5 0 0 0 0-5H18"></path><path d="M4 22h16"></path><path d="M10 14.66V17c0 .55-.47.98-.97 1.21C7.85 18.75 7 20.24 7 22"></path><path d="M14 14.66V17c0 .55.47.98.97 1.21C16.15 18.75 17 20.24 17 22"></path><path d="M18 2H6v7a6 6 0 0 0 12 0V2Z"></path>'),
+            Target: createIcon('<circle cx="12" cy="12" r="10"></circle><circle cx="12" cy="12" r="6"></circle><circle cx="12" cy="12" r="2"></circle>'),
+            Search: createIcon('<circle cx="11" cy="11" r="8"></circle><path d="m21 21-4.3-4.3"></path>'),
+            Filter: createIcon('<polygon points="22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3"></polygon>'),
+            X: createIcon('<path d="M18 6 6 18"></path><path d="m6 6 12 12"></path>'),
+            Check: createIcon('<polyline points="20 6 9 17 4 12"></polyline>'),
+            Wifi: createIcon('<path d="M5 13a10 10 0 0 1 14 0"></path><path d="M8.5 16.5a5 5 0 0 1 7 0"></path><path d="M2 8.82a15 15 0 0 1 20 0"></path><circle cx="12" cy="20" r="1"></circle>'),
+            WifiOff: createIcon('<line x1="2" y1="2" x2="22" y2="22"></line><path d="M8.5 16.5a5 5 0 0 1 7 0"></path><path d="M2 8.82a15 15 0 0 1 4.17-2.65"></path><path d="M10.66 5c4.01-.36 8.14.9 11.34 3.76"></path><path d="M16.85 11.25a10 10 0 0 1 2.22 1.68"></path><path d="M5 13a10 10 0 0 1 5.24-2.76"></path><circle cx="12" cy="20" r="1"></circle>')
+        };
+        
+        function SurvivorFantasyLeague() {
+            const teams = [
+                { id: 'jackson-ray', name: 'Jackson/Ray', color: 'from-blue-500 to-indigo-600', bgColor: 'bg-blue-50', textColor: 'text-blue-700' },
+                { id: 'ryan-jordan', name: 'Ryan/Jordan', color: 'from-green-500 to-emerald-600', bgColor: 'bg-green-50', textColor: 'text-green-700' },
+                { id: 'austin-sandra', name: 'Austin/Sandra', color: 'from-red-500 to-rose-600', bgColor: 'bg-red-50', textColor: 'text-red-700' },
+                { id: 'maura', name: 'Maura', color: 'from-purple-500 to-violet-600', bgColor: 'bg-purple-50', textColor: 'text-purple-700' },
+                { id: 'ashlyn', name: 'Ashlyn', color: 'from-pink-500 to-fuchsia-600', bgColor: 'bg-pink-50', textColor: 'text-pink-700' },
+                { id: 'sydney', name: 'Sydney', color: 'from-amber-500 to-orange-600', bgColor: 'bg-amber-50', textColor: 'text-amber-700' }
+            ];
+            
+            const [playerTeams, setPlayerTeams] = useState({});
+            const [searchTerm, setSearchTerm] = useState('');
+            const [filterEra, setFilterEra] = useState('all');
+            const [filterTribe, setFilterTribe] = useState('all');
+            const [filterTeam, setFilterTeam] = useState('all');
+            const [viewMode, setViewMode] = useState('players');
+            const [showPlayerDetail, setShowPlayerDetail] = useState(false);
+            const [playerDetailId, setPlayerDetailId] = useState(null);
+            const [showTeamModal, setShowTeamModal] = useState(false);
+            const [playerToAssign, setPlayerToAssign] = useState(null);
+            const [connected, setConnected] = useState(firebaseInitialized);
+            
+            // Firebase real-time sync
+            useEffect(() => {
+                if (!firebaseInitialized) {
+                    // Fallback to localStorage if Firebase not configured
+                    const saved = localStorage.getItem('survivor50-teams');
+                    if (saved) {
+                        setPlayerTeams(JSON.parse(saved));
+                    }
+                    return;
+                }
+                
+                const teamsRef = database.ref('teams');
+                
+                // Listen for changes
+                teamsRef.on('value', (snapshot) => {
+                    const data = snapshot.val();
+                    if (data) {
+                        setPlayerTeams(data);
+                    }
+                });
+                
+                // Cleanup
+                return () => teamsRef.off();
+            }, []);
+            
+            // Save to Firebase when teams change
+            const updateFirebase = (newTeams) => {
+                if (firebaseInitialized) {
+                    database.ref('teams').set(newTeams);
+                } else {
+                    // Fallback to localStorage
+                    localStorage.setItem('survivor50-teams', JSON.stringify(newTeams));
+                }
+            };
+            
+            const players = [
+                // CILA TRIBE
+                { id: 1, name: "Jenna Lewis-Dougherty", tribe: "Cila", seasons: ["S1: Borneo", "S8: All-Stars"], placement: "3rd in All-Stars", era: "Old School", strengths: ["Social Game", "Longevity"], threat: "Medium", note: "Original Borneo castaway returning after 20+ years!", image: "https://www.fantasysurvivorgame.com/images/50/draftpics/jennaDFT.jpg" },
+                { id: 2, name: "Cirie Fields", tribe: "Cila", seasons: ["S12", "S16", "S20", "S34"], placement: "4th multiple times", era: "Legend", strengths: ["Strategy", "Social"], threat: "EXTREMELY HIGH", note: "5-time player! Best to never win", image: "https://www.fantasysurvivorgame.com/images/50/draftpics/cirieDFT.jpg" },
+                { id: 3, name: "Ozzy Lusth", tribe: "Cila", seasons: ["S13", "S16", "S23", "S34"], placement: "2nd in Cook Islands", era: "Legend", strengths: ["Physical", "Provider"], threat: "EXTREMELY HIGH", note: "5-time player! Challenge beast", image: "https://www.fantasysurvivorgame.com/images/50/draftpics/ozzyDFT.jpg" },
+                { id: 4, name: "Christian Hubicki", tribe: "Cila", seasons: ["S37"], placement: "7th", era: "New School", strengths: ["Puzzles", "Likeable"], threat: "High", note: "Robotics professor with algorithm brain", image: "https://www.fantasysurvivorgame.com/images/50/draftpics/christianDFT.jpg" },
+                { id: 5, name: "Rick Devens", tribe: "Cila", seasons: ["S38"], placement: "4th", era: "New School", strengths: ["Idols", "Resilience"], threat: "High", note: "News anchor comeback king", image: "https://www.fantasysurvivorgame.com/images/50/draftpics/rickDFT.jpg" },
+                { id: 6, name: "Emily Flippen", tribe: "Cila", seasons: ["S45"], placement: "8th", era: "New Era", strengths: ["Strategic", "Social"], threat: "Medium", note: "Corporate strategist from S45", image: "https://www.fantasysurvivorgame.com/images/50/draftpics/emilyDFT.jpg" },
+                { id: 7, name: "Joe Hunter", tribe: "Cila", seasons: ["S46"], placement: "5th", era: "New Era", strengths: ["Physical", "Idols"], threat: "Very High", note: "Challenge competitor from S46", image: "https://www.fantasysurvivorgame.com/images/50/draftpics/joeDFT.jpg" },
+                { id: 8, name: "Savannah Louie", tribe: "Cila", seasons: ["S49 - WINNER"], placement: "WINNER", era: "New Era", strengths: ["Strategic", "Social"], threat: "EXTREMELY HIGH", note: "Just won S49! Only 2 weeks between seasons", image: "https://www.fantasysurvivorgame.com/images/50/draftpics/savannahDFT.jpg" },
+                
+                // KALO TRIBE  
+                { id: 9, name: "Coach Wade", tribe: "Kalo", seasons: ["S18", "S20", "S23"], placement: "2nd in South Pacific", era: "Old School", strengths: ["Leadership", "Character"], threat: "High", note: "The Dragon Slayer returns!", image: "https://www.fantasysurvivorgame.com/images/50/draftpics/coachDFT.jpg" },
+                { id: 10, name: "Chrissy Hofbeck", tribe: "Kalo", seasons: ["S35"], placement: "2nd", era: "New School", strengths: ["Strategic", "Challenges"], threat: "High", note: "Actuary who nearly won S35", image: "https://www.fantasysurvivorgame.com/images/50/draftpics/chrissyDFT.jpg" },
+                { id: 11, name: "Mike White", tribe: "Kalo", seasons: ["S37"], placement: "2nd", era: "New School", strengths: ["Social", "Strategic"], threat: "Very High", note: "Hollywood screenwriter & School of Rock writer", image: "https://www.fantasysurvivorgame.com/images/50/draftpics/mikeDFT.jpg" },
+                { id: 12, name: "Jonathan Young", tribe: "Kalo", seasons: ["S42"], placement: "4th", era: "New Era", strengths: ["Physical Beast", "Provider"], threat: "VERY HIGH", note: "Alabama strength coach. Absolute unit!", image: "https://www.fantasysurvivorgame.com/images/50/draftpics/jonathanDFT.jpg" },
+                { id: 13, name: "Charlie Davis", tribe: "Kalo", seasons: ["S46"], placement: "2nd", era: "New Era", strengths: ["Strategic", "Social"], threat: "Very High", note: "Law student who nearly won S46", image: "https://www.fantasysurvivorgame.com/images/50/draftpics/charlieDFT.jpg" },
+                { id: 14, name: "Tiffany Ervin", tribe: "Kalo", seasons: ["S46"], placement: "8th", era: "New Era", strengths: ["Strategic", "Underdog"], threat: "Medium", note: "Teacher from S46", image: "https://www.fantasysurvivorgame.com/images/50/draftpics/tiffanyDFT.jpg" },
+                { id: 15, name: "Kamilla Karthigesu", tribe: "Kalo", seasons: ["S46"], placement: "6th", era: "New Era", strengths: ["Physical", "Strategic"], threat: "High", note: "Has history with Joe from S46", image: "https://www.fantasysurvivorgame.com/images/50/draftpics/kamillaDFT.jpg" },
+                { id: 16, name: "Dee Valladares", tribe: "Kalo", seasons: ["S45 - WINNER"], placement: "WINNER", era: "New Era", strengths: ["Strategic", "Social"], threat: "EXTREMELY HIGH", note: "Winner of S45!", image: "https://www.fantasysurvivorgame.com/images/50/draftpics/deeDFT.jpg" },
+                
+                // VATU TRIBE
+                { id: 17, name: "Colby Donaldson", tribe: "Vatu", seasons: ["S2", "S8", "S20"], placement: "2nd in Australia", era: "Old School", strengths: ["Physical", "Leadership"], threat: "High", note: "Original challenge beast from S2", image: "https://www.fantasysurvivorgame.com/images/50/draftpics/colbyDFT.jpg" },
+                { id: 18, name: "Stephenie LaGrossa", tribe: "Vatu", seasons: ["S10", "S11", "S20"], placement: "2nd in Guatemala", era: "Old School", strengths: ["Physical", "Resilience"], threat: "High", note: "Last woman standing in Palau!", image: "https://www.fantasysurvivorgame.com/images/50/draftpics/stephenieDFT.jpg" },
+                { id: 19, name: "Aubry Bracco", tribe: "Vatu", seasons: ["S32", "S34", "S38"], placement: "2nd in Kaoh Rong", era: "New School", strengths: ["Strategic", "Adaptable"], threat: "Very High", note: "Fan favorite strategic player", image: "https://www.fantasysurvivorgame.com/images/50/draftpics/aubryDFT.jpg" },
+                { id: 20, name: "Angelina Keeley", tribe: "Vatu", seasons: ["S37"], placement: "3rd", era: "New School", strengths: ["Negotiation", "Strategy"], threat: "Medium-High", note: "Can I have your jacket? Rice negotiator!", image: "https://www.fantasysurvivorgame.com/images/50/draftpics/angelinaDFT.jpg" },
+                { id: 21, name: "Genevieve Mushaluk", tribe: "Vatu", seasons: ["S47"], placement: "3rd", era: "New Era", strengths: ["Strategy", "Cutthroat"], threat: "Very High", note: "Canadian lawyer. Cutthroat player", image: "https://www.fantasysurvivorgame.com/images/50/draftpics/genevieveDFT.jpg" },
+                { id: 22, name: "Q Burdette", tribe: "Vatu", seasons: ["S46"], placement: "7th", era: "New Era", strengths: ["Strategic", "Charismatic"], threat: "Medium-High", note: "Real estate agent from S46", image: "https://www.fantasysurvivorgame.com/images/50/draftpics/%22q%22DFT.jpg" },
+                { id: 23, name: "Rizo Velovic", tribe: "Vatu", seasons: ["S49"], placement: "TBD", era: "New Era", strengths: ["Unknown", "Fresh"], threat: "Medium", note: "Just finished S49 with Savannah!", image: "https://www.fantasysurvivorgame.com/images/50/draftpics/rizoDFT.jpg" },
+                { id: 24, name: "Kyle Fraser", tribe: "Vatu", seasons: ["S48 - WINNER"], placement: "WINNER", era: "New Era", strengths: ["Strategic", "Social"], threat: "EXTREMELY HIGH", note: "Winner of S48!", image: "https://www.fantasysurvivorgame.com/images/50/draftpics/kyleDFT.jpg" }
+            ];
+            
+            const assignPlayer = (playerId, teamId) => {
+                const teamRoster = players.filter(p => playerTeams[p.id] === teamId);
+                if (teamRoster.length >= 4) {
+                    alert('This team already has 4 players! Maximum team size is 4.');
+                    return;
+                }
+                
+                const newTeams = { ...playerTeams, [playerId]: teamId };
+                setPlayerTeams(newTeams);
+                updateFirebase(newTeams);
+                setShowTeamModal(false);
+                setPlayerToAssign(null);
+            };
+            
+            const removePlayer = (playerId) => {
+                const newTeams = { ...playerTeams };
+                delete newTeams[playerId];
+                setPlayerTeams(newTeams);
+                updateFirebase(newTeams);
+            };
+            
+            const openPlayerDetail = (playerId) => {
+                setPlayerDetailId(playerId);
+                setShowPlayerDetail(true);
+            };
+            
+            const openTeamModal = (playerId) => {
+                setPlayerToAssign(playerId);
+                setShowTeamModal(true);
+            };
+            
+            const filteredPlayers = useMemo(() => {
+                return players.filter(player => {
+                    const matchesSearch = player.name.toLowerCase().includes(searchTerm.toLowerCase());
+                    const matchesEra = filterEra === 'all' || player.era === filterEra;
+                    const matchesTribe = filterTribe === 'all' || player.tribe === filterTribe;
+                    const matchesTeam = filterTeam === 'all' || 
+                        (filterTeam === 'unassigned' && !playerTeams[player.id]) ||
+                        (filterTeam !== 'unassigned' && playerTeams[player.id] === filterTeam);
+                    return matchesSearch && matchesEra && matchesTribe && matchesTeam;
+                });
+            }, [searchTerm, filterEra, filterTribe, filterTeam, playerTeams]);
+            
+            const stats = useMemo(() => {
+                const assigned = Object.keys(playerTeams).length;
+                return {
+                    total: players.length,
+                    assigned,
+                    unassigned: players.length - assigned
+                };
+            }, [playerTeams]);
+            
+            const getTeamRoster = (teamId) => {
+                return players.filter(p => playerTeams[p.id] === teamId);
+            };
+            
+            const getTribeBadgeColor = (tribe) => {
+                if (tribe === 'Cila') return 'bg-white/90 text-orange-600 border border-orange-200';
+                if (tribe === 'Kalo') return 'bg-white/90 text-teal-600 border border-teal-200';
+                if (tribe === 'Vatu') return 'bg-white/90 text-purple-600 border border-purple-200';
+                return 'bg-gray-100 text-gray-800';
+            };
+            
+            const getThreatColor = (threat) => {
+                if (threat.includes('EXTREMELY')) return 'from-red-500 to-rose-600';
+                if (threat.includes('VERY')) return 'from-orange-500 to-amber-600';
+                if (threat.includes('High')) return 'from-yellow-500 to-orange-500';
+                return 'from-green-500 to-emerald-600';
+            };
+            
+            const getTribeColor = (tribe) => {
+                if (tribe === 'Cila') return 'from-orange-500 to-amber-600';
+                if (tribe === 'Kalo') return 'from-teal-500 to-cyan-600';
+                if (tribe === 'Vatu') return 'from-purple-500 to-pink-600';
+                return 'from-gray-500 to-slate-600';
+            };
+            
+            const PlayerCard = ({ player }) => {
+                const assignedTeam = playerTeams[player.id] ? teams.find(t => t.id === playerTeams[player.id]) : null;
+                
+                return h('div', { 
+                    className: 'bg-white rounded-2xl shadow-lg overflow-hidden hover:shadow-xl transition-all duration-300 border-2 border-gray-100'
+                },
+                    h('div', { className: `p-4 bg-gradient-to-r ${getTribeColor(player.tribe)} text-white relative` },
+                        h('img', {
+                            src: player.image,
+                            alt: player.name,
+                            className: 'absolute top-2 right-2 w-20 h-20 rounded-full border-3 border-white shadow-lg object-cover'
+                        }),
+                        h('div', { className: 'flex justify-between items-start mb-2' },
+                            assignedTeam ? 
+                                h('div', { className: `px-3 py-1 rounded-full text-xs font-bold flex items-center gap-1 bg-gradient-to-r ${assignedTeam.color} text-white shadow-lg` },
+                                    h(Icons.Check, { size: 12 }),
+                                    ` ${assignedTeam.name}`
+                                ) :
+                                h('div', { className: 'bg-yellow-500 text-yellow-900 px-3 py-1 rounded-full text-xs font-bold' }, 'UNASSIGNED')
+                        ),
+                        h('div', { className: 'text-white pr-24' },
+                            h('h3', { className: 'text-2xl font-black mb-1', style: { fontFamily: '"Bebas Neue", cursive' }}, player.name),
+                            h('div', { className: 'flex gap-2 items-center flex-wrap' },
+                                h('div', { className: 'text-xs font-semibold bg-white/20 backdrop-blur-sm px-3 py-1 rounded-full' }, player.era),
+                                h('div', { className: `text-xs font-semibold px-3 py-1 rounded-full ${getTribeBadgeColor(player.tribe)} backdrop-blur-sm shadow-sm` },
+                                    player.tribe === 'Cila' ? '🔥 ' : player.tribe === 'Kalo' ? '🌊 ' : '⚡ ',
+                                    player.tribe
+                                )
+                            )
+                        )
+                    ),
+                    h('div', { className: 'p-4' },
+                        h('div', { className: 'mb-3' },
+                            h('div', { className: 'text-xs font-bold text-gray-500 mb-1' }, 'SEASONS'),
+                            h('div', { className: 'text-sm text-gray-700' }, player.seasons.join(', '))
+                        ),
+                        h('div', { className: 'mb-3' },
+                            h('div', { className: 'text-xs font-bold text-gray-500 mb-1' }, 'BEST PLACEMENT'),
+                            h('div', { className: `text-sm font-bold ${player.placement.includes('WINNER') ? 'text-yellow-600' : 'text-gray-700'}` }, player.placement)
+                        ),
+                        h('div', { className: 'mb-3' },
+                            h('div', { className: 'text-xs font-bold text-gray-500 mb-1' }, 'THREAT LEVEL'),
+                            h('div', { className: `inline-block text-xs font-black px-3 py-1 rounded-full bg-gradient-to-r ${getThreatColor(player.threat)} text-white` }, player.threat)
+                        ),
+                        h('div', { className: 'mb-4' },
+                            h('div', { className: 'text-xs text-gray-600 italic' }, `"${player.note}"`)
+                        ),
+                        h('div', { className: 'flex gap-2' },
+                            assignedTeam ?
+                                h('button', {
+                                    onClick: () => removePlayer(player.id),
+                                    className: 'w-full px-4 py-2 bg-red-500 text-white rounded-lg font-bold hover:bg-red-600 transition text-sm'
+                                }, 'Remove') :
+                                h('button', {
+                                    onClick: () => openTeamModal(player.id),
+                                    className: 'w-full px-4 py-2 bg-gradient-to-r from-orange-500 to-amber-600 text-white rounded-lg font-bold hover:shadow-lg transition text-sm'
+                                }, 'Assign')
+                        )
+                    )
+                );
+            };
+            
+            return h('div', { className: 'min-h-screen grey-ombre-bg p-4 md:p-8' },
+                h('div', { className: 'max-w-7xl mx-auto' },
+                    // Connection Status
+                    h('div', { className: 'fixed top-4 right-4 z-50' },
+                        h('div', { className: `flex items-center gap-2 px-4 py-2 rounded-full ${connected ? 'bg-green-500' : 'bg-yellow-500'} text-white shadow-lg` },
+                            h(connected ? Icons.Wifi : Icons.WifiOff, { size: 16 }),
+                            h('span', { className: 'text-xs font-bold' }, connected ? 'LIVE' : 'LOCAL')
+                        )
+                    ),
+                    
+                    // Header
+                    h('div', { className: 'text-center mb-8' },
+                        h('img', {
+                            src: 'https://ew.com/thmb/6mbyDNpMeIIJDi91XdHmOLk0c0U=/1500x0/filters:no_upscale():max_bytes(150000):strip_icc()/SURVIVOR48-012825-05-a1d41174deeb40b0919aa8b2bfe6f22c.jpg',
+                            alt: 'Jeff Probst',
+                            className: 'w-32 h-32 rounded-full mx-auto mb-4 border-4 border-white shadow-xl object-cover'
+                        }),
+                        h('h1', { 
+                            className: 'text-6xl md:text-8xl font-black mb-4 text-gray-900 drop-shadow-lg',
+                            style: { fontFamily: '"Bebas Neue", cursive' }
+                        }, 'SURVIVOR 50'),
+                        h('p', { 
+                            className: 'text-2xl md:text-3xl text-gray-800 font-semibold drop-shadow-md',
+                            style: { fontFamily: '"Playfair Display", serif' }
+                        }, 'In the Hands of the Fans - Fantasy League')
+                    ),
+                    
+                    // Stats Bar
+                    h('div', { className: 'grid grid-cols-3 gap-6 bg-white/10 backdrop-blur-md rounded-2xl p-6 border border-white/20 mb-8' },
+                        h('div', { className: 'text-center text-gray-900' },
+                            h('div', { className: 'flex items-center justify-center gap-2 mb-1' },
+                                h(Icons.Users, { size: 24 }),
+                                h('span', { className: 'text-3xl font-bold' }, stats.total)
+                            ),
+                            h('div', { className: 'text-sm text-gray-800 font-medium' }, 'Total Players')
+                        ),
+                        h('div', { className: 'text-center text-gray-900' },
+                            h('div', { className: 'flex items-center justify-center gap-2 mb-1' },
+                                h(Icons.Check, { size: 24 }),
+                                h('span', { className: 'text-3xl font-bold' }, stats.assigned)
+                            ),
+                            h('div', { className: 'text-sm text-gray-800 font-medium' }, 'Assigned')
+                        ),
+                        h('div', { className: 'text-center text-gray-900' },
+                            h('div', { className: 'flex items-center justify-center gap-2 mb-1' },
+                                h(Icons.Target, { size: 24 }),
+                                h('span', { className: 'text-3xl font-bold' }, stats.unassigned)
+                            ),
+                            h('div', { className: 'text-sm text-gray-800 font-medium' }, 'Unassigned')
+                        )
+                    ),
+                    
+                    // View Toggle
+                    h('div', { className: 'flex justify-center mb-6' },
+                        h('div', { className: 'bg-white/95 backdrop-blur-md rounded-xl p-2 flex gap-2' },
+                            h('button', {
+                                onClick: () => setViewMode('players'),
+                                className: `px-6 py-2 rounded-lg font-bold transition ${viewMode === 'players' ? 'bg-gradient-to-r from-orange-500 to-amber-600 text-white' : 'text-gray-700 hover:bg-gray-100'}`
+                            }, 'Player View'),
+                            h('button', {
+                                onClick: () => setViewMode('rosters'),
+                                className: `px-6 py-2 rounded-lg font-bold transition ${viewMode === 'rosters' ? 'bg-gradient-to-r from-orange-500 to-amber-600 text-white' : 'text-gray-700 hover:bg-gray-100'}`
+                            }, 'Team Rosters')
+                        )
+                    ),
+                    
+                    viewMode === 'players' ? 
+                        h(Fragment, {},
+                            h('div', { className: 'bg-white/95 backdrop-blur-md rounded-2xl p-6 mb-8 shadow-xl' },
+                                h('div', { className: 'grid md:grid-cols-4 gap-4' },
+                                    h('input', {
+                                        type: 'text',
+                                        placeholder: 'Search players...',
+                                        value: searchTerm,
+                                        onChange: (e) => setSearchTerm(e.target.value),
+                                        className: 'px-4 py-3 border-2 border-gray-300 rounded-xl focus:border-orange-500 focus:outline-none'
+                                    }),
+                                    h('select', {
+                                        value: filterEra,
+                                        onChange: (e) => setFilterEra(e.target.value),
+                                        className: 'px-4 py-3 border-2 border-gray-300 rounded-xl focus:border-orange-500 focus:outline-none'
+                                    },
+                                        h('option', { value: 'all' }, 'All Eras'),
+                                        h('option', { value: 'Old School' }, 'Old School'),
+                                        h('option', { value: 'Legend' }, 'Legend'),
+                                        h('option', { value: 'New School' }, 'New School'),
+                                        h('option', { value: 'New Era' }, 'New Era')
+                                    ),
+                                    h('select', {
+                                        value: filterTribe,
+                                        onChange: (e) => setFilterTribe(e.target.value),
+                                        className: 'px-4 py-3 border-2 border-gray-300 rounded-xl focus:border-orange-500 focus:outline-none'
+                                    },
+                                        h('option', { value: 'all' }, 'All Tribes'),
+                                        h('option', { value: 'Cila' }, '🔥 Cila'),
+                                        h('option', { value: 'Kalo' }, '🌊 Kalo'),
+                                        h('option', { value: 'Vatu' }, '⚡ Vatu')
+                                    ),
+                                    h('select', {
+                                        value: filterTeam,
+                                        onChange: (e) => setFilterTeam(e.target.value),
+                                        className: 'px-4 py-3 border-2 border-gray-300 rounded-xl focus:border-orange-500 focus:outline-none'
+                                    },
+                                        h('option', { value: 'all' }, 'All Players'),
+                                        h('option', { value: 'unassigned' }, `Unassigned (${stats.unassigned})`)
+                                    )
+                                )
+                            ),
+                            
+                            h('div', { className: 'grid md:grid-cols-2 lg:grid-cols-3 gap-6' },
+                                ...filteredPlayers.map(player => h(PlayerCard, { key: player.id, player }))
+                            )
+                        ) :
+                        h('div', { className: 'grid md:grid-cols-2 lg:grid-cols-3 gap-6' },
+                            ...teams.map(team => {
+                                const roster = getTeamRoster(team.id);
+                                return h('div', {
+                                    key: team.id,
+                                    className: `bg-white rounded-2xl shadow-xl p-6 ${team.bgColor}`
+                                },
+                                    h('div', { className: 'mb-4' },
+                                        h('div', { className: 'flex items-center justify-between' },
+                                            h('h2', { 
+                                                className: `text-3xl font-black ${team.textColor}`,
+                                                style: { fontFamily: '"Bebas Neue", cursive' }
+                                            }, team.name),
+                                            roster.length >= 4 && h('div', { className: 'bg-green-500 text-white px-3 py-1 rounded-full text-xs font-bold' }, 'FULL')
+                                        ),
+                                        h('div', { className: 'text-sm text-gray-600 font-semibold' }, 
+                                            `${roster.length} / 4 Players`
+                                        )
+                                    ),
+                                    roster.length === 0 ?
+                                        h('div', { className: 'text-center py-8 text-gray-400 italic' },
+                                            'No players assigned yet'
+                                        ) :
+                                        h('div', { className: 'space-y-3' },
+                                            ...roster.map(player =>
+                                                h('div', {
+                                                    key: player.id,
+                                                    className: 'bg-white p-3 rounded-lg border-2 border-gray-200 hover:border-orange-300 transition'
+                                                },
+                                                    h('div', { className: 'flex justify-between items-start' },
+                                                        h('div', { className: 'flex-1' },
+                                                            h('div', {},
+                                                                h('div', { className: 'font-bold text-gray-900' }, player.name),
+                                                                h('div', { className: 'text-xs text-gray-600' }, 
+                                                                    `${player.tribe} • ${player.era}`
+                                                                )
+                                                            )
+                                                        ),
+                                                        h('button', {
+                                                            onClick: () => removePlayer(player.id),
+                                                            className: 'text-red-500 hover:text-red-700 transition ml-2'
+                                                        }, h(Icons.X, { size: 16 }))
+                                                    )
+                                                )
+                                            )
+                                        )
+                                );
+                            })
+                        ),
+                    
+                    // Team Modal
+                    showTeamModal && h('div', { 
+                        className: 'modal-backdrop',
+                        onClick: () => setShowTeamModal(false)
+                    },
+                        h('div', { 
+                            className: 'modal-content',
+                            onClick: (e) => e.stopPropagation()
+                        },
+                            h('div', { className: 'p-6' },
+                                h('h2', { className: 'text-2xl font-bold mb-4' }, 'Assign to Team'),
+                                h('div', { className: 'grid md:grid-cols-2 gap-4' },
+                                    ...teams.map(team => {
+                                        const teamRoster = getTeamRoster(team.id);
+                                        const isFull = teamRoster.length >= 4;
+                                        return h('button', {
+                                            key: team.id,
+                                            onClick: () => assignPlayer(playerToAssign, team.id),
+                                            disabled: isFull,
+                                            className: `p-4 rounded-xl border-2 transition ${team.bgColor} ${isFull ? 'opacity-50 cursor-not-allowed border-gray-400' : 'hover:shadow-lg border-gray-200'}`
+                                        },
+                                            h('div', { className: `text-lg font-bold ${team.textColor}` }, team.name),
+                                            h('div', { className: 'text-sm text-gray-600 mt-1' }, 
+                                                `${teamRoster.length} / 4 players${isFull ? ' - FULL' : ''}`
+                                            )
+                                        );
+                                    })
+                                ),
+                                h('button', {
+                                    onClick: () => setShowTeamModal(false),
+                                    className: 'mt-4 w-full py-3 bg-gray-200 rounded-xl font-bold hover:bg-gray-300 transition'
+                                }, 'Cancel')
+                            )
+                        )
+                    ),
+                    
+                    // Footer
+                    h('div', { className: 'mt-12 text-center text-gray-900' },
+                        h('p', { className: 'text-lg font-semibold mb-2' }, '📺 Season Premiere: February 25, 2026 on CBS'),
+                        h('p', { className: 'text-sm text-gray-700' }, '3-Hour Special Episode • Biggest Cast Ever • In the Hands of the Fans')
+                    )
+                )
+            );
+        }
+        
+        const root = ReactDOM.createRoot(document.getElementById('root'));
+        root.render(h(SurvivorFantasyLeague));
+    }
+    </script>
+</body>
+</html>
