@@ -1,0 +1,933 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Survivor 50 - Scoring</title>
+    <script src="https://cdn.jsdelivr.net/npm/react@18.2.0/umd/react.production.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/react-dom@18.2.0/umd/react-dom.production.min.js"></script>
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <!-- Firebase SDK -->
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-database-compat.js"></script>
+    
+    <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Playfair+Display:wght@700&display=swap" rel="stylesheet">
+    <style>
+        body { margin: 0; padding: 0; font-family: system-ui, -apple-system, sans-serif; }
+        #root { min-height: 100vh; }
+        .grey-ombre-bg {
+            background: linear-gradient(135deg, #f5f5f5 0%, #9e9e9e 50%, #424242 100%);
+            min-height: 100vh;
+        }
+        .modal-backdrop {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.7);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 1000;
+            padding: 20px;
+            overflow-y: auto;
+        }
+        .modal-content {
+            background: white;
+            border-radius: 20px;
+            max-width: 1200px;
+            max-height: 90vh;
+            overflow-y: auto;
+            width: 100%;
+            margin: 20px;
+        }
+        .rules-section {
+            background: white;
+            border-left: 4px solid #f97316;
+            padding: 16px;
+            margin: 12px 0;
+            border-radius: 8px;
+        }
+        .point-badge {
+            display: inline-block;
+            background: #f97316;
+            color: white;
+            padding: 2px 8px;
+            border-radius: 12px;
+            font-size: 12px;
+            font-weight: bold;
+            margin-left: 8px;
+        }
+    </style>
+</head>
+<body>
+    <div id="root">
+        <div style="display: flex; justify-content: center; align-items: center; min-height: 100vh; font-size: 24px; color: #f97316; font-weight: bold;">
+            🔥 Loading Survivor 50 Scoring...
+        </div>
+    </div>
+    
+    <script src="https://unpkg.com/lucide@latest"></script>
+    
+    <script>
+    // Firebase Configuration
+    const firebaseConfig = {
+        apiKey: "AIzaSyAls1zpuUGgNx7xhlpCjF4bDEXp8qfxQ3A",
+        authDomain: "survivorfantasy-cc908.firebaseapp.com",
+        databaseURL: "https://survivorfantasy-cc908-default-rtdb.firebaseio.com",
+        projectId: "survivorfantasy-cc908",
+        storageBucket: "survivorfantasy-cc908.firebasestorage.app",
+        messagingSenderId: "401357232113",
+        appId: "1:401357232113:web:a9980c49bde38ff981d650"
+    };
+    
+    let database;
+    let firebaseInitialized = false;
+    
+    try {
+        firebase.initializeApp(firebaseConfig);
+        database = firebase.database();
+        firebaseInitialized = true;
+        console.log('🔥 Firebase initialized');
+    } catch (error) {
+        console.error('Firebase error:', error);
+    }
+    
+    window.addEventListener('load', function() {
+        setTimeout(function() {
+            initializeApp();
+        }, 500);
+    });
+    
+    function initializeApp() {
+        const { createElement: h, useState, useMemo, Fragment, useEffect } = React;
+        
+        const createIcon = (svgContent) => {
+            return (props) => h('svg', {
+                width: props.size || 24,
+                height: props.size || 24,
+                viewBox: '0 0 24 24',
+                fill: 'none',
+                stroke: 'currentColor',
+                strokeWidth: 2,
+                strokeLinecap: 'round',
+                strokeLinejoin: 'round',
+                dangerouslySetInnerHTML: { __html: svgContent }
+            });
+        };
+        
+        const Icons = {
+            Trophy: createIcon('<path d="M6 9H4.5a2.5 2.5 0 0 1 0-5H6"></path><path d="M18 9h1.5a2.5 2.5 0 0 0 0-5H18"></path><path d="M4 22h16"></path><path d="M10 14.66V17c0 .55-.47.98-.97 1.21C7.85 18.75 7 20.24 7 22"></path><path d="M14 14.66V17c0 .55.47.98.97 1.21C16.15 18.75 17 20.24 17 22"></path><path d="M18 2H6v7a6 6 0 0 0 12 0V2Z"></path>'),
+            Plus: createIcon('<path d="M12 5v14m-7-7h14"></path>'),
+            Edit: createIcon('<path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path>'),
+            Book: createIcon('<path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"></path><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"></path>'),
+            Award: createIcon('<circle cx="12" cy="8" r="7"></circle><polyline points="8.21 13.89 7 23 12 20 17 23 15.79 13.88"></polyline>'),
+            X: createIcon('<path d="M18 6 6 18"></path><path d="m6 6 12 12"></path>'),
+            ChevronDown: createIcon('<polyline points="6 9 12 15 18 9"></polyline>'),
+            Home: createIcon('<path d="m3 9 9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path><polyline points="9 22 9 12 15 12 15 22"></polyline>')
+        };
+        
+        function ScoringPage() {
+            const teams = [
+                { id: 'austin', name: 'Austin', color: 'from-blue-500 to-indigo-600', bgColor: 'bg-blue-50', textColor: 'text-blue-700' },
+                { id: 'sandra', name: 'Sandra', color: 'from-green-500 to-emerald-600', bgColor: 'bg-green-50', textColor: 'text-green-700' },
+                { id: 'ashlynn', name: 'Ashlynn', color: 'from-red-500 to-rose-600', bgColor: 'bg-red-50', textColor: 'text-red-700' },
+                { id: 'jackson-ray', name: 'Jackson/Ray', color: 'from-purple-500 to-violet-600', bgColor: 'bg-purple-50', textColor: 'text-purple-700' },
+                { id: 'maura', name: 'Maura', color: 'from-pink-500 to-fuchsia-600', bgColor: 'bg-pink-50', textColor: 'text-pink-700' },
+                { id: 'ryan-jordan', name: 'Ryan/Jordan', color: 'from-amber-500 to-orange-600', bgColor: 'bg-amber-50', textColor: 'text-amber-700' }
+            ];
+            
+            const players = [
+                { id: 1, name: "Jenna Lewis-Dougherty" },
+                { id: 2, name: "Cirie Fields" },
+                { id: 3, name: "Ozzy Lusth" },
+                { id: 4, name: "Christian Hubicki" },
+                { id: 5, name: "Rick Devens" },
+                { id: 6, name: "Emily Flippen" },
+                { id: 7, name: "Joe Hunter" },
+                { id: 8, name: "Savannah Louie" },
+                { id: 9, name: "Coach Wade" },
+                { id: 10, name: "Chrissy Hofbeck" },
+                { id: 11, name: "Mike White" },
+                { id: 12, name: "Jonathan Young" },
+                { id: 13, name: "Charlie Davis" },
+                { id: 14, name: "Tiffany Ervin" },
+                { id: 15, name: "Kamilla Karthigesu" },
+                { id: 16, name: "Dee Valladares" },
+                { id: 17, name: "Colby Donaldson" },
+                { id: 18, name: "Stephenie LaGrossa" },
+                { id: 19, name: "Aubry Bracco" },
+                { id: 20, name: "Angelina Keeley" },
+                { id: 21, name: "Genevieve Mushaluk" },
+                { id: 22, name: "Q Burdette" },
+                { id: 23, name: "Rizo Velovic" },
+                { id: 24, name: "Kyle Fraser" }
+            ];
+            
+            const scoringCategories = [
+                { id: 'marooning', name: 'Win Marooning Challenge', points: 1, limit: 'once per season' },
+                { id: 'supply', name: 'Win Supply Challenge', points: 1, limit: 'once per season' },
+                { id: 'tribe-reward', name: 'Win Tribe Reward Challenge', points: 2, limit: 'per challenge' },
+                { id: 'tribe-immunity', name: 'Win Tribe Immunity Challenge', points: 3, limit: 'per challenge' },
+                { id: 'individual-reward', name: 'Win Individual Reward', points: 1, limit: 'per challenge' },
+                { id: 'individual-immunity', name: 'Win Individual Immunity', points: 2, limit: 'per challenge' },
+                { id: 'journey-challenge', name: 'Win Journey Challenge', points: 1, limit: 'per journey' },
+                { id: 'fire-making', name: 'Win Fire Making Challenge (F4)', points: 2, limit: 'once per season' },
+                { id: 'tree-mail', name: 'Read Tree Mail', points: 1, limit: 'once per episode' },
+                { id: 'find-idol-clue', name: 'Find Clue to Idol/Advantage', points: 1, limit: 'per clue' },
+                { id: 'gain-idol', name: 'Gain Immunity Idol', points: 1, limit: 'per idol' },
+                { id: 'gain-advantage', name: 'Gain Advantage', points: 1, limit: 'per advantage' },
+                { id: 'play-idol', name: 'Play Idol or Advantage', points: 2, limit: 'per play' },
+                { id: 'shot-in-dark', name: 'Play Shot in the Dark', points: 1, limit: 'once per player' },
+                { id: 'go-journey', name: 'Go on Journey', points: 1, limit: 'once per episode' },
+                { id: 'merge', name: 'Make the Merge', points: 2, limit: 'once per season' }
+            ];
+            
+            const [playerTeams, setPlayerTeams] = useState({});
+            const [scores, setScores] = useState({});
+            const [eliminationOrder, setEliminationOrder] = useState({});
+            const [winner, setWinner] = useState(null); // Single winner ID
+            const [currentEpisode, setCurrentEpisode] = useState(1);
+            const [showRules, setShowRules] = useState(false);
+            const [showAddScore, setShowAddScore] = useState(false);
+            const [showMarkElimination, setShowMarkElimination] = useState(false);
+            const [showMarkWinner, setShowMarkWinner] = useState(false);
+            const [expandedTeams, setExpandedTeams] = useState({});
+            
+            // Load data from Firebase
+            useEffect(() => {
+                if (!firebaseInitialized) return;
+                
+                database.ref('teams').on('value', (snapshot) => {
+                    setPlayerTeams(snapshot.val() || {});
+                });
+                
+                database.ref('scores').on('value', (snapshot) => {
+                    setScores(snapshot.val() || {});
+                });
+                
+                database.ref('eliminationOrder').on('value', (snapshot) => {
+                    setEliminationOrder(snapshot.val() || {});
+                });
+                
+                database.ref('winner').on('value', (snapshot) => {
+                    setWinner(snapshot.val() || null);
+                });
+                
+                database.ref('currentEpisode').on('value', (snapshot) => {
+                    setCurrentEpisode(snapshot.val() || 1);
+                });
+                
+                return () => {
+                    database.ref('teams').off();
+                    database.ref('scores').off();
+                    database.ref('eliminationOrder').off();
+                    database.ref('winner').off();
+                    database.ref('currentEpisode').off();
+                };
+            }, []);
+            
+            // Calculate team scores
+            const getTeamScore = (teamId) => {
+                const roster = players.filter(p => playerTeams[p.id] === teamId);
+                let total = 0;
+                
+                roster.forEach(player => {
+                    const playerScores = scores[player.id] || {};
+                    Object.values(playerScores).forEach(episodeScores => {
+                        Object.values(episodeScores).forEach(score => {
+                            total += score.points || 0;
+                        });
+                    });
+                    
+                    // Add elimination bonus
+                    if (eliminationOrder[player.id]) {
+                        const episode = eliminationOrder[player.id];
+                        total += episode; // Points = episode number (rewards longevity)
+                    }
+                });
+                
+                // Add winner bonus (20 points if winner is on this team)
+                if (winner) {
+                    const roster = players.filter(p => playerTeams[p.id] === teamId);
+                    if (roster.some(p => p.id === parseInt(winner))) {
+                        total += 20; // Flat 20 point bonus for having the winner on your team
+                    }
+                }
+                
+                return total;
+            };
+            
+            const leaderboard = useMemo(() => {
+                return teams.map(team => ({
+                    ...team,
+                    score: getTeamScore(team.id),
+                    roster: players.filter(p => playerTeams[p.id] === team.id)
+                })).sort((a, b) => b.score - a.score);
+            }, [playerTeams, scores, eliminationOrder, winner]);
+            
+            const toggleTeamExpanded = (teamId) => {
+                setExpandedTeams(prev => ({ ...prev, [teamId]: !prev[teamId] }));
+            };
+            
+            const getPlayerScore = (playerId) => {
+                const playerScores = scores[playerId] || {};
+                let total = 0;
+                Object.values(playerScores).forEach(episodeScores => {
+                    Object.values(episodeScores).forEach(score => {
+                        total += score.points || 0;
+                    });
+                });
+                
+                // Add elimination bonus
+                if (eliminationOrder[playerId]) {
+                    const episode = eliminationOrder[playerId];
+                    total += episode; // Points = episode number (rewards longevity)
+                }
+                
+                return total;
+            };
+            
+            const getPlayerBreakdown = (playerId) => {
+                const playerScores = scores[playerId] || {};
+                const breakdown = [];
+                
+                Object.entries(playerScores).forEach(([episode, episodeScores]) => {
+                    Object.entries(episodeScores).forEach(([scoreId, score]) => {
+                        breakdown.push({
+                            episode: parseInt(episode),
+                            category: score.category,
+                            points: score.points,
+                            note: score.note
+                        });
+                    });
+                });
+                
+                // Add elimination bonus if exists
+                if (eliminationOrder[playerId]) {
+                    const episode = eliminationOrder[playerId];
+                    const placement = 25 - episode; // Calculate placement
+                    breakdown.push({
+                        episode: episode,
+                        category: 'Elimination Bonus',
+                        points: episode,
+                        note: `Placed ${placement}th (Episode ${episode})`
+                    });
+                }
+                
+                // Add winner bonus if this player won
+                if (winner && parseInt(winner) === playerId) {
+                    breakdown.push({
+                        episode: 14,
+                        category: 'Winner Bonus',
+                        points: 20,
+                        note: 'Sole Survivor! 🔥'
+                    });
+                }
+                
+                return breakdown.sort((a, b) => a.episode - b.episode);
+            };
+            
+            return h('div', { className: 'min-h-screen grey-ombre-bg p-4 md:p-8' },
+                h('div', { className: 'max-w-7xl mx-auto' },
+                    // Header
+                    h('div', { className: 'text-center mb-8' },
+                        h('div', { className: 'flex justify-center items-center gap-4 mb-4' },
+                            h('a', {
+                                href: 'index.html',
+                                className: 'bg-white/90 backdrop-blur-md px-4 py-2 rounded-lg hover:bg-white transition flex items-center gap-2'
+                            },
+                                h(Icons.Home, { size: 20 }),
+                                h('span', { className: 'font-bold' }, 'Draft')
+                            )
+                        ),
+                        h('h1', { 
+                            className: 'text-5xl md:text-7xl font-black mb-4 text-gray-900 drop-shadow-lg',
+                            style: { fontFamily: '"Bebas Neue", cursive' }
+                        }, '📊 SCORING TRACKER'),
+                        h('p', { 
+                            className: 'text-xl md:text-2xl text-gray-800 font-semibold drop-shadow-md',
+                            style: { fontFamily: '"Playfair Display", serif' }
+                        }, `Episode ${currentEpisode} • In the Hands of the Fans`)
+                    ),
+                    
+                    // Action Buttons
+                    h('div', { className: 'flex flex-wrap justify-center gap-4 mb-8' },
+                        h('button', {
+                            onClick: () => setShowRules(true),
+                            className: 'bg-white/95 backdrop-blur-md px-6 py-3 rounded-xl font-bold hover:shadow-lg transition flex items-center gap-2'
+                        },
+                            h(Icons.Book, { size: 20 }),
+                            'View Rules'
+                        ),
+                        h('button', {
+                            onClick: () => setShowAddScore(true),
+                            className: 'bg-gradient-to-r from-orange-500 to-amber-600 text-white px-6 py-3 rounded-xl font-bold hover:shadow-lg transition flex items-center gap-2'
+                        },
+                            h(Icons.Plus, { size: 20 }),
+                            'Add Points'
+                        ),
+                        h('button', {
+                            onClick: () => setShowMarkElimination(true),
+                            className: 'bg-gradient-to-r from-red-500 to-rose-600 text-white px-6 py-3 rounded-xl font-bold hover:shadow-lg transition flex items-center gap-2'
+                        },
+                            h(Icons.X, { size: 20 }),
+                            'Mark Elimination'
+                        ),
+                        h('button', {
+                            onClick: () => setShowMarkWinner(true),
+                            className: 'bg-gradient-to-r from-yellow-500 to-amber-500 text-white px-6 py-3 rounded-xl font-bold hover:shadow-lg transition flex items-center gap-2'
+                        },
+                            h(Icons.Trophy, { size: 20 }),
+                            'Mark Winner'
+                        )
+                    ),
+                    
+                    // Leaderboard
+                    h('div', { className: 'bg-white/95 backdrop-blur-md rounded-2xl p-6 mb-8 shadow-xl' },
+                        h('h2', { 
+                            className: 'text-3xl font-black mb-6 flex items-center gap-3',
+                            style: { fontFamily: '"Bebas Neue", cursive' }
+                        },
+                            h(Icons.Trophy, { size: 32 }),
+                            'Leaderboard'
+                        ),
+                        h('div', { className: 'space-y-4' },
+                            ...leaderboard.map((team, index) => 
+                                h('div', {
+                                    key: team.id,
+                                    className: `border-2 rounded-xl p-4 ${team.bgColor} border-gray-200`
+                                },
+                                    h('div', { 
+                                        className: 'flex justify-between items-center cursor-pointer',
+                                        onClick: () => toggleTeamExpanded(team.id)
+                                    },
+                                        h('div', { className: 'flex items-center gap-4' },
+                                            h('div', { 
+                                                className: `text-3xl font-black ${team.textColor}`,
+                                                style: { fontFamily: '"Bebas Neue", cursive' }
+                                            }, `#${index + 1}`),
+                                            h('div', {},
+                                                h('div', { className: `text-2xl font-bold ${team.textColor}` }, team.name),
+                                                h('div', { className: 'text-sm text-gray-600' }, `${team.roster.length} players`)
+                                            )
+                                        ),
+                                        h('div', { className: 'flex items-center gap-3' },
+                                            h('div', { className: `text-4xl font-black ${team.textColor}` }, team.score),
+                                            h(Icons.ChevronDown, { 
+                                                size: 24,
+                                                style: { 
+                                                    transform: expandedTeams[team.id] ? 'rotate(180deg)' : 'rotate(0deg)',
+                                                    transition: 'transform 0.2s'
+                                                }
+                                            })
+                                        )
+                                    ),
+                                    
+                                    // Expanded player breakdown
+                                    expandedTeams[team.id] && h('div', { className: 'mt-4 pt-4 border-t-2 border-gray-200 space-y-3' },
+                                        team.roster.length === 0 ? 
+                                            h('div', { className: 'text-center text-gray-500 italic py-4' }, 'No players drafted') :
+                                            team.roster.map(player => {
+                                                const playerScore = getPlayerScore(player.id);
+                                                const breakdown = getPlayerBreakdown(player.id);
+                                                const isEliminated = eliminationOrder[player.id];
+                                                const isWinner = winner && parseInt(winner) === player.id;
+                                                
+                                                return h('div', {
+                                                    key: player.id,
+                                                    className: `bg-white p-3 rounded-lg ${isWinner ? 'border-2 border-yellow-400' : isEliminated ? 'opacity-60' : ''}`
+                                                },
+                                                    h('div', { className: 'flex justify-between items-start mb-2' },
+                                                        h('div', {},
+                                                            h('div', { className: 'font-bold text-gray-900' }, 
+                                                                player.name,
+                                                                isWinner && h('span', { className: 'ml-2 text-xs text-yellow-600 font-bold' }, 
+                                                                    '👑 SOLE SURVIVOR'
+                                                                ),
+                                                                isEliminated && !isWinner && h('span', { className: 'ml-2 text-xs text-red-600' }, 
+                                                                    `(Eliminated E${isEliminated})`
+                                                                )
+                                                            )
+                                                        ),
+                                                        h('div', { className: 'text-xl font-bold text-gray-900' }, playerScore)
+                                                    ),
+                                                    breakdown.length > 0 && h('div', { className: 'text-xs space-y-1' },
+                                                        ...breakdown.map((item, idx) => 
+                                                            h('div', { key: idx, className: 'flex justify-between text-gray-600' },
+                                                                h('span', {}, `E${item.episode}: ${item.category}${item.note ? ` - ${item.note}` : ''}`),
+                                                                h('span', { className: 'font-bold' }, `+${item.points}`)
+                                                            )
+                                                        )
+                                                    )
+                                                );
+                                            })
+                                    )
+                                )
+                            )
+                        )
+                    ),
+                    
+                    // Rules Modal
+                    showRules && h('div', { 
+                        className: 'modal-backdrop',
+                        onClick: () => setShowRules(false)
+                    },
+                        h('div', { 
+                            className: 'modal-content',
+                            onClick: (e) => e.stopPropagation()
+                        },
+                            h('div', { className: 'p-6' },
+                                h('div', { className: 'flex justify-between items-center mb-6' },
+                                    h('h2', { 
+                                        className: 'text-3xl font-black',
+                                        style: { fontFamily: '"Bebas Neue", cursive' }
+                                    }, '📖 SCORING RULES'),
+                                    h('button', {
+                                        onClick: () => setShowRules(false),
+                                        className: 'text-gray-500 hover:text-gray-700'
+                                    }, h(Icons.X, { size: 28 }))
+                                ),
+                                
+                                h('div', { className: 'space-y-4 text-gray-800' },
+                                    h('div', { className: 'rules-section' },
+                                        h('h3', { className: 'text-xl font-bold mb-3' }, '🏆 Challenge Points'),
+                                        h('ul', { className: 'space-y-2' },
+                                            h('li', {}, 
+                                                'Win Marooning Challenge',
+                                                h('span', { className: 'point-badge' }, '+1')
+                                            ),
+                                            h('li', {}, 
+                                                'Win Supply Challenge (entire tribe)',
+                                                h('span', { className: 'point-badge' }, '+1')
+                                            ),
+                                            h('li', {}, 
+                                                'Win Tribe Reward Challenge',
+                                                h('span', { className: 'point-badge' }, '+2')
+                                            ),
+                                            h('li', {}, 
+                                                'Win Tribe Immunity Challenge',
+                                                h('span', { className: 'point-badge' }, '+3')
+                                            ),
+                                            h('li', {}, 
+                                                'Win Individual Reward (including chosen companions)',
+                                                h('span', { className: 'point-badge' }, '+1')
+                                            ),
+                                            h('li', {}, 
+                                                'Win Individual Immunity',
+                                                h('span', { className: 'point-badge' }, '+2')
+                                            ),
+                                            h('li', {}, 
+                                                'Win Journey Challenge',
+                                                h('span', { className: 'point-badge' }, '+1')
+                                            ),
+                                            h('li', {}, 
+                                                'Win Fire Making Challenge (Final 4)',
+                                                h('span', { className: 'point-badge' }, '+2')
+                                            )
+                                        )
+                                    ),
+                                    
+                                    h('div', { className: 'rules-section' },
+                                        h('h3', { className: 'text-xl font-bold mb-3' }, '🎯 Strategy & Gameplay'),
+                                        h('ul', { className: 'space-y-2' },
+                                            h('li', {}, 
+                                                'Read Tree Mail',
+                                                h('span', { className: 'point-badge' }, '+1'),
+                                                h('span', { className: 'text-sm text-gray-600 ml-2' }, '(max once per episode)')
+                                            ),
+                                            h('li', {}, 
+                                                'Find Clue to Idol/Advantage',
+                                                h('span', { className: 'point-badge' }, '+1')
+                                            ),
+                                            h('li', {}, 
+                                                'Gain Immunity Idol',
+                                                h('span', { className: 'point-badge' }, '+1')
+                                            ),
+                                            h('li', {}, 
+                                                'Gain Advantage',
+                                                h('span', { className: 'point-badge' }, '+1')
+                                            ),
+                                            h('li', {}, 
+                                                'Play Idol or Advantage',
+                                                h('span', { className: 'point-badge' }, '+2')
+                                            ),
+                                            h('li', {}, 
+                                                'Play Shot in the Dark',
+                                                h('span', { className: 'point-badge' }, '+1'),
+                                                h('span', { className: 'text-sm text-gray-600 ml-2' }, '(once per player)')
+                                            ),
+                                            h('li', {}, 
+                                                'Go on Journey',
+                                                h('span', { className: 'point-badge' }, '+1'),
+                                                h('span', { className: 'text-sm text-gray-600 ml-2' }, '(max once per episode)')
+                                            ),
+                                            h('li', {}, 
+                                                'Make the Merge',
+                                                h('span', { className: 'point-badge' }, '+2')
+                                            )
+                                        )
+                                    ),
+                                    
+                                    h('div', { className: 'rules-section' },
+                                        h('h3', { className: 'text-xl font-bold mb-3' }, '⭐ Elimination Bonus'),
+                                        h('p', { className: 'mb-3' }, 
+                                            'Points awarded to ELIMINATED players only, based on which episode they were voted out. The winner does NOT receive elimination points.'
+                                        ),
+                                        h('div', { className: 'bg-orange-50 p-4 rounded-lg' },
+                                            h('p', { className: 'font-bold mb-2' }, 'Formula: Episode Number = Bonus Points'),
+                                            h('p', { className: 'text-sm mb-2' }, 'Rewards players who last longer in the game!'),
+                                            h('ul', { className: 'space-y-1 text-sm' },
+                                                h('li', {}, '• Episode 1 (24th place): 1 point'),
+                                                h('li', {}, '• Episode 7 (18th place): 7 points'),
+                                                h('li', {}, '• Episode 13 (4th place): 13 points'),
+                                                h('li', {}, '• Winner: Gets +20 winner bonus (no elimination points)')
+                                            )
+                                        )
+                                    ),
+                                    
+                                    h('div', { className: 'rules-section' },
+                                        h('h3', { className: 'text-xl font-bold mb-3' }, '👑 Winner Bonus'),
+                                        h('p', { className: 'mb-3' }, 
+                                            'If the Sole Survivor is on your team, you earn a bonus:'
+                                        ),
+                                        h('div', { className: 'bg-purple-50 p-4 rounded-lg' },
+                                            h('p', { className: 'font-bold text-2xl mb-2' }, '+20 Points'),
+                                            h('p', { className: 'text-sm' }, 
+                                                'Simple and straightforward - if one of your 4 drafted players wins Survivor, your team gets 20 bonus points!'
+                                            )
+                                        )
+                                    )
+                                )
+                            )
+                        )
+                    ),
+                    
+                    // Add Points Modal
+                    showAddScore && h('div', { 
+                        className: 'modal-backdrop',
+                        onClick: () => setShowAddScore(false)
+                    },
+                        h('div', { 
+                            className: 'modal-content',
+                            onClick: (e) => e.stopPropagation()
+                        },
+                            h('div', { className: 'p-6' },
+                                h('div', { className: 'flex justify-between items-center mb-6' },
+                                    h('h2', { 
+                                        className: 'text-3xl font-black',
+                                        style: { fontFamily: '"Bebas Neue", cursive' }
+                                    }, '➕ ADD POINTS'),
+                                    h('button', {
+                                        onClick: () => setShowAddScore(false),
+                                        className: 'text-gray-500 hover:text-gray-700'
+                                    }, h(Icons.X, { size: 28 }))
+                                ),
+                                
+                                h('div', { className: 'space-y-4' },
+                                    // Player Selection
+                                    h('div', {},
+                                        h('label', { className: 'block text-sm font-bold text-gray-700 mb-2' }, 'Select Player'),
+                                        h('select', {
+                                            id: 'player-select',
+                                            className: 'w-full px-4 py-3 border-2 border-gray-300 rounded-xl focus:border-orange-500 focus:outline-none'
+                                        },
+                                            h('option', { value: '' }, 'Choose a player...'),
+                                            ...players.map(player => 
+                                                h('option', { key: player.id, value: player.id }, player.name)
+                                            )
+                                        )
+                                    ),
+                                    
+                                    // Episode Selection
+                                    h('div', {},
+                                        h('label', { className: 'block text-sm font-bold text-gray-700 mb-2' }, 'Episode Number'),
+                                        h('select', {
+                                            id: 'episode-select',
+                                            className: 'w-full px-4 py-3 border-2 border-gray-300 rounded-xl focus:border-orange-500 focus:outline-none'
+                                        },
+                                            h('option', { value: '' }, 'Choose episode...'),
+                                            ...[...Array(14)].map((_, i) => 
+                                                h('option', { key: i + 1, value: i + 1 }, `Episode ${i + 1}`)
+                                            )
+                                        )
+                                    ),
+                                    
+                                    // Category Selection
+                                    h('div', {},
+                                        h('label', { className: 'block text-sm font-bold text-gray-700 mb-2' }, 'Scoring Category'),
+                                        h('select', {
+                                            id: 'category-select',
+                                            className: 'w-full px-4 py-3 border-2 border-gray-300 rounded-xl focus:border-orange-500 focus:outline-none',
+                                            onChange: (e) => {
+                                                const selected = scoringCategories.find(c => c.id === e.target.value);
+                                                if (selected) {
+                                                    document.getElementById('points-input').value = selected.points;
+                                                }
+                                            }
+                                        },
+                                            h('option', { value: '' }, 'Choose category...'),
+                                            ...scoringCategories.map(cat => 
+                                                h('option', { 
+                                                    key: cat.id, 
+                                                    value: cat.id 
+                                                }, `${cat.name} (+${cat.points} pts)`)
+                                            )
+                                        )
+                                    ),
+                                    
+                                    // Points (auto-filled but editable)
+                                    h('div', {},
+                                        h('label', { className: 'block text-sm font-bold text-gray-700 mb-2' }, 'Points'),
+                                        h('input', {
+                                            id: 'points-input',
+                                            type: 'number',
+                                            min: 0,
+                                            className: 'w-full px-4 py-3 border-2 border-gray-300 rounded-xl focus:border-orange-500 focus:outline-none',
+                                            placeholder: 'Auto-filled by category'
+                                        })
+                                    ),
+                                    
+                                    // Optional Note
+                                    h('div', {},
+                                        h('label', { className: 'block text-sm font-bold text-gray-700 mb-2' }, 'Note (Optional)'),
+                                        h('input', {
+                                            id: 'note-input',
+                                            type: 'text',
+                                            className: 'w-full px-4 py-3 border-2 border-gray-300 rounded-xl focus:border-orange-500 focus:outline-none',
+                                            placeholder: 'e.g., "Won against Jackson", "Found on beach"'
+                                        })
+                                    ),
+                                    
+                                    // Submit Button
+                                    h('button', {
+                                        onClick: () => {
+                                            const playerId = document.getElementById('player-select').value;
+                                            const episode = document.getElementById('episode-select').value;
+                                            const categoryId = document.getElementById('category-select').value;
+                                            const points = parseInt(document.getElementById('points-input').value);
+                                            const note = document.getElementById('note-input').value;
+                                            
+                                            if (!playerId || !episode || !categoryId || !points) {
+                                                alert('Please fill in all required fields');
+                                                return;
+                                            }
+                                            
+                                            const category = scoringCategories.find(c => c.id === categoryId);
+                                            const scoreId = Date.now().toString();
+                                            
+                                            if (firebaseInitialized) {
+                                                database.ref(`scores/${playerId}/${episode}/${scoreId}`).set({
+                                                    category: category.name,
+                                                    points: points,
+                                                    note: note || ''
+                                                }).then(() => {
+                                                    // Clear form
+                                                    document.getElementById('player-select').value = '';
+                                                    document.getElementById('episode-select').value = '';
+                                                    document.getElementById('category-select').value = '';
+                                                    document.getElementById('points-input').value = '';
+                                                    document.getElementById('note-input').value = '';
+                                                    
+                                                    alert('Points added successfully!');
+                                                });
+                                            }
+                                        },
+                                        className: 'w-full px-6 py-3 bg-gradient-to-r from-orange-500 to-amber-600 text-white rounded-xl font-bold hover:shadow-lg transition text-lg'
+                                    }, 'Add Points')
+                                )
+                            )
+                        )
+                    ),
+                    
+                    // Mark Elimination Modal
+                    showMarkElimination && h('div', { 
+                        className: 'modal-backdrop',
+                        onClick: () => setShowMarkElimination(false)
+                    },
+                        h('div', { 
+                            className: 'modal-content',
+                            onClick: (e) => e.stopPropagation(),
+                            style: { maxWidth: '600px' }
+                        },
+                            h('div', { className: 'p-6' },
+                                h('div', { className: 'flex justify-between items-center mb-6' },
+                                    h('h2', { 
+                                        className: 'text-3xl font-black',
+                                        style: { fontFamily: '"Bebas Neue", cursive' }
+                                    }, '❌ MARK ELIMINATION'),
+                                    h('button', {
+                                        onClick: () => setShowMarkElimination(false),
+                                        className: 'text-gray-500 hover:text-gray-700'
+                                    }, h(Icons.X, { size: 28 }))
+                                ),
+                                
+                                h('div', { className: 'space-y-4' },
+                                    // Player Selection
+                                    h('div', {},
+                                        h('label', { className: 'block text-sm font-bold text-gray-700 mb-2' }, 'Select Player'),
+                                        h('select', {
+                                            id: 'elim-player-select',
+                                            className: 'w-full px-4 py-3 border-2 border-gray-300 rounded-xl focus:border-red-500 focus:outline-none'
+                                        },
+                                            h('option', { value: '' }, 'Choose player...'),
+                                            ...players
+                                                .filter(p => !eliminationOrder[p.id] && (!winner || parseInt(winner) !== p.id))
+                                                .map(player => 
+                                                    h('option', { key: player.id, value: player.id }, player.name)
+                                                )
+                                        )
+                                    ),
+                                    
+                                    // Episode Selection
+                                    h('div', {},
+                                        h('label', { className: 'block text-sm font-bold text-gray-700 mb-2' }, 'Eliminated in Episode'),
+                                        h('select', {
+                                            id: 'elim-episode-select',
+                                            className: 'w-full px-4 py-3 border-2 border-gray-300 rounded-xl focus:border-red-500 focus:outline-none'
+                                        },
+                                            h('option', { value: '' }, 'Choose episode...'),
+                                            ...[...Array(13)].map((_, i) => {
+                                                const ep = i + 1;
+                                                const placement = 25 - ep;
+                                                return h('option', { key: ep, value: ep }, 
+                                                    `Episode ${ep} (${placement}th place - ${ep} pts)`
+                                                );
+                                            })
+                                        )
+                                    ),
+                                    
+                                    h('div', { className: 'bg-orange-50 p-4 rounded-lg text-sm' },
+                                        h('p', { className: 'font-bold mb-2' }, '📊 Elimination Bonus'),
+                                        h('p', {}, 'The player will receive bonus points equal to the episode number they were eliminated.')
+                                    ),
+                                    
+                                    // Submit Button
+                                    h('button', {
+                                        onClick: () => {
+                                            const playerId = document.getElementById('elim-player-select').value;
+                                            const episode = document.getElementById('elim-episode-select').value;
+                                            
+                                            if (!playerId || !episode) {
+                                                alert('Please select both player and episode');
+                                                return;
+                                            }
+                                            
+                                            if (firebaseInitialized) {
+                                                database.ref(`eliminationOrder/${playerId}`).set(parseInt(episode)).then(() => {
+                                                    setShowMarkElimination(false);
+                                                    alert(`Player eliminated in Episode ${episode}!`);
+                                                });
+                                            }
+                                        },
+                                        className: 'w-full px-6 py-3 bg-gradient-to-r from-red-500 to-rose-600 text-white rounded-xl font-bold hover:shadow-lg transition text-lg'
+                                    }, 'Mark as Eliminated')
+                                )
+                            )
+                        )
+                    ),
+                    
+                    // Mark Winner Modal
+                    showMarkWinner && h('div', { 
+                        className: 'modal-backdrop',
+                        onClick: () => setShowMarkWinner(false)
+                    },
+                        h('div', { 
+                            className: 'modal-content',
+                            onClick: (e) => e.stopPropagation(),
+                            style: { maxWidth: '600px' }
+                        },
+                            h('div', { className: 'p-6' },
+                                h('div', { className: 'flex justify-between items-center mb-6' },
+                                    h('h2', { 
+                                        className: 'text-3xl font-black',
+                                        style: { fontFamily: '"Bebas Neue", cursive' }
+                                    }, '👑 MARK WINNER'),
+                                    h('button', {
+                                        onClick: () => setShowMarkWinner(false),
+                                        className: 'text-gray-500 hover:text-gray-700'
+                                    }, h(Icons.X, { size: 28 }))
+                                ),
+                                
+                                winner ? 
+                                    h('div', { className: 'space-y-4' },
+                                        h('div', { className: 'bg-yellow-50 border-2 border-yellow-400 p-4 rounded-lg' },
+                                            h('p', { className: 'font-bold text-lg mb-2' }, '👑 Current Winner:'),
+                                            h('p', { className: 'text-2xl font-black' }, 
+                                                players.find(p => p.id === parseInt(winner))?.name || 'Unknown'
+                                            )
+                                        ),
+                                        h('button', {
+                                            onClick: () => {
+                                                if (confirm('Are you sure you want to clear the current winner?')) {
+                                                    if (firebaseInitialized) {
+                                                        database.ref('winner').set(null).then(() => {
+                                                            setShowMarkWinner(false);
+                                                            alert('Winner cleared!');
+                                                        });
+                                                    }
+                                                }
+                                            },
+                                            className: 'w-full px-6 py-3 bg-red-500 text-white rounded-xl font-bold hover:shadow-lg transition'
+                                        }, 'Clear Winner')
+                                    ) :
+                                    h('div', { className: 'space-y-4' },
+                                        h('div', {},
+                                            h('label', { className: 'block text-sm font-bold text-gray-700 mb-2' }, 'Select Sole Survivor'),
+                                            h('select', {
+                                                id: 'winner-select',
+                                                className: 'w-full px-4 py-3 border-2 border-gray-300 rounded-xl focus:border-yellow-500 focus:outline-none'
+                                            },
+                                                h('option', { value: '' }, 'Choose winner...'),
+                                                ...players
+                                                    .filter(p => !eliminationOrder[p.id])
+                                                    .map(player => 
+                                                        h('option', { key: player.id, value: player.id }, player.name)
+                                                    )
+                                            )
+                                        ),
+                                        
+                                        h('div', { className: 'bg-purple-50 p-4 rounded-lg text-sm' },
+                                            h('p', { className: 'font-bold mb-2' }, '🏆 Winner Bonus'),
+                                            h('p', {}, 'The winning player\'s team will receive a +20 point bonus!')
+                                        ),
+                                        
+                                        h('button', {
+                                            onClick: () => {
+                                                const playerId = document.getElementById('winner-select').value;
+                                                
+                                                if (!playerId) {
+                                                    alert('Please select a player');
+                                                    return;
+                                                }
+                                                
+                                                if (firebaseInitialized) {
+                                                    database.ref('winner').set(parseInt(playerId)).then(() => {
+                                                        setShowMarkWinner(false);
+                                                        alert('Winner marked! 🎉');
+                                                    });
+                                                }
+                                            },
+                                            className: 'w-full px-6 py-3 bg-gradient-to-r from-yellow-500 to-amber-500 text-white rounded-xl font-bold hover:shadow-lg transition text-lg'
+                                        }, 'Mark as Sole Survivor')
+                                    )
+                            )
+                        )
+                    ),
+                    
+                    // Footer
+                    h('div', { className: 'mt-12 text-center text-gray-900' },
+                        h('p', { className: 'text-sm text-gray-700' }, 'Season Premiere: February 25, 2026 • Episode airs Wednesdays on CBS')
+                    )
+                )
+            );
+        }
+        
+        const root = ReactDOM.createRoot(document.getElementById('root'));
+        root.render(h(ScoringPage));
+    }
+    </script>
+</body>
+</html>
