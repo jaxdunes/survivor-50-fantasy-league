@@ -168,22 +168,66 @@
             ];
             
             const scoringCategories = [
-                { id: 'marooning', name: 'Win Marooning Challenge', points: 1, limit: 'once per season' },
-                { id: 'supply', name: 'Win Supply Challenge', points: 1, limit: 'once per season' },
-                { id: 'tribe-reward', name: 'Win Tribe Reward Challenge', points: 2, limit: 'per challenge' },
-                { id: 'tribe-immunity', name: 'Win Tribe Immunity Challenge', points: 3, limit: 'per challenge' },
-                { id: 'individual-reward', name: 'Win Individual Reward', points: 1, limit: 'per challenge' },
-                { id: 'individual-immunity', name: 'Win Individual Immunity', points: 2, limit: 'per challenge' },
-                { id: 'journey-challenge', name: 'Win Journey Challenge', points: 1, limit: 'per journey' },
-                { id: 'fire-making', name: 'Win Fire Making Challenge (F4)', points: 2, limit: 'once per season' },
-                { id: 'tree-mail', name: 'Read Tree Mail', points: 1, limit: 'once per episode' },
-                { id: 'find-idol-clue', name: 'Find Clue to Idol/Advantage', points: 1, limit: 'per clue' },
-                { id: 'gain-idol', name: 'Gain Immunity Idol', points: 1, limit: 'per idol' },
-                { id: 'gain-advantage', name: 'Gain Advantage', points: 1, limit: 'per advantage' },
-                { id: 'play-idol', name: 'Play Idol or Advantage', points: 2, limit: 'per play' },
-                { id: 'shot-in-dark', name: 'Play Shot in the Dark', points: 1, limit: 'once per player' },
-                { id: 'go-journey', name: 'Go on Journey', points: 1, limit: 'once per episode' },
-                { id: 'merge', name: 'Make the Merge', points: 2, limit: 'once per season' }
+                // First to Drop
+                { id: 'solo-immunity', name: 'Wins Solo Immunity', points: 25, category: 'First to Drop' },
+                { id: 'tribe-immunity', name: 'Wins Tribe Immunity', points: 15, category: 'First to Drop' },
+                { id: 'tribe-immunity-second', name: 'Second Place Tribe Immunity', points: 10, category: 'First to Drop' },
+                { id: 'tribe-reward', name: 'Wins Tribe Reward', points: 10, category: 'First to Drop' },
+                { id: 'tribe-reward-second', name: 'Second Place Tribe Reward', points: 5, category: 'First to Drop' },
+                { id: 'solo-reward', name: 'Wins Solo Reward', points: 15, category: 'First to Drop' },
+                { id: 'reward-pick', name: 'Chosen to Go On Reward', points: 3, category: 'First to Drop' },
+                { id: 'first-to-drop', name: 'First to Drop', points: -2, category: 'First to Drop' },
+                { id: 'made-merge', name: 'Makes It to the Merge', points: 10, category: 'First to Drop' },
+                
+                // Gameplay
+                { id: 'showmance-start', name: 'Starts a Showmance', points: 5, category: 'Gameplay' },
+                { id: 'showmance-end', name: 'Ends a Showmance', points: -3, category: 'Gameplay' },
+                { id: 'finds-idol', name: 'Finds a Hidden Immunity Idol', points: 10, category: 'Gameplay' },
+                { id: 'named-alliance', name: 'Makes a named alliance', points: 5, category: 'Gameplay' },
+                { id: 'makes-jury', name: 'Makes It to Jury', points: 10, category: 'Gameplay' },
+                
+                // Tribal Council
+                { id: 'uses-idol-self', name: 'Uses Hidden Immunity Idol On Self', points: 5, category: 'Tribal Council' },
+                { id: 'uses-idol-correctly', name: 'Uses Hidden Immunity Idol Correctly', points: 5, category: 'Tribal Council' },
+                { id: 'uses-idol-ally', name: 'Uses Hidden Immunity Idol On Somebody Else', points: 3, category: 'Tribal Council' },
+                { id: 'idol-used-them', name: 'Has Hidden Immunity Idol Used On Them', points: 5, category: 'Tribal Council' },
+                { id: 'voted-out', name: 'Gets Voted Out', points: -25, category: 'Tribal Council' },
+                { id: 'votes-survived', name: 'Gets Votes and Survives (0.5 × # of votes)', points: 0.5, category: 'Tribal Council' },
+                { id: 'pulls-rock', name: 'Pulls a Rock', points: 1, category: 'Tribal Council' },
+                { id: 'first-voted-out', name: 'First Voted Out', points: -10, category: 'Tribal Council' },
+                { id: 'wins-fire', name: 'Wins Fire Making Challenge', points: 5, category: 'Tribal Council' },
+                { id: 'shot-dark-correct', name: 'Plays shot in the dark correctly', points: 15, category: 'Tribal Council' },
+                { id: 'voted-idol-pocket', name: 'Voted out with idol in pocket', points: -10, category: 'Tribal Council' },
+                { id: 'lost-vote', name: 'Does not have a vote during tribal (including stolen votes)', points: -5, category: 'Tribal Council' },
+                
+                // Misc.
+                { id: 'hashtag', name: 'Inspires an on-screen hashtag', points: 1, category: 'Misc.' },
+                { id: 'mentions-prev-player', name: 'Mentions a Player from a Previous Season', points: -1, category: 'Misc.' },
+                { id: 'names-episode', name: 'Says the title of the episode', points: 10, category: 'Misc.' },
+                
+                // Emotions
+                { id: 'camp-meeting', name: 'Calls a Camp Meeting to Confront Someone', points: -5, category: 'Emotions' },
+                { id: 'yelling-match', name: 'Gets in a Yelling Match', points: -5, category: 'Emotions' },
+                { id: 'confessional-tears', name: 'Cries in Confessional', points: -1, category: 'Emotions' },
+                { id: 'public-tears', name: 'Cries in Front of Player', points: -3, category: 'Emotions' },
+                { id: 'expelled', name: 'Expelled from the Island', points: 25, category: 'Emotions' },
+                { id: 'medevac', name: 'Medical Removed from Island', points: -25, category: 'Emotions' },
+                
+                // Advantages / Idols
+                { id: 'voted-w-idol', name: 'Voted out with idol', points: -10, category: 'Advantages / Idols' },
+                { id: 'voted-w-advantage', name: 'Voted out with advantage', points: -10, category: 'Advantages / Idols' },
+                { id: 'finds-advantage', name: 'Finds a Special Power/Advantage', points: 5, category: 'Advantages / Idols' },
+                { id: 'given-advantage', name: 'Is Given a Special Power from Somebody', points: 5, category: 'Advantages / Idols' },
+                { id: 'uses-advantage-correct', name: 'Uses advantage correctly', points: 10, category: 'Advantages / Idols' },
+                { id: 'fails-advantage', name: 'Fails the advantage challenge', points: -10, category: 'Advantages / Idols' },
+                
+                // End of Season
+                { id: 'most-votes', name: 'Most votes against at end of season', points: 15, category: 'End of Season' },
+                { id: 'least-votes', name: 'Least votes against (Post-Merge)', points: 15, category: 'End of Season' },
+                { id: 'most-immunities', name: 'Most individual immunities won', points: 20, category: 'End of Season' },
+                { id: 'most-idols-found', name: 'Most idols/advantages found', points: 20, category: 'End of Season' },
+                { id: 'sole-survivor', name: 'Sole Survivor', points: 75, category: 'End of Season' },
+                { id: 'runner-up', name: 'Runner-ups', points: 25, category: 'End of Season' }
             ];
             
             const [playerTeams, setPlayerTeams] = useState({});
@@ -500,112 +544,99 @@
                                 ),
                                 
                                 h('div', { className: 'space-y-4 text-gray-800' },
+                                    // First to Drop
                                     h('div', { className: 'rules-section' },
-                                        h('h3', { className: 'text-xl font-bold mb-3' }, '🏆 Challenge Points'),
+                                        h('h3', { className: 'text-xl font-bold mb-3 text-pink-600' }, '🏆 First to Drop'),
                                         h('ul', { className: 'space-y-2' },
-                                            h('li', {}, 
-                                                'Win Marooning Challenge',
-                                                h('span', { className: 'point-badge' }, '+1')
-                                            ),
-                                            h('li', {}, 
-                                                'Win Supply Challenge (entire tribe)',
-                                                h('span', { className: 'point-badge' }, '+1')
-                                            ),
-                                            h('li', {}, 
-                                                'Win Tribe Reward Challenge',
-                                                h('span', { className: 'point-badge' }, '+2')
-                                            ),
-                                            h('li', {}, 
-                                                'Win Tribe Immunity Challenge',
-                                                h('span', { className: 'point-badge' }, '+3')
-                                            ),
-                                            h('li', {}, 
-                                                'Win Individual Reward (including chosen companions)',
-                                                h('span', { className: 'point-badge' }, '+1')
-                                            ),
-                                            h('li', {}, 
-                                                'Win Individual Immunity',
-                                                h('span', { className: 'point-badge' }, '+2')
-                                            ),
-                                            h('li', {}, 
-                                                'Win Journey Challenge',
-                                                h('span', { className: 'point-badge' }, '+1')
-                                            ),
-                                            h('li', {}, 
-                                                'Win Fire Making Challenge (Final 4)',
-                                                h('span', { className: 'point-badge' }, '+2')
-                                            )
+                                            h('li', {}, 'Wins Solo Immunity', h('span', { className: 'point-badge' }, '+25')),
+                                            h('li', {}, 'Wins Tribe Immunity', h('span', { className: 'point-badge' }, '+15')),
+                                            h('li', {}, 'Second Place Tribe Immunity', h('span', { className: 'point-badge' }, '+10')),
+                                            h('li', {}, 'Wins Tribe Reward', h('span', { className: 'point-badge' }, '+10')),
+                                            h('li', {}, 'Second Place Tribe Reward', h('span', { className: 'point-badge' }, '+5')),
+                                            h('li', {}, 'Wins Solo Reward', h('span', { className: 'point-badge' }, '+15')),
+                                            h('li', {}, 'Chosen to Go On Reward', h('span', { className: 'point-badge' }, '+3')),
+                                            h('li', {}, 'First to Drop', h('span', { className: 'point-badge bg-red-100 text-red-700' }, '-2')),
+                                            h('li', {}, 'Makes It to the Merge', h('span', { className: 'point-badge' }, '+10'))
                                         )
                                     ),
                                     
+                                    // Gameplay
                                     h('div', { className: 'rules-section' },
-                                        h('h3', { className: 'text-xl font-bold mb-3' }, '🎯 Strategy & Gameplay'),
+                                        h('h3', { className: 'text-xl font-bold mb-3 text-orange-600' }, '🎯 Gameplay'),
                                         h('ul', { className: 'space-y-2' },
-                                            h('li', {}, 
-                                                'Read Tree Mail',
-                                                h('span', { className: 'point-badge' }, '+1'),
-                                                h('span', { className: 'text-sm text-gray-600 ml-2' }, '(max once per episode)')
-                                            ),
-                                            h('li', {}, 
-                                                'Find Clue to Idol/Advantage',
-                                                h('span', { className: 'point-badge' }, '+1')
-                                            ),
-                                            h('li', {}, 
-                                                'Gain Immunity Idol',
-                                                h('span', { className: 'point-badge' }, '+1')
-                                            ),
-                                            h('li', {}, 
-                                                'Gain Advantage',
-                                                h('span', { className: 'point-badge' }, '+1')
-                                            ),
-                                            h('li', {}, 
-                                                'Play Idol or Advantage',
-                                                h('span', { className: 'point-badge' }, '+2')
-                                            ),
-                                            h('li', {}, 
-                                                'Play Shot in the Dark',
-                                                h('span', { className: 'point-badge' }, '+1'),
-                                                h('span', { className: 'text-sm text-gray-600 ml-2' }, '(once per player)')
-                                            ),
-                                            h('li', {}, 
-                                                'Go on Journey',
-                                                h('span', { className: 'point-badge' }, '+1'),
-                                                h('span', { className: 'text-sm text-gray-600 ml-2' }, '(max once per episode)')
-                                            ),
-                                            h('li', {}, 
-                                                'Make the Merge',
-                                                h('span', { className: 'point-badge' }, '+2')
-                                            )
+                                            h('li', {}, 'Starts a Showmance', h('span', { className: 'point-badge' }, '+5')),
+                                            h('li', {}, 'Ends a Showmance', h('span', { className: 'point-badge bg-red-100 text-red-700' }, '-3')),
+                                            h('li', {}, 'Finds a Hidden Immunity Idol', h('span', { className: 'point-badge' }, '+10')),
+                                            h('li', {}, 'Makes a named alliance', h('span', { className: 'point-badge' }, '+5')),
+                                            h('li', {}, 'Makes It to Jury', h('span', { className: 'point-badge' }, '+10'))
                                         )
                                     ),
                                     
+                                    // Tribal Council
                                     h('div', { className: 'rules-section' },
-                                        h('h3', { className: 'text-xl font-bold mb-3' }, '⭐ Elimination Bonus'),
-                                        h('p', { className: 'mb-3' }, 
-                                            'Points awarded to ELIMINATED players only, based on which episode they were voted out. The winner does NOT receive elimination points.'
-                                        ),
-                                        h('div', { className: 'bg-orange-50 p-4 rounded-lg' },
-                                            h('p', { className: 'font-bold mb-2' }, 'Formula: Episode Number = Bonus Points'),
-                                            h('p', { className: 'text-sm mb-2' }, 'Rewards players who last longer in the game!'),
-                                            h('ul', { className: 'space-y-1 text-sm' },
-                                                h('li', {}, '• Episode 1 (24th place): 1 point'),
-                                                h('li', {}, '• Episode 7 (18th place): 7 points'),
-                                                h('li', {}, '• Episode 13 (4th place): 13 points'),
-                                                h('li', {}, '• Winner: Gets +20 winner bonus (no elimination points)')
-                                            )
+                                        h('h3', { className: 'text-xl font-bold mb-3 text-blue-600' }, '🗳️ Tribal Council'),
+                                        h('ul', { className: 'space-y-2' },
+                                            h('li', {}, 'Uses Hidden Immunity Idol On Self', h('span', { className: 'point-badge' }, '+5')),
+                                            h('li', {}, 'Uses Hidden Immunity Idol Correctly', h('span', { className: 'point-badge' }, '+5')),
+                                            h('li', {}, 'Uses Hidden Immunity Idol On Somebody Else', h('span', { className: 'point-badge' }, '+3')),
+                                            h('li', {}, 'Has Hidden Immunity Idol Used On Them', h('span', { className: 'point-badge' }, '+5')),
+                                            h('li', {}, 'Gets Voted Out', h('span', { className: 'point-badge bg-red-100 text-red-700' }, '-25')),
+                                            h('li', {}, 'Gets Votes and Survives (0.5 × # of votes)', h('span', { className: 'point-badge' }, '+0.5')),
+                                            h('li', {}, 'Pulls a Rock', h('span', { className: 'point-badge' }, '+1')),
+                                            h('li', {}, 'First Voted Out', h('span', { className: 'point-badge bg-red-100 text-red-700' }, '-10')),
+                                            h('li', {}, 'Wins Fire Making Challenge', h('span', { className: 'point-badge' }, '+5')),
+                                            h('li', {}, 'Plays shot in the dark correctly', h('span', { className: 'point-badge' }, '+15')),
+                                            h('li', {}, 'Voted out with idol in pocket', h('span', { className: 'point-badge bg-red-100 text-red-700' }, '-10')),
+                                            h('li', {}, 'Does not have a vote during tribal', h('span', { className: 'point-badge bg-red-100 text-red-700' }, '-5'))
                                         )
                                     ),
                                     
+                                    // Misc.
                                     h('div', { className: 'rules-section' },
-                                        h('h3', { className: 'text-xl font-bold mb-3' }, '👑 Winner Bonus'),
-                                        h('p', { className: 'mb-3' }, 
-                                            'If the Sole Survivor is on your team, you earn a bonus:'
-                                        ),
-                                        h('div', { className: 'bg-purple-50 p-4 rounded-lg' },
-                                            h('p', { className: 'font-bold text-2xl mb-2' }, '+20 Points'),
-                                            h('p', { className: 'text-sm' }, 
-                                                'Simple and straightforward - if one of your 4 drafted players wins Survivor, your team gets 20 bonus points!'
-                                            )
+                                        h('h3', { className: 'text-xl font-bold mb-3 text-red-600' }, '📺 Misc.'),
+                                        h('ul', { className: 'space-y-2' },
+                                            h('li', {}, 'Inspires an on-screen hashtag', h('span', { className: 'point-badge' }, '+1')),
+                                            h('li', {}, 'Mentions a Player from a Previous Season', h('span', { className: 'point-badge bg-red-100 text-red-700' }, '-1')),
+                                            h('li', {}, 'Says the title of the episode', h('span', { className: 'point-badge' }, '+10'))
+                                        )
+                                    ),
+                                    
+                                    // Emotions
+                                    h('div', { className: 'rules-section' },
+                                        h('h3', { className: 'text-xl font-bold mb-3 text-green-600' }, '😢 Emotions'),
+                                        h('ul', { className: 'space-y-2' },
+                                            h('li', {}, 'Calls a Camp Meeting to Confront Someone', h('span', { className: 'point-badge bg-red-100 text-red-700' }, '-5')),
+                                            h('li', {}, 'Gets in a Yelling Match', h('span', { className: 'point-badge bg-red-100 text-red-700' }, '-5')),
+                                            h('li', {}, 'Cries in Confessional', h('span', { className: 'point-badge bg-red-100 text-red-700' }, '-1')),
+                                            h('li', {}, 'Cries in Front of Player', h('span', { className: 'point-badge bg-red-100 text-red-700' }, '-3')),
+                                            h('li', {}, 'Expelled from the Island', h('span', { className: 'point-badge' }, '+25')),
+                                            h('li', {}, 'Medical Removed from Island', h('span', { className: 'point-badge bg-red-100 text-red-700' }, '-25'))
+                                        )
+                                    ),
+                                    
+                                    // Advantages / Idols
+                                    h('div', { className: 'rules-section' },
+                                        h('h3', { className: 'text-xl font-bold mb-3 text-purple-600' }, '🎴 Advantages / Idols'),
+                                        h('ul', { className: 'space-y-2' },
+                                            h('li', {}, 'Voted out with idol', h('span', { className: 'point-badge bg-red-100 text-red-700' }, '-10')),
+                                            h('li', {}, 'Voted out with advantage', h('span', { className: 'point-badge bg-red-100 text-red-700' }, '-10')),
+                                            h('li', {}, 'Finds a Special Power/Advantage', h('span', { className: 'point-badge' }, '+5')),
+                                            h('li', {}, 'Is Given a Special Power from Somebody', h('span', { className: 'point-badge' }, '+5')),
+                                            h('li', {}, 'Uses advantage correctly', h('span', { className: 'point-badge' }, '+10')),
+                                            h('li', {}, 'Fails the advantage challenge', h('span', { className: 'point-badge bg-red-100 text-red-700' }, '-10'))
+                                        )
+                                    ),
+                                    
+                                    // End of Season
+                                    h('div', { className: 'rules-section' },
+                                        h('h3', { className: 'text-xl font-bold mb-3 text-blue-500' }, '🏅 End of Season'),
+                                        h('ul', { className: 'space-y-2' },
+                                            h('li', {}, 'Most votes against at end of season', h('span', { className: 'point-badge' }, '+15')),
+                                            h('li', {}, 'Least votes against (Post-Merge)', h('span', { className: 'point-badge' }, '+15')),
+                                            h('li', {}, 'Most individual immunities won', h('span', { className: 'point-badge' }, '+20')),
+                                            h('li', {}, 'Most idols/advantages found', h('span', { className: 'point-badge' }, '+20')),
+                                            h('li', {}, 'Sole Survivor', h('span', { className: 'point-badge bg-yellow-100 text-yellow-800 font-black' }, '+75')),
+                                            h('li', {}, 'Runner-ups', h('span', { className: 'point-badge' }, '+25'))
                                         )
                                     )
                                 )
