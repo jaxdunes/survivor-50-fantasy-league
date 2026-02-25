@@ -1,0 +1,190 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin - User Setup</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <!-- Firebase SDK -->
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-database-compat.js"></script>
+    
+    <style>
+        body { font-family: system-ui, -apple-system, sans-serif; }
+    </style>
+</head>
+<body class="bg-gray-100 p-8">
+    <div class="max-w-4xl mx-auto">
+        <div class="bg-white rounded-2xl shadow-xl p-8 mb-6">
+            <h1 class="text-4xl font-black mb-4">👑 ADMIN - User Setup</h1>
+            <p class="text-gray-600">Create accounts for your league members and assign them to teams.</p>
+        </div>
+        
+        <div class="bg-white rounded-2xl shadow-xl p-8">
+            <h2 class="text-2xl font-bold mb-6">Create New User Account</h2>
+            
+            <form id="createUserForm" class="space-y-4">
+                <div>
+                    <label class="block text-sm font-bold text-gray-700 mb-2">Username</label>
+                    <input type="text" id="username" required
+                        class="w-full px-4 py-3 border-2 border-gray-300 rounded-xl focus:border-orange-500 focus:outline-none"
+                        placeholder="austin">
+                </div>
+                
+                <div>
+                    <label class="block text-sm font-bold text-gray-700 mb-2">Email</label>
+                    <input type="email" id="email" required
+                        class="w-full px-4 py-3 border-2 border-gray-300 rounded-xl focus:border-orange-500 focus:outline-none"
+                        placeholder="austin@example.com">
+                </div>
+                
+                <div>
+                    <label class="block text-sm font-bold text-gray-700 mb-2">Temporary Password</label>
+                    <input type="password" id="password" required
+                        class="w-full px-4 py-3 border-2 border-gray-300 rounded-xl focus:border-orange-500 focus:outline-none"
+                        placeholder="password123">
+                    <p class="text-xs text-gray-500 mt-1">User can change this after first login</p>
+                </div>
+                
+                <div>
+                    <label class="block text-sm font-bold text-gray-700 mb-2">Assign to Team</label>
+                    <select id="teamId" required
+                        class="w-full px-4 py-3 border-2 border-gray-300 rounded-xl focus:border-orange-500 focus:outline-none">
+                        <option value="">Select team...</option>
+                        <option value="austin">Austin</option>
+                        <option value="sandra">Sandra</option>
+                        <option value="ashlynn">Ashlynn</option>
+                        <option value="jackson-ray">Jackson/Ray</option>
+                        <option value="maura">Maura</option>
+                        <option value="ryan-jordan">Ryan/Jordan</option>
+                        <option value="peanut-gallery">🥜 The Peanut Gallery (Observer)</option>
+                    </select>
+                </div>
+                
+                <button type="submit"
+                    class="w-full bg-gradient-to-r from-orange-500 to-amber-600 text-white py-3 rounded-xl font-bold hover:shadow-lg transition">
+                    Create User Account
+                </button>
+            </form>
+            
+            <div id="result" class="mt-6"></div>
+        </div>
+        
+        <div class="bg-blue-50 border-2 border-blue-200 rounded-2xl p-6 mt-6">
+            <h3 class="font-bold text-lg mb-2">📋 Setup Instructions:</h3>
+            <ol class="list-decimal list-inside space-y-2 text-sm">
+                <li>Enable Email/Password authentication in Firebase Console</li>
+                <li>Users can now self-register at the Chat page!</li>
+                <li>Or use this page to create accounts for them</li>
+                <li>Share their username and password with them</li>
+                <li>"The Peanut Gallery" is for observers (Will & Maddy)</li>
+            </ol>
+        </div>
+        
+        <div class="bg-green-50 border-2 border-green-200 rounded-2xl p-6 mt-6">
+            <h3 class="font-bold text-lg mb-2">✨ New: Self-Registration!</h3>
+            <p class="text-sm">Users can now create their own accounts at the Chat page. They just need to:</p>
+            <ol class="list-decimal list-inside space-y-1 text-sm mt-2">
+                <li>Go to the Chat page</li>
+                <li>Click "Don't have an account? Register"</li>
+                <li>Choose their own username and password</li>
+                <li>Select their team</li>
+                <li>Done!</li>
+            </ol>
+        </div>
+        
+        <div class="bg-yellow-50 border-2 border-yellow-200 rounded-2xl p-6 mt-6">
+            <h3 class="font-bold text-lg mb-2">⚠️ Security Note:</h3>
+            <p class="text-sm">This admin page should be removed or password-protected after initial setup. Anyone who accesses it can create accounts.</p>
+        </div>
+    </div>
+    
+    <script>
+        // Firebase Configuration
+        const firebaseConfig = {
+            apiKey: "AIzaSyAls1zpuUGgNx7xhlpCjF4bDEXp8qfxQ3A",
+            authDomain: "survivorfantasy-cc908.firebaseapp.com",
+            databaseURL: "https://survivorfantasy-cc908-default-rtdb.firebaseio.com",
+            projectId: "survivorfantasy-cc908",
+            storageBucket: "survivorfantasy-cc908.firebasestorage.app",
+            messagingSenderId: "401357232113",
+            appId: "1:401357232113:web:a9980c49bde38ff981d650"
+        };
+        
+        firebase.initializeApp(firebaseConfig);
+        const auth = firebase.auth();
+        const database = firebase.database();
+        
+        document.getElementById('createUserForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            
+            const username = document.getElementById('username').value;
+            const email = document.getElementById('email').value;
+            const password = document.getElementById('password').value;
+            const teamId = document.getElementById('teamId').value;
+            const resultDiv = document.getElementById('result');
+            
+            resultDiv.innerHTML = '<div class="text-blue-600">Creating account...</div>';
+            
+            try {
+                // Create user
+                const userCredential = await auth.createUserWithEmailAndPassword(email, password);
+                const user = userCredential.user;
+                
+                // Determine display name
+                const teamNames = {
+                    'austin': 'Austin',
+                    'sandra': 'Sandra',
+                    'ashlynn': 'Ashlynn',
+                    'jackson-ray': 'Jackson/Ray',
+                    'maura': 'Maura',
+                    'ryan-jordan': 'Ryan/Jordan',
+                    'peanut-gallery': 'The Peanut Gallery'
+                };
+                
+                const displayName = teamId === 'peanut-gallery' ? 'The Peanut Gallery' : teamNames[teamId] || username;
+                
+                // Save user profile
+                await database.ref(`users/${user.uid}`).set({
+                    username: username,
+                    email: email,
+                    teamId: teamId,
+                    displayName: displayName,
+                    createdAt: Date.now()
+                });
+                
+                // Sign out the newly created user (so admin stays logged in as admin)
+                await auth.signOut();
+                
+                resultDiv.innerHTML = `
+                    <div class="bg-green-50 border-2 border-green-500 rounded-xl p-4">
+                        <div class="font-bold text-green-700">✅ Account Created!</div>
+                        <div class="text-sm text-gray-700 mt-2">
+                            <strong>Username:</strong> ${username}<br>
+                            <strong>Email:</strong> ${email}<br>
+                            <strong>Password:</strong> ${password}<br>
+                            <strong>Team:</strong> ${displayName}
+                        </div>
+                        <div class="text-xs text-gray-600 mt-2">
+                            Share the username and password with the user. They login with their username, not email!
+                        </div>
+                    </div>
+                `;
+                
+                // Reset form
+                document.getElementById('createUserForm').reset();
+                
+            } catch (error) {
+                resultDiv.innerHTML = `
+                    <div class="bg-red-50 border-2 border-red-500 rounded-xl p-4">
+                        <div class="font-bold text-red-700">❌ Error</div>
+                        <div class="text-sm text-gray-700 mt-2">${error.message}</div>
+                    </div>
+                `;
+            }
+        });
+    </script>
+</body>
+</html>
