@@ -129,6 +129,10 @@
             const [selectedEpisode, setSelectedEpisode] = useState(null);
             const [messages, setMessages] = useState([]);
             const [newMessage, setNewMessage] = useState('');
+            const [isRegistering, setIsRegistering] = useState(false);
+            const [username, setUsername] = useState('');
+            const [regEmail, setRegEmail] = useState('');
+            const [teamSelect, setTeamSelect] = useState('');
             const messagesEndRef = useRef(null);
             
             // Check auth state
@@ -264,11 +268,6 @@
             
             // Login screen
             if (!user || showLogin) {
-                const [isRegistering, setIsRegistering] = useState(false);
-                const [username, setUsername] = useState('');
-                const [regEmail, setRegEmail] = useState('');
-                const [teamSelect, setTeamSelect] = useState('');
-                
                 const handleRegister = async (e) => {
                     e.preventDefault();
                     setError('');
