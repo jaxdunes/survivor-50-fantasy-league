@@ -12,6 +12,15 @@
     <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-auth-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-database-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-messaging-compat.js"></script>
+    
+    <!-- PWA Manifest -->
+    <link rel="manifest" href="/manifest.json">
+    <meta name="theme-color" content="#f97316">
+    <link rel="apple-touch-icon" href="/icons/icon-192x192.png">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="default">
+    <meta name="apple-mobile-web-app-title" content="Survivor 50">
     
     <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Playfair+Display:wght@700&display=swap" rel="stylesheet">
     <style>
@@ -235,6 +244,18 @@
                     setWatchedEpisodes([...watchedEpisodes, episode]);
                 } catch (err) {
                     console.error('Error marking episode:', err);
+                }
+            };
+            
+            // Unmark episode as watched
+            const unmarkEpisodeWatched = async (episode) => {
+                if (!user) return;
+                
+                try {
+                    await database.ref(`users/${user.uid}/watchedEpisodes/${episode}`).remove();
+                    setWatchedEpisodes(watchedEpisodes.filter(ep => ep !== episode));
+                } catch (err) {
+                    console.error('Error unmarking episode:', err);
                 }
             };
             
@@ -498,6 +519,10 @@
                                         h(Icons.Home, { size: 18 }),
                                         'Draft'
                                     ),
+                                    h('a', {
+                                        href: 'notifications.html',
+                                        className: 'px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition flex items-center gap-2'
+                                    }, '🔔 Notifications'),
                                     h('button', {
                                         onClick: handleLogout,
                                         className: 'px-4 py-2 bg-red-500 text-white rounded-lg hover:bg-red-600 transition flex items-center gap-2'
@@ -540,12 +565,21 @@
                                                     h(Icons.Eye, { size: 14 }),
                                                     'Watched'
                                                 ),
-                                                isWatched && h('button', {
-                                                    onClick: () => setSelectedEpisode(episode),
-                                                    className: 'px-3 py-1 bg-gradient-to-r from-orange-500 to-amber-600 text-white rounded-lg text-sm hover:shadow-lg transition flex items-center gap-1'
-                                                },
-                                                    h(Icons.MessageCircle, { size: 14 }),
-                                                    'Chat'
+                                                isWatched && h(Fragment, {},
+                                                    h('button', {
+                                                        onClick: () => setSelectedEpisode(episode),
+                                                        className: 'px-3 py-1 bg-gradient-to-r from-orange-500 to-amber-600 text-white rounded-lg text-sm hover:shadow-lg transition flex items-center gap-1'
+                                                    },
+                                                        h(Icons.MessageCircle, { size: 14 }),
+                                                        'Chat'
+                                                    ),
+                                                    h('button', {
+                                                        onClick: () => unmarkEpisodeWatched(episode),
+                                                        className: 'px-3 py-1 bg-gray-400 text-white rounded-lg text-sm hover:bg-gray-500 transition flex items-center gap-1'
+                                                    },
+                                                        h(Icons.X, { size: 14 }),
+                                                        'Unmark'
+                                                    )
                                                 )
                                             )
                                         )
@@ -638,6 +672,52 @@
         
         const root = ReactDOM.createRoot(document.getElementById('root'));
         root.render(h(ChatApp));
+    }
+    </script>
+    
+    <!-- PWA Service Worker & Push Notifications -->
+    <script>
+    // Register service workers for PWA
+    if ('serviceWorker' in navigator) {
+        // Register Firebase Messaging Service Worker
+        navigator.serviceWorker.register('/firebase-messaging-sw.js')
+            .then((registration) => {
+                console.log('Firebase Messaging Service Worker registered:', registration);
+            })
+            .catch((error) => {
+                console.error('Firebase Messaging SW registration failed:', error);
+            });
+        
+        // Register main Service Worker
+        navigator.serviceWorker.register('/service-worker.js')
+            .then((registration) => {
+                console.log('Main Service Worker registered:', registration);
+            })
+            .catch((error) => {
+                console.error('Main SW registration failed:', error);
+            });
+    }
+
+    // Initialize Firebase Messaging (if available)
+    if (firebase.messaging.isSupported()) {
+        const messaging = firebase.messaging();
+
+        // Listen for foreground messages
+        messaging.onMessage((payload) => {
+            console.log('Message received in foreground:', payload);
+            
+            // Show notification even when app is open
+            const notificationTitle = payload.notification?.title || 'New Message';
+            const notificationOptions = {
+                body: payload.notification?.body || '',
+                icon: '/icons/icon-192x192.png',
+                badge: '/icons/icon-72x72.png'
+            };
+            
+            if (Notification.permission === 'granted') {
+                new Notification(notificationTitle, notificationOptions);
+            }
+        });
     }
     </script>
 </body>

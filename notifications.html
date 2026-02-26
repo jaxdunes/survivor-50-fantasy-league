@@ -1,0 +1,291 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Notification Settings - Survivor 50</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <!-- Firebase SDK -->
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-database-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-messaging-compat.js"></script>
+    
+    <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&display=swap" rel="stylesheet">
+    <style>
+        body { margin: 0; padding: 0; font-family: system-ui, -apple-system, sans-serif; }
+        .grey-ombre-bg {
+            background: linear-gradient(135deg, #f5f5f5 0%, #9e9e9e 50%, #424242 100%);
+            min-height: 100vh;
+        }
+    </style>
+</head>
+<body class="grey-ombre-bg">
+    <div class="max-w-2xl mx-auto p-4 md:p-8">
+        <!-- Header -->
+        <div class="bg-white/95 backdrop-blur-md rounded-2xl p-6 mb-6 shadow-xl">
+            <div class="flex justify-between items-center">
+                <div>
+                    <h1 class="text-4xl font-black" style="font-family: 'Bebas Neue', cursive">
+                        🔔 NOTIFICATIONS
+                    </h1>
+                    <p class="text-gray-600 mt-1">Customize your alerts</p>
+                </div>
+                <a href="chat.html" class="px-4 py-2 bg-gray-200 rounded-lg hover:bg-gray-300 transition">
+                    ← Back
+                </a>
+            </div>
+        </div>
+        
+        <!-- Notification Status -->
+        <div id="notificationStatus" class="bg-white/95 backdrop-blur-md rounded-2xl p-6 mb-6 shadow-xl">
+            <h2 class="text-xl font-bold mb-4">Push Notification Status</h2>
+            <div id="statusContent">
+                <!-- Will be populated by JavaScript -->
+            </div>
+        </div>
+        
+        <!-- Notification Preferences -->
+        <div id="preferences" class="bg-white/95 backdrop-blur-md rounded-2xl p-6 shadow-xl">
+            <h2 class="text-xl font-bold mb-4">What do you want to be notified about?</h2>
+            
+            <div class="space-y-4">
+                <!-- Chat Notifications -->
+                <div class="border-2 border-gray-200 rounded-xl p-4">
+                    <h3 class="font-bold text-lg mb-3 flex items-center gap-2">
+                        💬 Chat
+                    </h3>
+                    <div class="space-y-3">
+                        <label class="flex items-center gap-3 cursor-pointer">
+                            <input type="checkbox" id="notify-chat-message" class="w-5 h-5 text-orange-600 rounded">
+                            <div>
+                                <div class="font-semibold">New Messages</div>
+                                <div class="text-sm text-gray-600">When someone sends a message in chat</div>
+                            </div>
+                        </label>
+                        
+                        <label class="flex items-center gap-3 cursor-pointer">
+                            <input type="checkbox" id="notify-episode-watched" class="w-5 h-5 text-orange-600 rounded">
+                            <div>
+                                <div class="font-semibold">Episode Watched</div>
+                                <div class="text-sm text-gray-600">When someone marks an episode as watched</div>
+                            </div>
+                        </label>
+                    </div>
+                </div>
+                
+                <!-- Scoring Notifications -->
+                <div class="border-2 border-gray-200 rounded-xl p-4">
+                    <h3 class="font-bold text-lg mb-3 flex items-center gap-2">
+                        📊 Scoring
+                    </h3>
+                    <div class="space-y-3">
+                        <label class="flex items-center gap-3 cursor-pointer">
+                            <input type="checkbox" id="notify-points-added" class="w-5 h-5 text-orange-600 rounded">
+                            <div>
+                                <div class="font-semibold">Points Added</div>
+                                <div class="text-sm text-gray-600">When points are added to any player</div>
+                            </div>
+                        </label>
+                        
+                        <label class="flex items-center gap-3 cursor-pointer">
+                            <input type="checkbox" id="notify-my-team-points" class="w-5 h-5 text-orange-600 rounded">
+                            <div>
+                                <div class="font-semibold">My Team Points Only</div>
+                                <div class="text-sm text-gray-600">Only notify for your team's players</div>
+                            </div>
+                        </label>
+                        
+                        <label class="flex items-center gap-3 cursor-pointer">
+                            <input type="checkbox" id="notify-elimination" class="w-5 h-5 text-orange-600 rounded">
+                            <div>
+                                <div class="font-semibold">Player Eliminated</div>
+                                <div class="text-sm text-gray-600">When a player is voted out</div>
+                            </div>
+                        </label>
+                        
+                        <label class="flex items-center gap-3 cursor-pointer">
+                            <input type="checkbox" id="notify-winner" class="w-5 h-5 text-orange-600 rounded">
+                            <div>
+                                <div class="font-semibold">Winner Declared</div>
+                                <div class="text-sm text-gray-600">When the Sole Survivor is crowned</div>
+                            </div>
+                        </label>
+                    </div>
+                </div>
+                
+                <!-- Draft Notifications -->
+                <div class="border-2 border-gray-200 rounded-xl p-4">
+                    <h3 class="font-bold text-lg mb-3 flex items-center gap-2">
+                        🏝️ Draft
+                    </h3>
+                    <div class="space-y-3">
+                        <label class="flex items-center gap-3 cursor-pointer">
+                            <input type="checkbox" id="notify-player-drafted" class="w-5 h-5 text-orange-600 rounded">
+                            <div>
+                                <div class="font-semibold">Player Drafted</div>
+                                <div class="text-sm text-gray-600">When a player is assigned to a team</div>
+                            </div>
+                        </label>
+                    </div>
+                </div>
+            </div>
+            
+            <button id="saveButton" 
+                class="w-full mt-6 px-6 py-3 bg-gradient-to-r from-orange-500 to-amber-600 text-white rounded-xl font-bold hover:shadow-lg transition text-lg">
+                Save Preferences
+            </button>
+        </div>
+    </div>
+    
+    <script>
+        // Firebase Configuration
+        const firebaseConfig = {
+            apiKey: "AIzaSyAls1zpuUGgNx7xhlpCjF4bDEXp8qfxQ3A",
+            authDomain: "survivorfantasy-cc908.firebaseapp.com",
+            databaseURL: "https://survivorfantasy-cc908-default-rtdb.firebaseio.com",
+            projectId: "survivorfantasy-cc908",
+            storageBucket: "survivorfantasy-cc908.firebasestorage.app",
+            messagingSenderId: "401357232113",
+            appId: "1:401357232113:web:a9980c49bde38ff981d650"
+        };
+        
+        firebase.initializeApp(firebaseConfig);
+        const auth = firebase.auth();
+        const database = firebase.database();
+        const messaging = firebase.messaging();
+        
+        let currentUser = null;
+        
+        // Check auth state
+        auth.onAuthStateChanged((user) => {
+            currentUser = user;
+            if (user) {
+                loadPreferences();
+                updateNotificationStatus();
+            } else {
+                window.location.href = 'chat.html';
+            }
+        });
+        
+        // Update notification status display
+        async function updateNotificationStatus() {
+            const statusContent = document.getElementById('statusContent');
+            
+            if (!('Notification' in window)) {
+                statusContent.innerHTML = `
+                    <div class="bg-red-50 border-2 border-red-200 rounded-lg p-4">
+                        <p class="font-bold text-red-700">❌ Not Supported</p>
+                        <p class="text-sm text-gray-700 mt-1">Your browser doesn't support push notifications.</p>
+                    </div>
+                `;
+                return;
+            }
+            
+            const permission = Notification.permission;
+            
+            if (permission === 'granted') {
+                statusContent.innerHTML = `
+                    <div class="bg-green-50 border-2 border-green-200 rounded-lg p-4">
+                        <p class="font-bold text-green-700">✅ Enabled</p>
+                        <p class="text-sm text-gray-700 mt-1">You'll receive notifications based on your preferences below.</p>
+                    </div>
+                `;
+            } else if (permission === 'denied') {
+                statusContent.innerHTML = `
+                    <div class="bg-red-50 border-2 border-red-200 rounded-lg p-4">
+                        <p class="font-bold text-red-700">❌ Blocked</p>
+                        <p class="text-sm text-gray-700 mt-1">You've blocked notifications. Enable them in your browser settings.</p>
+                    </div>
+                `;
+            } else {
+                statusContent.innerHTML = `
+                    <div class="bg-yellow-50 border-2 border-yellow-200 rounded-lg p-4">
+                        <p class="font-bold text-yellow-700">⚠️ Not Enabled</p>
+                        <p class="text-sm text-gray-700 mt-1 mb-3">Enable notifications to stay updated!</p>
+                        <button onclick="requestNotificationPermission()" 
+                            class="px-4 py-2 bg-orange-500 text-white rounded-lg font-bold hover:bg-orange-600 transition">
+                            Enable Notifications
+                        </button>
+                    </div>
+                `;
+            }
+        }
+        
+        // Request notification permission
+        async function requestNotificationPermission() {
+            try {
+                const permission = await Notification.requestPermission();
+                
+                if (permission === 'granted') {
+                    // Get FCM token
+                    const token = await messaging.getToken({
+                        vapidKey: 'BCRCwdCbgJexfIuD4XAxhdssLVz1hsxKho8_NZs98qjikUKNFkZoHyNBY4--A1BTd4ae_b8cUTIzvDQmXceFaZw'
+                    });
+                    
+                    // Save token to Firebase
+                    if (currentUser) {
+                        await database.ref(`users/${currentUser.uid}/fcmToken`).set(token);
+                    }
+                    
+                    updateNotificationStatus();
+                    alert('Notifications enabled! 🎉');
+                } else {
+                    updateNotificationStatus();
+                }
+            } catch (error) {
+                console.error('Error enabling notifications:', error);
+                alert('Error enabling notifications. Please try again.');
+            }
+        }
+        
+        // Load user preferences
+        async function loadPreferences() {
+            if (!currentUser) return;
+            
+            try {
+                const snapshot = await database.ref(`users/${currentUser.uid}/notificationPrefs`).once('value');
+                const prefs = snapshot.val() || {};
+                
+                // Set checkboxes based on saved preferences (default to true)
+                document.getElementById('notify-chat-message').checked = prefs.chatMessage !== false;
+                document.getElementById('notify-episode-watched').checked = prefs.episodeWatched !== false;
+                document.getElementById('notify-points-added').checked = prefs.pointsAdded !== false;
+                document.getElementById('notify-my-team-points').checked = prefs.myTeamPointsOnly === true;
+                document.getElementById('notify-elimination').checked = prefs.elimination !== false;
+                document.getElementById('notify-winner').checked = prefs.winner !== false;
+                document.getElementById('notify-player-drafted').checked = prefs.playerDrafted !== false;
+            } catch (error) {
+                console.error('Error loading preferences:', error);
+            }
+        }
+        
+        // Save preferences
+        document.getElementById('saveButton').addEventListener('click', async () => {
+            if (!currentUser) return;
+            
+            const prefs = {
+                chatMessage: document.getElementById('notify-chat-message').checked,
+                episodeWatched: document.getElementById('notify-episode-watched').checked,
+                pointsAdded: document.getElementById('notify-points-added').checked,
+                myTeamPointsOnly: document.getElementById('notify-my-team-points').checked,
+                elimination: document.getElementById('notify-elimination').checked,
+                winner: document.getElementById('notify-winner').checked,
+                playerDrafted: document.getElementById('notify-player-drafted').checked
+            };
+            
+            try {
+                await database.ref(`users/${currentUser.uid}/notificationPrefs`).set(prefs);
+                alert('Preferences saved! ✅');
+            } catch (error) {
+                console.error('Error saving preferences:', error);
+                alert('Error saving preferences. Please try again.');
+            }
+        });
+        
+        // Make function global
+        window.requestNotificationPermission = requestNotificationPermission;
+    </script>
+</body>
+</html>
