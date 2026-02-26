@@ -26,8 +26,8 @@ messaging.onBackgroundMessage((payload) => {
     const notificationTitle = payload.notification.title || 'Survivor 50 Fantasy League';
     const notificationOptions = {
         body: payload.notification.body,
-        icon: '/icons/icon-192x192.png',
-        badge: '/icons/icon-72x72.png',
+        icon: 'icons/icon-192x192.png',
+        badge: 'icons/icon-72x72.png',
         tag: payload.data?.type || 'general',
         data: payload.data,
         requireInteraction: false,

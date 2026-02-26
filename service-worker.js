@@ -1,13 +1,13 @@
 // Service Worker for Survivor 50 Fantasy League PWA
 const CACHE_NAME = 'survivor-50-v1';
 const urlsToCache = [
-    '/',
-    '/index.html',
-    '/scoring.html',
-    '/chat.html',
-    '/manifest.json',
-    '/icons/icon-192x192.png',
-    '/icons/icon-512x512.png'
+    './',
+    './index.html',
+    './scoring.html',
+    './chat.html',
+    './manifest.json',
+    './icons/icon-192x192.png',
+    './icons/icon-512x512.png'
 ];
 
 // Install event - cache resources
