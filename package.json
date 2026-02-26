@@ -1,0 +1,16 @@
+{
+  "name": "survivor-fantasy-notifications",
+  "description": "Cloud Functions for Survivor 50 Fantasy League push notifications",
+  "engines": {
+    "node": "18"
+  },
+  "main": "index.js",
+  "dependencies": {
+    "firebase-admin": "^11.8.0",
+    "firebase-functions": "^4.3.1"
+  },
+  "devDependencies": {
+    "firebase-functions-test": "^3.1.0"
+  },
+  "private": true
+}
