@@ -345,7 +345,10 @@
                             episode: parseInt(episode),
                             category: score.category,
                             points: score.points,
-                            note: score.note
+                            note: score.note,
+                            scoreId: scoreId,
+                            playerId: playerId,
+                            canDelete: true
                         });
                     });
                 });
@@ -373,6 +376,23 @@
                 }
                 
                 return breakdown.sort((a, b) => a.episode - b.episode);
+            };
+            
+            // Delete a score entry
+            const deleteScore = async (playerId, episode, scoreId) => {
+                if (!confirm('Are you sure you want to delete this score entry?')) {
+                    return;
+                }
+                
+                if (firebaseInitialized) {
+                    try {
+                        await database.ref(`scores/${playerId}/${episode}/${scoreId}`).remove();
+                        alert('Score deleted successfully!');
+                    } catch (err) {
+                        console.error('Error deleting score:', err);
+                        alert('Error deleting score. Please try again.');
+                    }
+                }
             };
             
             return h('div', { className: 'min-h-screen grey-ombre-bg p-4 md:p-8' },
@@ -508,9 +528,19 @@
                                                     ),
                                                     breakdown.length > 0 && h('div', { className: 'text-xs space-y-1' },
                                                         ...breakdown.map((item, idx) => 
-                                                            h('div', { key: idx, className: 'flex justify-between text-gray-600' },
+                                                            h('div', { key: idx, className: 'flex justify-between items-center text-gray-600 group' },
                                                                 h('span', {}, `E${item.episode}: ${item.category}${item.note ? ` - ${item.note}` : ''}`),
-                                                                h('span', { className: 'font-bold' }, `+${item.points}`)
+                                                                h('div', { className: 'flex items-center gap-2' },
+                                                                    h('span', { className: 'font-bold' }, `+${item.points}`),
+                                                                    item.canDelete && h('button', {
+                                                                        onClick: (e) => {
+                                                                            e.stopPropagation();
+                                                                            deleteScore(item.playerId, item.episode, item.scoreId);
+                                                                        },
+                                                                        className: 'opacity-0 group-hover:opacity-100 transition-opacity ml-2 text-red-500 hover:text-red-700 font-bold',
+                                                                        title: 'Delete this score'
+                                                                    }, '×')
+                                                                )
                                                             )
                                                         )
                                                     )
