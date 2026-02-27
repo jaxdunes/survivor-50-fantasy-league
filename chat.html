@@ -785,3 +785,30 @@ window.addEventListener('focus', async () => {
     </script>
 </body>
 </html>
+
+// === BADGE CLEARING CODE ===
+auth.onAuthStateChanged(async (user) => {
+    if (user) {
+        await database.ref(`users/${user.uid}/unreadMessages`).set(0);
+        if ('clearAppBadge' in navigator) {
+            try {
+                await navigator.clearAppBadge();
+            } catch (e) {
+                console.log('Badge not supported');
+            }
+        }
+    }
+});
+
+window.addEventListener('focus', async () => {
+    const user = auth.currentUser;
+    if (user) {
+        await database.ref(`users/${user.uid}/unreadMessages`).set(0);
+        if ('clearAppBadge' in navigator) {
+            try {
+                await navigator.clearAppBadge();
+            } catch (e) {}
+        }
+    }
+});
+</script>
