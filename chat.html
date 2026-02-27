@@ -1,0 +1,787 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Survivor 50 - Chat</title>
+    <script src="https://cdn.jsdelivr.net/npm/react@18.2.0/umd/react.production.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/react-dom@18.2.0/umd/react-dom.production.min.js"></script>
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <!-- Firebase SDK -->
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-database-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-messaging-compat.js"></script>
+    
+    <!-- PWA Manifest -->
+    <link rel="manifest" href="manifest.json">
+    <meta name="theme-color" content="#f97316">
+    <link rel="apple-touch-icon" href="icons/icon-192x192.png">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="default">
+    <meta name="apple-mobile-web-app-title" content="Survivor 50">
+    
+    <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Playfair+Display:wght@700&display=swap" rel="stylesheet">
+    <style>
+        body { margin: 0; padding: 0; font-family: system-ui, -apple-system, sans-serif; }
+        #root { min-height: 100vh; }
+        .grey-ombre-bg {
+            background: linear-gradient(135deg, #f5f5f5 0%, #9e9e9e 50%, #424242 100%);
+            min-height: 100vh;
+        }
+        .chat-container {
+            display: flex;
+            flex-direction: column;
+            height: 60vh;
+        }
+        .messages {
+            flex: 1;
+            overflow-y: auto;
+            padding: 20px;
+        }
+        .message {
+            margin-bottom: 12px;
+            padding: 12px;
+            border-radius: 12px;
+            background: white;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+        }
+    </style>
+</head>
+<body>
+    <div id="root">
+        <div style="display: flex; justify-content: center; align-items: center; min-height: 100vh; font-size: 24px; color: #f97316; font-weight: bold;">
+            🔥 Loading...
+        </div>
+    </div>
+    
+    <script>
+    // Firebase Configuration
+    const firebaseConfig = {
+        apiKey: "AIzaSyAls1zpuUGgNx7xhlpCjF4bDEXp8qfxQ3A",
+        authDomain: "survivorfantasy-cc908.firebaseapp.com",
+        databaseURL: "https://survivorfantasy-cc908-default-rtdb.firebaseio.com/",
+        projectId: "survivorfantasy-cc908",
+        storageBucket: "survivorfantasy-cc908.firebasestorage.app",
+        messagingSenderId: "401357232113",
+        appId: "1:401357232113:web:a9980c49bde38ff981d650"
+    };
+    
+    let database, auth;
+    let firebaseInitialized = false;
+    
+    try {
+        firebase.initializeApp(firebaseConfig);
+        database = firebase.database();
+        auth = firebase.auth();
+        firebaseInitialized = true;
+        console.log('🔥 Firebase initialized');
+    } catch (error) {
+        console.error('Firebase error:', error);
+    }
+    
+    window.addEventListener('load', function() {
+        setTimeout(function() {
+            initializeApp();
+        }, 500);
+    });
+    
+    function initializeApp() {
+        const { createElement: h, useState, useEffect, Fragment, useRef } = React;
+        
+        const createIcon = (svgContent) => {
+            return (props) => h('svg', {
+                width: props.size || 24,
+                height: props.size || 24,
+                viewBox: '0 0 24 24',
+                fill: 'none',
+                stroke: 'currentColor',
+                strokeWidth: 2,
+                strokeLinecap: 'round',
+                strokeLinejoin: 'round',
+                dangerouslySetInnerHTML: { __html: svgContent }
+            });
+        };
+        
+        const Icons = {
+            Home: createIcon('<path d="m3 9 9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path><polyline points="9 22 9 12 15 12 15 22"></polyline>'),
+            MessageCircle: createIcon('<path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"></path>'),
+            Send: createIcon('<line x1="22" y1="2" x2="11" y2="13"></line><polygon points="22 2 15 22 11 13 2 9 22 2"></polygon>'),
+            Check: createIcon('<polyline points="20 6 9 17 4 12"></polyline>'),
+            X: createIcon('<path d="M18 6 6 18"></path><path d="m6 6 12 12"></path>'),
+            Lock: createIcon('<rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect><path d="M7 11V7a5 5 0 0 1 10 0v4"></path>'),
+            Unlock: createIcon('<rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect><path d="M7 11V7a5 5 0 0 1 9.9-1"></path>'),
+            Eye: createIcon('<path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path><circle cx="12" cy="12" r="3"></circle>'),
+            LogOut: createIcon('<path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path><polyline points="16 17 21 12 16 7"></polyline><line x1="21" y1="12" x2="9" y2="12"></line>')
+        };
+        
+        const teams = [
+            { id: 'austin', name: 'Austin', color: 'from-blue-500 to-indigo-600' },
+            { id: 'sandra', name: 'Sandra', color: 'from-green-500 to-emerald-600' },
+            { id: 'ashlynn', name: 'Ashlynn', color: 'from-red-500 to-rose-600' },
+            { id: 'jackson-ray', name: 'Jackson/Ray', color: 'from-purple-500 to-violet-600' },
+            { id: 'maura', name: 'Maura', color: 'from-pink-500 to-fuchsia-600' },
+            { id: 'ryan-jordan', name: 'Ryan/Jordan', color: 'from-amber-500 to-orange-600' }
+        ];
+        
+        function ChatApp() {
+            const [user, setUser] = useState(null);
+            const [loading, setLoading] = useState(true);
+            const [showLogin, setShowLogin] = useState(false);
+            const [email, setEmail] = useState('');
+            const [password, setPassword] = useState('');
+            const [rememberMe, setRememberMe] = useState(true);
+            const [error, setError] = useState('');
+            const [userProfile, setUserProfile] = useState(null);
+            const [watchedEpisodes, setWatchedEpisodes] = useState([]);
+            const [selectedEpisode, setSelectedEpisode] = useState(null);
+            const [messages, setMessages] = useState([]);
+            const [newMessage, setNewMessage] = useState('');
+            const [isRegistering, setIsRegistering] = useState(false);
+            const [username, setUsername] = useState('');
+            const [regEmail, setRegEmail] = useState('');
+            const [teamSelect, setTeamSelect] = useState('');
+            const messagesEndRef = useRef(null);
+            
+            // Check auth state
+            useEffect(() => {
+                if (!firebaseInitialized) {
+                    setLoading(false);
+                    return;
+                }
+                
+                const persistence = rememberMe ? 
+                    firebase.auth.Auth.Persistence.LOCAL : 
+                    firebase.auth.Auth.Persistence.SESSION;
+                    
+                auth.setPersistence(persistence);
+                
+                const unsubscribe = auth.onAuthStateChanged((currentUser) => {
+                    setUser(currentUser);
+                    if (currentUser) {
+                        loadUserProfile(currentUser.uid);
+                    } else {
+                        setUserProfile(null);
+                    }
+                    setLoading(false);
+                });
+                
+                return () => unsubscribe();
+            }, []);
+            
+            // Load user profile
+            const loadUserProfile = (uid) => {
+                database.ref(`users/${uid}`).on('value', (snapshot) => {
+                    const profile = snapshot.val();
+                    setUserProfile(profile);
+                    if (profile && profile.watchedEpisodes) {
+                        setWatchedEpisodes(Object.keys(profile.watchedEpisodes).map(Number));
+                    }
+                });
+            };
+            
+            // Load messages for selected episode
+            useEffect(() => {
+                if (!selectedEpisode || !firebaseInitialized) return;
+                
+                const messagesRef = database.ref(`chat/episode-${selectedEpisode}`);
+                messagesRef.on('value', (snapshot) => {
+                    const data = snapshot.val();
+                    if (data) {
+                        const messageList = Object.entries(data).map(([key, val]) => ({
+                            id: key,
+                            ...val
+                        })).sort((a, b) => a.timestamp - b.timestamp);
+                        setMessages(messageList);
+                    } else {
+                        setMessages([]);
+                    }
+                });
+                
+                return () => messagesRef.off();
+            }, [selectedEpisode]);
+            
+            // Auto scroll to bottom
+            useEffect(() => {
+                messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
+            }, [messages]);
+            
+            // Login
+            const handleLogin = async (e) => {
+                e.preventDefault();
+                setError('');
+                
+                try {
+                    const persistence = rememberMe ? 
+                        firebase.auth.Auth.Persistence.LOCAL : 
+                        firebase.auth.Auth.Persistence.SESSION;
+                    await auth.setPersistence(persistence);
+                    await auth.signInWithEmailAndPassword(email, password);
+                    setShowLogin(false);
+                } catch (err) {
+                    setError(err.message);
+                }
+            };
+            
+            // Logout
+            const handleLogout = async () => {
+                try {
+                    await auth.signOut();
+                    setSelectedEpisode(null);
+                    setMessages([]);
+                } catch (err) {
+                    console.error('Logout error:', err);
+                }
+            };
+            
+            // Mark episode as watched
+            const markEpisodeWatched = async (episode) => {
+                if (!user) return;
+                
+                try {
+                    await database.ref(`users/${user.uid}/watchedEpisodes/${episode}`).set(true);
+                    setWatchedEpisodes([...watchedEpisodes, episode]);
+                } catch (err) {
+                    console.error('Error marking episode:', err);
+                }
+            };
+            
+            // Unmark episode as watched
+            const unmarkEpisodeWatched = async (episode) => {
+                if (!user) return;
+                
+                try {
+                    await database.ref(`users/${user.uid}/watchedEpisodes/${episode}`).remove();
+                    setWatchedEpisodes(watchedEpisodes.filter(ep => ep !== episode));
+                } catch (err) {
+                    console.error('Error unmarking episode:', err);
+                }
+            };
+            
+            // Send message
+            const sendMessage = async (e) => {
+                e.preventDefault();
+                if (!newMessage.trim() || !user || !selectedEpisode) return;
+                
+                try {
+                    const messageData = {
+                        text: newMessage.trim(),
+                        userId: user.uid,
+                        username: userProfile?.username || user.email,
+                        displayName: userProfile?.displayName || userProfile?.username || user.email,
+                        teamId: userProfile?.teamId || null,
+                        timestamp: Date.now()
+                    };
+                    
+                    await database.ref(`chat/episode-${selectedEpisode}`).push(messageData);
+                    setNewMessage('');
+                } catch (err) {
+                    console.error('Error sending message:', err);
+                }
+            };
+            
+            if (loading) {
+                return h('div', { className: 'flex justify-center items-center min-height: 100vh' },
+                    h('div', { className: 'text-2xl font-bold text-orange-600' }, '🔥 Loading...')
+                );
+            }
+            
+            // Login screen
+            if (!user || showLogin) {
+                const handleRegister = async (e) => {
+                    e.preventDefault();
+                    setError('');
+                    
+                    if (!username || !password || !regEmail) {
+                        setError('Please fill in all fields');
+                        return;
+                    }
+                    
+                    try {
+                        // Create account
+                        const userCredential = await auth.createUserWithEmailAndPassword(regEmail, password);
+                        const newUser = userCredential.user;
+                        
+                        // Save profile
+                        await database.ref(`users/${newUser.uid}`).set({
+                            username: username,
+                            email: regEmail,
+                            teamId: teamSelect || null,
+                            displayName: teamSelect === 'peanut-gallery' ? 'The Peanut Gallery' : teams.find(t => t.id === teamSelect)?.name || username,
+                            createdAt: Date.now()
+                        });
+                        
+                        setIsRegistering(false);
+                        alert('Account created! You can now log in.');
+                    } catch (err) {
+                        setError(err.message);
+                    }
+                };
+                
+                const handleLoginWithUsername = async (e) => {
+                    e.preventDefault();
+                    setError('');
+                    
+                    if (!email || !password) {
+                        setError('Please enter username and password');
+                        return;
+                    }
+                    
+                    try {
+                        const persistence = rememberMe ? 
+                            firebase.auth.Auth.Persistence.LOCAL : 
+                            firebase.auth.Auth.Persistence.SESSION;
+                        await auth.setPersistence(persistence);
+                        
+                        // Find user by username
+                        const snapshot = await database.ref('users').orderByChild('username').equalTo(email).once('value');
+                        const userData = snapshot.val();
+                        
+                        if (!userData) {
+                            setError('Username not found');
+                            return;
+                        }
+                        
+                        const userId = Object.keys(userData)[0];
+                        const userEmail = userData[userId].email;
+                        
+                        await auth.signInWithEmailAndPassword(userEmail, password);
+                        setShowLogin(false);
+                    } catch (err) {
+                        setError(err.message);
+                    }
+                };
+                
+                return h('div', { className: 'min-h-screen grey-ombre-bg flex items-center justify-center p-4' },
+                    h('div', { className: 'bg-white rounded-2xl shadow-2xl p-8 max-w-md w-full' },
+                        h('div', { className: 'text-center mb-8' },
+                            h('h1', { 
+                                className: 'text-5xl font-black mb-2',
+                                style: { fontFamily: '"Bebas Neue", cursive' }
+                            }, 'SURVIVOR 50'),
+                            h('p', { className: 'text-gray-600' }, isRegistering ? 'Create Account' : 'Chat Login')
+                        ),
+                        
+                        isRegistering ? 
+                            // Registration form
+                            h('form', { onSubmit: handleRegister, className: 'space-y-4' },
+                                h('div', {},
+                                    h('label', { className: 'block text-sm font-bold text-gray-700 mb-2' }, 'Username'),
+                                    h('input', {
+                                        type: 'text',
+                                        value: username,
+                                        onChange: (e) => setUsername(e.target.value),
+                                        className: 'w-full px-4 py-3 border-2 border-gray-300 rounded-xl focus:border-orange-500 focus:outline-none',
+                                        placeholder: 'austin',
+                                        required: true
+                                    })
+                                ),
+                                
+                                h('div', {},
+                                    h('label', { className: 'block text-sm font-bold text-gray-700 mb-2' }, 'Email'),
+                                    h('input', {
+                                        type: 'email',
+                                        value: regEmail,
+                                        onChange: (e) => setRegEmail(e.target.value),
+                                        className: 'w-full px-4 py-3 border-2 border-gray-300 rounded-xl focus:border-orange-500 focus:outline-none',
+                                        placeholder: 'your@email.com',
+                                        required: true
+                                    })
+                                ),
+                                
+                                h('div', {},
+                                    h('label', { className: 'block text-sm font-bold text-gray-700 mb-2' }, 'Password'),
+                                    h('input', {
+                                        type: 'password',
+                                        value: password,
+                                        onChange: (e) => setPassword(e.target.value),
+                                        className: 'w-full px-4 py-3 border-2 border-gray-300 rounded-xl focus:border-orange-500 focus:outline-none',
+                                        placeholder: '••••••••',
+                                        required: true
+                                    })
+                                ),
+                                
+                                h('div', {},
+                                    h('label', { className: 'block text-sm font-bold text-gray-700 mb-2' }, 'Select Your Team'),
+                                    h('select', {
+                                        value: teamSelect,
+                                        onChange: (e) => setTeamSelect(e.target.value),
+                                        className: 'w-full px-4 py-3 border-2 border-gray-300 rounded-xl focus:border-orange-500 focus:outline-none',
+                                        required: true
+                                    },
+                                        h('option', { value: '' }, 'Choose team...'),
+                                        ...teams.map(team => h('option', { key: team.id, value: team.id }, team.name)),
+                                        h('option', { value: 'peanut-gallery' }, 'The Peanut Gallery (Observer)')
+                                    )
+                                ),
+                                
+                                error && h('div', { className: 'bg-red-50 text-red-600 p-3 rounded-lg text-sm' }, error),
+                                
+                                h('button', {
+                                    type: 'submit',
+                                    className: 'w-full bg-gradient-to-r from-orange-500 to-amber-600 text-white py-3 rounded-xl font-bold hover:shadow-lg transition'
+                                }, 'Create Account'),
+                                
+                                h('button', {
+                                    type: 'button',
+                                    onClick: () => setIsRegistering(false),
+                                    className: 'w-full text-orange-600 hover:text-orange-700 font-semibold mt-2'
+                                }, 'Already have an account? Sign In')
+                            )
+                        :
+                            // Login form
+                            h('form', { onSubmit: handleLoginWithUsername, className: 'space-y-4' },
+                                h('div', {},
+                                    h('label', { className: 'block text-sm font-bold text-gray-700 mb-2' }, 'Username'),
+                                    h('input', {
+                                        type: 'text',
+                                        value: email,
+                                        onChange: (e) => setEmail(e.target.value),
+                                        className: 'w-full px-4 py-3 border-2 border-gray-300 rounded-xl focus:border-orange-500 focus:outline-none',
+                                        placeholder: 'austin',
+                                        required: true
+                                    })
+                                ),
+                                
+                                h('div', {},
+                                    h('label', { className: 'block text-sm font-bold text-gray-700 mb-2' }, 'Password'),
+                                    h('input', {
+                                        type: 'password',
+                                        value: password,
+                                        onChange: (e) => setPassword(e.target.value),
+                                        className: 'w-full px-4 py-3 border-2 border-gray-300 rounded-xl focus:border-orange-500 focus:outline-none',
+                                        placeholder: '••••••••',
+                                        required: true
+                                    })
+                                ),
+                                
+                                h('div', { className: 'flex items-center' },
+                                    h('input', {
+                                        type: 'checkbox',
+                                        id: 'remember',
+                                        checked: rememberMe,
+                                        onChange: (e) => setRememberMe(e.target.checked),
+                                        className: 'w-4 h-4 text-orange-600 rounded'
+                                    }),
+                                    h('label', { 
+                                        htmlFor: 'remember',
+                                        className: 'ml-2 text-sm text-gray-700 font-semibold'
+                                    }, 'Keep me signed in')
+                                ),
+                                
+                                error && h('div', { className: 'bg-red-50 text-red-600 p-3 rounded-lg text-sm' }, error),
+                                
+                                h('button', {
+                                    type: 'submit',
+                                    className: 'w-full bg-gradient-to-r from-orange-500 to-amber-600 text-white py-3 rounded-xl font-bold hover:shadow-lg transition'
+                                }, 'Sign In'),
+                                
+                                h('button', {
+                                    type: 'button',
+                                    onClick: () => setIsRegistering(true),
+                                    className: 'w-full text-orange-600 hover:text-orange-700 font-semibold mt-4'
+                                }, "Don't have an account? Register"),
+                                
+                                h('a', {
+                                    href: 'index.html',
+                                    className: 'block text-center text-gray-600 hover:text-gray-700 font-semibold mt-4'
+                                }, '← Back to Draft')
+                            )
+                    )
+                );
+            }
+            
+            // Main app - episode selection
+            if (!selectedEpisode) {
+                return h('div', { className: 'min-h-screen grey-ombre-bg p-4' },
+                    h('div', { className: 'max-w-4xl mx-auto' },
+                        // Header
+                        h('div', { className: 'bg-white/95 backdrop-blur-md rounded-2xl p-6 mb-6 shadow-xl' },
+                            h('div', { className: 'flex justify-between items-center' },
+                                h('div', {},
+                                    h('h1', { 
+                                        className: 'text-4xl font-black',
+                                        style: { fontFamily: '"Bebas Neue", cursive' }
+                                    }, '💬 EPISODE CHAT'),
+                                    h('p', { className: 'text-gray-600 mt-1' },
+                                        `Logged in as: ${userProfile?.username || user.email}`,
+                                        userProfile?.teamId === 'peanut-gallery' && h('span', { 
+                                            className: 'ml-2 px-3 py-1 rounded-full text-xs font-bold bg-gradient-to-r from-gray-500 to-slate-600 text-white'
+                                        }, '🥜 The Peanut Gallery')
+                                    )
+                                ),
+                                h('div', { className: 'flex gap-2' },
+                                    h('a', {
+                                        href: 'index.html',
+                                        className: 'px-4 py-2 bg-gray-200 rounded-lg hover:bg-gray-300 transition flex items-center gap-2'
+                                    },
+                                        h(Icons.Home, { size: 18 }),
+                                        'Draft'
+                                    ),
+                                    h('a', {
+                                        href: 'notifications.html',
+                                        className: 'px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition flex items-center gap-2'
+                                    }, '🔔 Notifications'),
+                                    h('button', {
+                                        onClick: handleLogout,
+                                        className: 'px-4 py-2 bg-red-500 text-white rounded-lg hover:bg-red-600 transition flex items-center gap-2'
+                                    },
+                                        h(Icons.LogOut, { size: 18 }),
+                                        'Logout'
+                                    )
+                                )
+                            )
+                        ),
+                        
+                        // Episode selection
+                        h('div', { className: 'bg-white/95 backdrop-blur-md rounded-2xl p-6 shadow-xl' },
+                            h('h2', { className: 'text-2xl font-bold mb-4' }, 'Select an Episode to Chat'),
+                            h('p', { className: 'text-gray-600 mb-6' }, 
+                                'Mark episodes as watched to unlock spoiler-free chat rooms!'
+                            ),
+                            
+                            h('div', { className: 'grid md:grid-cols-2 gap-4' },
+                                ...[...Array(14)].map((_, i) => {
+                                    const episode = i + 1;
+                                    const isWatched = watchedEpisodes.includes(episode);
+                                    
+                                    return h('div', {
+                                        key: episode,
+                                        className: `border-2 rounded-xl p-4 ${isWatched ? 'border-green-500 bg-green-50' : 'border-gray-300'}`
+                                    },
+                                        h('div', { className: 'flex justify-between items-center' },
+                                            h('div', {},
+                                                h('div', { className: 'font-bold text-lg' }, `Episode ${episode}`),
+                                                h('div', { className: 'text-sm text-gray-600' },
+                                                    isWatched ? '✓ Watched' : 'Not watched yet'
+                                                )
+                                            ),
+                                            h('div', { className: 'flex gap-2' },
+                                                !isWatched && h('button', {
+                                                    onClick: () => markEpisodeWatched(episode),
+                                                    className: 'px-3 py-1 bg-green-500 text-white rounded-lg text-sm hover:bg-green-600 transition flex items-center gap-1'
+                                                },
+                                                    h(Icons.Eye, { size: 14 }),
+                                                    'Watched'
+                                                ),
+                                                isWatched && h(Fragment, {},
+                                                    h('button', {
+                                                        onClick: () => setSelectedEpisode(episode),
+                                                        className: 'px-3 py-1 bg-gradient-to-r from-orange-500 to-amber-600 text-white rounded-lg text-sm hover:shadow-lg transition flex items-center gap-1'
+                                                    },
+                                                        h(Icons.MessageCircle, { size: 14 }),
+                                                        'Chat'
+                                                    ),
+                                                    h('button', {
+                                                        onClick: () => unmarkEpisodeWatched(episode),
+                                                        className: 'px-3 py-1 bg-gray-400 text-white rounded-lg text-sm hover:bg-gray-500 transition flex items-center gap-1'
+                                                    },
+                                                        h(Icons.X, { size: 14 }),
+                                                        'Unmark'
+                                                    )
+                                                )
+                                            )
+                                        )
+                                    );
+                                })
+                            )
+                        )
+                    )
+                );
+            }
+            
+            // Chat interface
+            return h('div', { className: 'min-h-screen grey-ombre-bg p-4' },
+                h('div', { className: 'max-w-4xl mx-auto' },
+                    // Header
+                    h('div', { className: 'bg-white/95 backdrop-blur-md rounded-2xl p-4 mb-4 shadow-xl' },
+                        h('div', { className: 'flex justify-between items-center' },
+                            h('div', {},
+                                h('h1', { 
+                                    className: 'text-3xl font-black',
+                                    style: { fontFamily: '"Bebas Neue", cursive' }
+                                }, `Episode ${selectedEpisode} Chat`),
+                                h('p', { className: 'text-sm text-gray-600' },
+                                    `${messages.length} messages • Spoiler-free zone`
+                                )
+                            ),
+                            h('button', {
+                                onClick: () => setSelectedEpisode(null),
+                                className: 'px-4 py-2 bg-gray-200 rounded-lg hover:bg-gray-300 transition'
+                            }, '← Back')
+                        )
+                    ),
+                    
+                    // Chat messages
+                    h('div', { className: 'bg-white/95 backdrop-blur-md rounded-2xl shadow-xl chat-container' },
+                        h('div', { className: 'messages' },
+                            messages.length === 0 && h('div', { className: 'text-center text-gray-500 py-8' },
+                                'No messages yet. Start the conversation!'
+                            ),
+                            
+                            ...messages.map(msg => 
+                                h('div', {
+                                    key: msg.id,
+                                    className: 'message'
+                                },
+                                    h('div', { className: 'flex justify-between items-start mb-1' },
+                                        h('div', { className: 'flex items-center gap-2' },
+                                            h('span', { className: 'font-bold' }, msg.username || msg.userEmail?.split('@')[0] || 'Unknown'),
+                                            msg.teamId === 'peanut-gallery' && h('span', { 
+                                                className: 'px-2 py-0.5 rounded-full text-xs font-bold bg-gradient-to-r from-gray-500 to-slate-600 text-white'
+                                            }, '🥜 Peanut Gallery')
+                                        ),
+                                        h('span', { className: 'text-xs text-gray-500' },
+                                            new Date(msg.timestamp).toLocaleTimeString()
+                                        )
+                                    ),
+                                    h('div', { className: 'text-gray-800' }, msg.text)
+                                )
+                            ),
+                            
+                            h('div', { ref: messagesEndRef })
+                        ),
+                        
+                        // Message input
+                        h('form', { 
+                            onSubmit: sendMessage,
+                            className: 'p-4 border-t-2'
+                        },
+                            h('div', { className: 'flex gap-2' },
+                                h('input', {
+                                    type: 'text',
+                                    value: newMessage,
+                                    onChange: (e) => setNewMessage(e.target.value),
+                                    placeholder: 'Type your message...',
+                                    className: 'flex-1 px-4 py-3 border-2 border-gray-300 rounded-xl focus:border-orange-500 focus:outline-none'
+                                }),
+                                h('button', {
+                                    type: 'submit',
+                                    className: 'px-6 py-3 bg-gradient-to-r from-orange-500 to-amber-600 text-white rounded-xl font-bold hover:shadow-lg transition flex items-center gap-2'
+                                },
+                                    h(Icons.Send, { size: 20 }),
+                                    'Send'
+                                )
+                            )
+                        )
+                    )
+                )
+            );
+        }
+        
+        const root = ReactDOM.createRoot(document.getElementById('root'));
+        root.render(h(ChatApp));
+    }
+    </script>
+    
+    <!-- PWA Service Worker & Push Notifications -->
+    <script>
+    // Register service workers for PWA
+    if ('serviceWorker' in navigator) {
+        // Register Firebase Messaging Service Worker
+        navigator.serviceWorker.register('firebase-messaging-sw.js')
+            .then((registration) => {
+                console.log('Firebase Messaging Service Worker registered:', registration);
+            })
+            .catch((error) => {
+                console.error('Firebase Messaging SW registration failed:', error);
+            });
+        
+        // Register main Service Worker
+        navigator.serviceWorker.register('service-worker.js')
+            .then((registration) => {
+                console.log('Main Service Worker registered:', registration);
+            })
+            .catch((error) => {
+                console.error('Main SW registration failed:', error);
+            });
+    }
+
+    // Initialize Firebase Messaging (if available)
+    if (firebase.messaging.isSupported()) {
+        const messaging = firebase.messaging();
+
+        // Listen for foreground messages
+        messaging.onMessage((payload) => {
+            console.log('Message received in foreground:', payload);
+            
+            // Show notification even when app is open
+            const notificationTitle = payload.notification?.title || 'New Message';
+            const notificationOptions = {
+                body: payload.notification?.body || '',
+                icon: '/icons/icon-192x192.png',
+                badge: '/icons/icon-72x72.png'
+            };
+            
+            if (Notification.permission === 'granted') {
+                new Notification(notificationTitle, notificationOptions);
+            }
+        });
+    }
+
+// ADD THIS CODE TO chat.html - Place it at the end of the existing <script> section, before </script>
+
+// Badge Count Management
+let currentUser = null;
+
+// Listen for badge update requests from service worker
+if ('serviceWorker' in navigator) {
+    navigator.serviceWorker.addEventListener('message', (event) => {
+        if (event.data.type === 'UPDATE_BADGE') {
+            updateBadgeFromFirebase();
+        }
+    });
+}
+
+// Update badge count from Firebase
+async function updateBadgeFromFirebase() {
+    if (!currentUser) return;
+    
+    try {
+        const unreadSnapshot = await database.ref(`users/${currentUser.uid}/unreadMessages`).once('value');
+        const unreadCount = unreadSnapshot.val() || 0;
+        
+        if ('setAppBadge' in navigator) {
+            if (unreadCount > 0) {
+                await navigator.setAppBadge(unreadCount);
+            } else {
+                await navigator.clearAppBadge();
+            }
+        }
+    } catch (error) {
+        console.error('Error updating badge:', error);
+    }
+}
+
+// Clear unread count when user opens chat
+auth.onAuthStateChanged(async (user) => {
+    if (user) {
+        currentUser = user;
+        
+        // Clear unread count when chat is opened
+        await database.ref(`users/${user.uid}/unreadMessages`).set(0);
+        
+        // Clear badge
+        if ('clearAppBadge' in navigator) {
+            await navigator.clearAppBadge();
+        }
+        
+        // Update badge every time chat is opened
+        updateBadgeFromFirebase();
+    }
+});
+
+// Also clear when window gets focus
+window.addEventListener('focus', async () => {
+    if (currentUser) {
+        await database.ref(`users/${currentUser.uid}/unreadMessages`).set(0);
+        if ('clearAppBadge' in navigator) {
+            await navigator.clearAppBadge();
+        }
+    }
+});
+
+    </script>
+</body>
+</html>
