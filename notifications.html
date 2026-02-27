@@ -208,13 +208,11 @@
         
         let currentUser = null;
         
-        // UI Elements
         const enableBtn = document.getElementById('enableBtn');
         const statusMessage = document.getElementById('statusMessage');
         const preferencesSection = document.getElementById('preferencesSection');
         const toggleSwitches = document.querySelectorAll('.toggle-switch');
         
-        // Check auth state
         auth.onAuthStateChanged(async (user) => {
             if (!user) {
                 window.location.href = 'chat.html';
@@ -226,13 +224,11 @@
             await loadPreferences();
         });
         
-        // Enable notifications button
         enableBtn.addEventListener('click', async () => {
             try {
                 enableBtn.disabled = true;
                 enableBtn.textContent = 'Requesting permission...';
                 
-                // Request notification permission
                 const permission = await Notification.requestPermission();
                 
                 if (permission !== 'granted') {
@@ -242,39 +238,29 @@
                     return;
                 }
                 
-                // Register service worker
                 const registration = await navigator.serviceWorker.register('service-worker.js');
-await navigator.serviceWorker.ready;
-
-// Subscribe to push
-const subscription = await registration.pushManager.subscribe({
-    userVisibleOnly: true,
-    applicationServerKey: urlBase64ToUint8Array(VAPID_PUBLIC_KEY)
-});
-
-// Save subscription to database
-const subscriptionData = JSON.stringify(subscription);
-await database.ref(`users/${currentUser.uid}/pushSubscription`).set(subscriptionData);
-
-// Set initial badge from Firebase
-const unreadRef = database.ref(`users/${currentUser.uid}/unreadMessages`);
-const unreadSnapshot = await unreadRef.once('value');
-const unreadCount = unreadSnapshot.val() || 0;
-if ('setAppBadge' in navigator && unreadCount > 0) {
-    try {
-        await navigator.setAppBadge(unreadCount);
-        console.log('Badge set to:', unreadCount);
-    } catch (err) {
-        console.error('Badge error:', err);
-    }
-}
+                await navigator.serviceWorker.ready;
+                
+                const subscription = await registration.pushManager.subscribe({
                     userVisibleOnly: true,
                     applicationServerKey: urlBase64ToUint8Array(VAPID_PUBLIC_KEY)
                 });
                 
-                // Save subscription to database
                 const subscriptionData = JSON.stringify(subscription);
                 await database.ref(`users/${currentUser.uid}/pushSubscription`).set(subscriptionData);
+                
+                try {
+                    const unreadRef = database.ref(`users/${currentUser.uid}/unreadMessages`);
+                    const unreadSnapshot = await unreadRef.once('value');
+                    const unreadCount = unreadSnapshot.val() || 0;
+                    
+                    if ('setAppBadge' in navigator && unreadCount > 0) {
+                        await navigator.setAppBadge(unreadCount);
+                        console.log('Badge set to:', unreadCount);
+                    }
+                } catch (badgeError) {
+                    console.log('Badge not supported:', badgeError);
+                }
                 
                 showStatus('Notifications enabled! 🎉', 'success');
                 enableBtn.textContent = 'Notifications Enabled ✓';
@@ -288,7 +274,6 @@ if ('setAppBadge' in navigator && unreadCount > 0) {
             }
         });
         
-        // Toggle switches
         toggleSwitches.forEach(toggle => {
             toggle.addEventListener('click', async () => {
                 toggle.classList.toggle('active');
@@ -299,7 +284,6 @@ if ('setAppBadge' in navigator && unreadCount > 0) {
             });
         });
         
-        // Check if notifications are already enabled
         async function checkNotificationStatus() {
             try {
                 const snapshot = await database.ref(`users/${currentUser.uid}/pushSubscription`).once('value');
@@ -308,13 +292,24 @@ if ('setAppBadge' in navigator && unreadCount > 0) {
                     enableBtn.textContent = 'Notifications Enabled ✓';
                     preferencesSection.classList.remove('hidden');
                     showStatus('Notifications are active', 'success');
+                    
+                    try {
+                        const unreadRef = database.ref(`users/${currentUser.uid}/unreadMessages`);
+                        const unreadSnapshot = await unreadRef.once('value');
+                        const unreadCount = unreadSnapshot.val() || 0;
+                        
+                        if ('setAppBadge' in navigator && unreadCount > 0) {
+                            await navigator.setAppBadge(unreadCount);
+                        }
+                    } catch (badgeError) {
+                        console.log('Badge not supported:', badgeError);
+                    }
                 }
             } catch (error) {
                 console.error('Error checking status:', error);
             }
         }
         
-        // Load user preferences
         async function loadPreferences() {
             try {
                 const snapshot = await database.ref(`users/${currentUser.uid}/notificationPrefs`).once('value');
@@ -331,7 +326,6 @@ if ('setAppBadge' in navigator && unreadCount > 0) {
             }
         }
         
-        // Helper function
         function urlBase64ToUint8Array(base64String) {
             const padding = '='.repeat((4 - base64String.length % 4) % 4);
             const base64 = (base64String + padding)
