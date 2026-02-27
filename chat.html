@@ -720,11 +720,6 @@
         });
     }
 
-// ADD THIS CODE TO chat.html - Place it at the end of the existing <script> section, before </script>
-
-// Badge Count Management
-let currentUser = null;
-
 // Listen for badge update requests from service worker
 if ('serviceWorker' in navigator) {
     navigator.serviceWorker.addEventListener('message', (event) => {
