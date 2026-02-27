@@ -719,6 +719,69 @@
             }
         });
     }
+
+// ADD THIS CODE TO chat.html - Place it at the end of the existing <script> section, before </script>
+
+// Badge Count Management
+let currentUser = null;
+
+// Listen for badge update requests from service worker
+if ('serviceWorker' in navigator) {
+    navigator.serviceWorker.addEventListener('message', (event) => {
+        if (event.data.type === 'UPDATE_BADGE') {
+            updateBadgeFromFirebase();
+        }
+    });
+}
+
+// Update badge count from Firebase
+async function updateBadgeFromFirebase() {
+    if (!currentUser) return;
+    
+    try {
+        const unreadSnapshot = await database.ref(`users/${currentUser.uid}/unreadMessages`).once('value');
+        const unreadCount = unreadSnapshot.val() || 0;
+        
+        if ('setAppBadge' in navigator) {
+            if (unreadCount > 0) {
+                await navigator.setAppBadge(unreadCount);
+            } else {
+                await navigator.clearAppBadge();
+            }
+        }
+    } catch (error) {
+        console.error('Error updating badge:', error);
+    }
+}
+
+// Clear unread count when user opens chat
+auth.onAuthStateChanged(async (user) => {
+    if (user) {
+        currentUser = user;
+        
+        // Clear unread count when chat is opened
+        await database.ref(`users/${user.uid}/unreadMessages`).set(0);
+        
+        // Clear badge
+        if ('clearAppBadge' in navigator) {
+            await navigator.clearAppBadge();
+        }
+        
+        // Update badge every time chat is opened
+        updateBadgeFromFirebase();
+    }
+});
+
+// Also clear when window gets focus
+window.addEventListener('focus', async () => {
+    if (currentUser) {
+        await database.ref(`users/${currentUser.uid}/unreadMessages`).set(0);
+        if ('clearAppBadge' in navigator) {
+            await navigator.clearAppBadge();
+        }
+    }
+});
+
     </script>
 </body>
 </html>

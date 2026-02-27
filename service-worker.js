@@ -68,16 +68,36 @@ self.addEventListener('push', (event) => {
     }
     
     event.waitUntil(
-        self.registration.showNotification(notificationData.title, {
-            body: notificationData.body,
-            icon: notificationData.icon,
-            badge: notificationData.badge,
-            data: notificationData.data,
-            vibrate: [200, 100, 200],
-            tag: notificationData.data.type || 'general'
-        })
+        Promise.all([
+            // Show notification
+            self.registration.showNotification(notificationData.title, {
+                body: notificationData.body,
+                icon: notificationData.icon,
+                badge: notificationData.badge,
+                data: notificationData.data,
+                vibrate: [200, 100, 200],
+                tag: notificationData.data.type || 'general'
+            }),
+            // Update badge count
+            updateBadgeCount()
+        ])
     );
 });
+
+// Update badge count from Firebase
+async function updateBadgeCount() {
+    try {
+        // Get all clients (open tabs/windows)
+        const clients = await self.clients.matchAll({ type: 'window', includeUncontrolled: true });
+        
+        if (clients.length > 0) {
+            // Ask the first client to update the badge
+            clients[0].postMessage({ type: 'UPDATE_BADGE' });
+        }
+    } catch (error) {
+        console.error('Error updating badge:', error);
+    }
+}
 
 // Notification click event
 self.addEventListener('notificationclick', (event) => {
