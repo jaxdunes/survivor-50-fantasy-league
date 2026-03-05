@@ -1142,7 +1142,7 @@
                                 
                                 h('div', { className: 'max-h-96 overflow-y-auto mb-6' },
                                     h('div', { className: 'grid gap-3' },
-                                        ...players.map(player => 
+                                        ...players.filter(p => !eliminationOrder[p.id]).map(player =>
                                             h('div', {
                                                 key: player.id,
                                                 className: 'flex items-center justify-between p-3 bg-gray-50 rounded-xl'
