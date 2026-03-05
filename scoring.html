@@ -306,12 +306,6 @@
                             total += score.points || 0;
                         });
                     });
-                    
-                    // Add elimination bonus
-                    if (eliminationOrder[player.id]) {
-                        const episode = eliminationOrder[player.id];
-                        total += episode; // Points = episode number (rewards longevity)
-                    }
                 });
                 
                 // Add winner bonus (20 points if winner is on this team)
@@ -346,11 +340,6 @@
                     });
                 });
                 
-                // Add elimination bonus
-                if (eliminationOrder[playerId]) {
-                    const episode = eliminationOrder[playerId];
-                    total += episode; // Points = episode number (rewards longevity)
-                }
                 
                 return total;
             };
@@ -373,17 +362,6 @@
                     });
                 });
                 
-                // Add elimination bonus if exists
-                if (eliminationOrder[playerId]) {
-                    const episode = eliminationOrder[playerId];
-                    const placement = 25 - episode; // Calculate placement
-                    breakdown.push({
-                        episode: episode,
-                        category: 'Elimination Bonus',
-                        points: episode,
-                        note: `Placed ${placement}th (Episode ${episode})`
-                    });
-                }
                 
                 // Add winner bonus if this player won
                 if (winner && parseInt(winner) === playerId) {
@@ -957,11 +935,6 @@
                                                 );
                                             })
                                         )
-                                    ),
-                                    
-                                    h('div', { className: 'bg-orange-50 p-4 rounded-lg text-sm' },
-                                        h('p', { className: 'font-bold mb-2' }, '📊 Elimination Bonus'),
-                                        h('p', {}, 'The player will receive bonus points equal to the episode number they were eliminated.')
                                     ),
                                     
                                     // Submit Button
