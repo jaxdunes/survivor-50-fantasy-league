@@ -811,7 +811,7 @@
                                                 h('option', { 
                                                     key: cat.id, 
                                                     value: cat.id 
-                                                }, `${cat.name} (+${cat.points} pts)`)
+                                                }, `${cat.name} (${cat.points > 0 ? '+' : ''}${cat.points} pts)`)
                                             )
                                         )
                                     ),
@@ -931,7 +931,7 @@
                                                 const ep = i + 1;
                                                 const placement = 25 - ep;
                                                 return h('option', { key: ep, value: ep }, 
-                                                    `Episode ${ep} (${placement}th place - ${ep} pts)`
+                                                    `Episode ${ep}`
                                                 );
                                             })
                                         )
