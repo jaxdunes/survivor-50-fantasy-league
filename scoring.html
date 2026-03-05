@@ -422,7 +422,9 @@
                 }
                 
                 const category = scoringCategories.find(c => c.id === selectedCategory);
-                const tribePlayers = players.filter(p => playerTribes[p.id] === selectedTribe);
+                const tribePlayers = players.filter(p => 
+                playerTribes[p.id] === selectedTribe && !eliminationOrder[p.id]
+                );
                 
                 if (tribePlayers.length === 0) {
                     alert('No players found on this tribe');
