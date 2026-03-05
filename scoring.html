@@ -247,6 +247,12 @@
             const [showAddScore, setShowAddScore] = useState(false);
             const [showMarkElimination, setShowMarkElimination] = useState(false);
             const [showMarkWinner, setShowMarkWinner] = useState(false);
+            const [showMassPoints, setShowMassPoints] = useState(false);
+            const [showTribeEditor, setShowTribeEditor] = useState(false);
+            const [selectedTribe, setSelectedTribe] = useState('');
+            const [selectedCategory, setSelectedCategory] = useState('');
+            const [playerTribes, setPlayerTribes] = useState({});
+            const [tempTribes, setTempTribes] = useState({});
             const [expandedTeams, setExpandedTeams] = useState({});
             
             // Load data from Firebase
@@ -272,6 +278,11 @@
                 database.ref('currentEpisode').on('value', (snapshot) => {
                     setCurrentEpisode(snapshot.val() || 1);
                 });
+                database.ref('playerTribes').on('value', (snapshot) => {
+                    const tribes = snapshot.val() || {};
+                    setPlayerTribes(tribes);
+                    setTempTribes(tribes);
+                });
                 
                 return () => {
                     database.ref('teams').off();
@@ -279,6 +290,7 @@
                     database.ref('eliminationOrder').off();
                     database.ref('winner').off();
                     database.ref('currentEpisode').off();
+                    database.ref('playerTribes').off();
                 };
             }, []);
             
@@ -402,6 +414,61 @@
                     }
                 }
             };
+            // Mass assign points to entire tribe
+            const assignTribePoints = async () => {
+                if (!selectedTribe || !selectedCategory) {
+                    alert('Please select both tribe and category');
+                    return;
+                }
+                
+                const category = scoringCategories.find(c => c.id === selectedCategory);
+                const tribePlayers = players.filter(p => playerTribes[p.id] === selectedTribe);
+                
+                if (tribePlayers.length === 0) {
+                    alert('No players found on this tribe');
+                    return;
+                }
+                
+                try {
+                    for (const player of tribePlayers) {
+                        const scoreId = Date.now() + '_' + Math.random().toString(36);
+                        await database.ref(`scores/${player.id}/${currentEpisode}/${scoreId}`).set({
+                            category: category.name,
+                            points: category.points,
+                            note: `${selectedTribe} tribe reward`,
+                            timestamp: Date.now()
+                        });
+                    }
+                    
+                    alert(`✅ Added ${category.points} points to all ${tribePlayers.length} players on ${selectedTribe}!`);
+                    setShowMassPoints(false);
+                    setSelectedTribe('');
+                    setSelectedCategory('');
+                } catch (error) {
+                    console.error('Error assigning tribe points:', error);
+                    alert('Error assigning points. Please try again.');
+                }
+            };
+            
+            // Save tribe changes
+            const saveTribeChanges = async () => {
+                try {
+                    await database.ref('playerTribes').set(tempTribes);
+                    alert('✅ Tribe changes saved!');
+                    setShowTribeEditor(false);
+                } catch (error) {
+                    console.error('Error saving tribes:', error);
+                    alert('Error saving tribes. Please try again.');
+                }
+            };
+            
+            // Update temp tribe for a player
+            const updateTempTribe = (playerId, newTribe) => {
+                setTempTribes(prev => ({
+                    ...prev,
+                    [playerId]: newTribe
+                }));
+            };
             
             return h('div', { className: 'min-h-screen grey-ombre-bg p-4 md:p-8' },
                 h('div', { className: 'max-w-7xl mx-auto' },
@@ -462,6 +529,20 @@
                         },
                             h(Icons.Trophy, { size: 20 }),
                             'Mark Winner'
+                        ),
+                        h('button', {
+                            onClick: () => setShowMassPoints(true),
+                            className: 'bg-gradient-to-r from-teal-500 to-cyan-600 text-white px-6 py-3 rounded-xl font-bold hover:shadow-lg transition flex items-center gap-2'
+                        },
+                            h(Icons.Trophy, { size: 20 }),
+                            'Tribe Points'
+                        ),
+                        h('button', {
+                            onClick: () => setShowTribeEditor(true),
+                            className: 'bg-gradient-to-r from-purple-500 to-violet-600 text-white px-6 py-3 rounded-xl font-bold hover:shadow-lg transition flex items-center gap-2'
+                        },
+                            h(Icons.Edit, { size: 20 }),
+                            'Edit Tribes'
                         )
                     ),
                     
@@ -990,6 +1071,136 @@
                                             className: 'w-full px-6 py-3 bg-gradient-to-r from-yellow-500 to-amber-500 text-white rounded-xl font-bold hover:shadow-lg transition text-lg'
                                         }, 'Mark as Sole Survivor')
                                     )
+                            )
+                        )
+                    ),
+                  // Mass Tribe Points Modal
+                    showMassPoints && h('div', {
+                        className: 'modal-backdrop',
+                        onClick: () => setShowMassPoints(false)
+                    },
+                        h('div', {
+                            className: 'modal-content',
+                            onClick: (e) => e.stopPropagation()
+                        },
+                            h('div', { className: 'p-6' },
+                                h('div', { className: 'flex justify-between items-center mb-6' },
+                                    h('h2', { className: 'text-2xl font-bold' }, '🏆 Assign Points to Entire Tribe'),
+                                    h('button', {
+                                        onClick: () => setShowMassPoints(false),
+                                        className: 'text-gray-500 hover:text-gray-700'
+                                    }, h(Icons.X, { size: 24 }))
+                                ),
+                                
+                                h('div', { className: 'space-y-4 mb-6' },
+                                    h('div', {},
+                                        h('label', { className: 'block text-sm font-bold mb-2' }, 'Select Tribe'),
+                                        h('select', {
+                                            value: selectedTribe,
+                                            onChange: (e) => setSelectedTribe(e.target.value),
+                                            className: 'w-full p-3 border-2 border-gray-300 rounded-xl'
+                                        },
+                                            h('option', { value: '' }, '-- Select Tribe --'),
+                                            h('option', { value: 'Cila' }, '🔥 Cila (Orange)'),
+                                            h('option', { value: 'Kalo' }, '🌊 Kalo (Teal)'),
+                                            h('option', { value: 'Vatu' }, '⚡ Vatu (Purple)')
+                                        )
+                                    ),
+                                    h('div', {},
+                                        h('label', { className: 'block text-sm font-bold mb-2' }, 'Select Category'),
+                                        h('select', {
+                                            value: selectedCategory,
+                                            onChange: (e) => setSelectedCategory(e.target.value),
+                                            className: 'w-full p-3 border-2 border-gray-300 rounded-xl'
+                                        },
+                                            h('option', { value: '' }, '-- Select Category --'),
+                                            h('option', { value: 'tribe-immunity' }, 'Wins Tribe Immunity (+15 pts)'),
+                                            h('option', { value: 'tribe-immunity-second' }, 'Second Place Tribe Immunity (+10 pts)'),
+                                            h('option', { value: 'tribe-reward' }, 'Wins Tribe Reward (+10 pts)'),
+                                            h('option', { value: 'tribe-reward-second' }, 'Second Place Tribe Reward (+5 pts)')
+                                        )
+                                    ),
+                                    selectedTribe && selectedCategory && h('div', {
+                                        className: 'bg-blue-50 border-2 border-blue-200 rounded-xl p-4'
+                                    },
+                                        h('p', { className: 'text-sm' },
+                                            `This will assign points to all players currently on ${selectedTribe}`
+                                        )
+                                    )
+                                ),
+                                
+                                h('div', { className: 'flex gap-3' },
+                                    h('button', {
+                                        onClick: () => setShowMassPoints(false),
+                                        className: 'flex-1 px-6 py-3 bg-gray-200 rounded-xl font-bold hover:bg-gray-300 transition'
+                                    }, 'Cancel'),
+                                    h('button', {
+                                        onClick: assignTribePoints,
+                                        disabled: !selectedTribe || !selectedCategory,
+                                        className: 'flex-1 px-6 py-3 bg-gradient-to-r from-teal-500 to-cyan-600 text-white rounded-xl font-bold hover:shadow-lg transition disabled:opacity-50 disabled:cursor-not-allowed'
+                                    }, 'Assign to Tribe')
+                                )
+                            )
+                        )
+                    ),
+                    
+                    // Tribe Editor Modal
+                    showTribeEditor && h('div', {
+                        className: 'modal-backdrop',
+                        onClick: () => setShowTribeEditor(false)
+                    },
+                        h('div', {
+                            className: 'modal-content',
+                            onClick: (e) => e.stopPropagation()
+                        },
+                            h('div', { className: 'p-6' },
+                                h('div', { className: 'flex justify-between items-center mb-6' },
+                                    h('h2', { className: 'text-2xl font-bold' }, '⚡ Edit Player Tribes'),
+                                    h('button', {
+                                        onClick: () => {
+                                            setTempTribes(playerTribes);
+                                            setShowTribeEditor(false);
+                                        },
+                                        className: 'text-gray-500 hover:text-gray-700'
+                                    }, h(Icons.X, { size: 24 }))
+                                ),
+                                
+                                h('div', { className: 'max-h-96 overflow-y-auto mb-6' },
+                                    h('div', { className: 'grid gap-3' },
+                                        ...players.map(player => 
+                                            h('div', {
+                                                key: player.id,
+                                                className: 'flex items-center justify-between p-3 bg-gray-50 rounded-xl'
+                                            },
+                                                h('div', { className: 'font-semibold' }, player.name),
+                                                h('select', {
+                                                    value: tempTribes[player.id] || '',
+                                                    onChange: (e) => updateTempTribe(player.id, e.target.value),
+                                                    className: 'p-2 border-2 border-gray-300 rounded-lg'
+                                                },
+                                                    h('option', { value: '' }, '-- No Tribe --'),
+                                                    h('option', { value: 'Cila' }, '🔥 Cila'),
+                                                    h('option', { value: 'Kalo' }, '🌊 Kalo'),
+                                                    h('option', { value: 'Vatu' }, '⚡ Vatu')
+                                                )
+                                            )
+                                        )
+                                    )
+                                ),
+                                
+                                h('div', { className: 'flex gap-3' },
+                                    h('button', {
+                                        onClick: () => {
+                                            setTempTribes(playerTribes);
+                                            setShowTribeEditor(false);
+                                        },
+                                        className: 'flex-1 px-6 py-3 bg-gray-200 rounded-xl font-bold hover:bg-gray-300 transition'
+                                    }, 'Cancel'),
+                                    h('button', {
+                                        onClick: saveTribeChanges,
+                                        className: 'flex-1 px-6 py-3 bg-gradient-to-r from-purple-500 to-violet-600 text-white rounded-xl font-bold hover:shadow-lg transition'
+                                    }, 'Save Changes')
+                                )
                             )
                         )
                     ),
