@@ -120,6 +120,7 @@
             ];
             
             const [playerTeams, setPlayerTeams] = useState({});
+            const [seasonData, setSeasonData] = useState(null);
             const [searchTerm, setSearchTerm] = useState('');
             const [filterEra, setFilterEra] = useState('all');
             const [filterTribe, setFilterTribe] = useState('all');
@@ -131,6 +132,14 @@
             const [playerToAssign, setPlayerToAssign] = useState(null);
             const [connected, setConnected] = useState(window.firebaseInitialized);
             
+            // Load season preset data
+            useEffect(() => {
+                fetch('seasons/' + activeSeasonId + '.json')
+                    .then(res => res.json())
+                    .then(data => setSeasonData(data))
+                    .catch(err => console.warn('Could not load season json, using fallback.', err));
+            }, []);
+
             // Firebase real-time sync
             useEffect(() => {
                 if (!window.firebaseInitialized) {
@@ -165,7 +174,7 @@
                 }
             };
             
-            const players = [
+            const defaultPlayers = [
                 // CILA TRIBE
                 { id: 1, name: "Jenna Lewis-Dougherty", tribe: "Cila", seasons: ["S1: Borneo", "S8: All-Stars"], placement: "3rd in All-Stars", era: "Old School", strengths: ["Social Game", "Longevity"], threat: "Medium", note: "Original Borneo castaway returning after 20+ years!", image: "https://www.fantasysurvivorgame.com/images/50/draftpics/jennaDFT.jpg" },
                 { id: 2, name: "Cirie Fields", tribe: "Cila", seasons: ["S12", "S16", "S20", "S34"], placement: "4th multiple times", era: "Legend", strengths: ["Strategy", "Social"], threat: "EXTREMELY HIGH", note: "5-time player! Best to never win", image: "https://www.fantasysurvivorgame.com/images/50/draftpics/cirieDFT.jpg" },
@@ -196,6 +205,8 @@
                 { id: 23, name: "Rizo Velovic", tribe: "Vatu", seasons: ["S49"], placement: "TBD", era: "New Era", strengths: ["Unknown", "Fresh"], threat: "Medium", note: "Just finished S49 with Savannah!", image: "https://www.fantasysurvivorgame.com/images/50/draftpics/rizoDFT.jpg" },
                 { id: 24, name: "Kyle Fraser", tribe: "Vatu", seasons: ["S48 - WINNER"], placement: "WINNER", era: "New Era", strengths: ["Strategic", "Social"], threat: "EXTREMELY HIGH", note: "Winner of S48!", image: "https://www.fantasysurvivorgame.com/images/50/draftpics/kyleDFT.jpg" }
             ];
+
+            const players = (seasonData && seasonData.contestants) ? seasonData.contestants : defaultPlayers;
             
             const assignPlayer = (playerId, teamId) => {
                 const teamRoster = players.filter(p => playerTeams[p.id] === teamId);
@@ -317,15 +328,15 @@
                     h('div', { className: 'p-4' },
                         h('div', { className: 'mb-3' },
                             h('div', { className: 'text-xs font-bold text-gray-500 mb-1' }, 'SEASONS'),
-                            h('div', { className: 'text-sm text-gray-700' }, player.seasons.join(', '))
+                            h('div', { className: 'text-sm text-gray-700' }, (player.seasons || [player.era || 'S51']).join(', '))
                         ),
                         h('div', { className: 'mb-3' },
                             h('div', { className: 'text-xs font-bold text-gray-500 mb-1' }, 'BEST PLACEMENT'),
-                            h('div', { className: `text-sm font-bold ${player.placement.includes('WINNER') ? 'text-yellow-600' : 'text-gray-700'}` }, player.placement)
+                            h('div', { className: `text-sm font-bold ${(player.placement || 'TBD').includes('WINNER') ? 'text-yellow-600' : 'text-gray-700'}` }, player.placement || 'TBD')
                         ),
                         h('div', { className: 'mb-3' },
                             h('div', { className: 'text-xs font-bold text-gray-500 mb-1' }, 'THREAT LEVEL'),
-                            h('div', { className: `inline-block text-xs font-black px-3 py-1 rounded-full bg-gradient-to-r ${getThreatColor(player.threat)} text-white` }, player.threat)
+                            h('div', { className: `inline-block text-xs font-black px-3 py-1 rounded-full bg-gradient-to-r ${getThreatColor(player.threat || 'Medium')} text-white` }, player.threat || 'Medium')
                         ),
                         h('div', { className: 'mb-4' },
                             h('div', { className: 'text-xs text-gray-600 italic' }, `"${player.note}"`)

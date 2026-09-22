@@ -1,5 +1,5 @@
 // Service Worker for Survivor 50 Fantasy League
-const CACHE_NAME = 'survivor-50-v3';
+const CACHE_NAME = 'survivor-50-v4';
 const urlsToCache = [
     './',
     './index.html',
@@ -9,7 +9,9 @@ const urlsToCache = [
     './manifest.json',
     './js/config.js',
     './js/scoring-engine.js',
-    './js/api.js'
+    './js/api.js',
+    './seasons/season-50.json',
+    './seasons/season-51.json'
 ];
 
 // Install event
