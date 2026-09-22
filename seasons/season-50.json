@@ -1,0 +1,33 @@
+{
+  "id": "season-50",
+  "title": "Survivor 50: In the Hands of the Gods",
+  "seasonNumber": 50,
+  "status": "active",
+  "defaultScoringRules": {
+    "immunityWinIndiv": 15,
+    "immunityWinTribe": 5,
+    "rewardWinIndiv": 10,
+    "rewardWinTribe": 3,
+    "idolFound": 10,
+    "advantageFound": 5,
+    "survivedTribal": 2,
+    "confessional": 1,
+    "individualImmunityPlayed": 5,
+    "successfulIdolPlay": 10
+  },
+  "contestants": [
+    { "id": "c01", "name": "Parvati Shallow", "startingTribe": "Tribu", "status": "active", "photoUrl": "icons/icon-192x192.png" },
+    { "id": "c02", "name": "Tony Vlachos", "startingTribe": "Caka", "status": "active", "photoUrl": "icons/icon-192x192.png" },
+    { "id": "c03", "name": "Boston Rob", "startingTribe": "Tribu", "status": "active", "photoUrl": "icons/icon-192x192.png" },
+    { "id": "c04", "name": "Sandra Diaz-Twine", "startingTribe": "Caka", "status": "active", "photoUrl": "icons/icon-192x192.png" },
+    { "id": "c05", "name": "Cirie Fields", "startingTribe": "Tribu", "status": "active", "photoUrl": "icons/icon-192x192.png" },
+    { "id": "c06", "name": "Jeremy Collins", "startingTribe": "Caka", "status": "active", "photoUrl": "icons/icon-192x192.png" }
+  ],
+  "episodes": [
+    { "number": 1, "title": "Episode 1", "airDate": "2026-09-24" },
+    { "number": 2, "title": "Episode 2", "airDate": "2026-10-01" },
+    { "number": 3, "title": "Episode 3", "airDate": "2026-10-08" },
+    { "number": 4, "title": "Episode 4", "airDate": "2026-10-15" },
+    { "number": 5, "title": "Episode 5", "airDate": "2026-10-22" }
+  ]
+}

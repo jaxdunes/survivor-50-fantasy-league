@@ -3,7 +3,48 @@ const admin = require('firebase-admin');
 
 admin.initializeApp();
 
-// Send notification when new chat message is posted
+// Send notification when new league chat message is posted
+exports.sendLeagueChatNotification = functions.database.ref('/leagues/{leagueId}/chat/episode-{episodeNum}/{messageId}')
+    .onCreate(async (snapshot, context) => {
+        const message = snapshot.val();
+        const episodeNum = context.params.episodeNum;
+        const leagueId = context.params.leagueId;
+        
+        console.log(`New chat message in league ${leagueId}:`, message);
+        
+        const usersSnapshot = await admin.database().ref('users').once('value');
+        const users = usersSnapshot.val();
+        if (!users) return null;
+        
+        const tokens = [];
+        for (const userId in users) {
+            const user = users[userId];
+            if (!user.fcmToken || user.username === message.username) continue;
+            const prefs = user.notificationPrefs || {};
+            if (prefs.chatMessage === false) continue;
+            if (!user.watchedEpisodes || !user.watchedEpisodes[episodeNum]) continue;
+            tokens.push(user.fcmToken);
+        }
+        
+        if (tokens.length === 0) return null;
+        
+        const payload = {
+            notification: {
+                title: `💬 Survivor 50 Chat (${leagueId})`,
+                body: `${message.username}: ${message.text ? message.text.substring(0, 100) : ''}`,
+            },
+            data: { type: 'chat', leagueId, episode: episodeNum, messageId: context.params.messageId }
+        };
+        
+        try {
+            return await admin.messaging().sendToDevice(tokens, payload);
+        } catch (error) {
+            console.error('Error sending notification:', error);
+            return null;
+        }
+    });
+
+// Legacy single-league chat notification
 exports.sendChatNotification = functions.database.ref('/chat/episode-{episodeNum}/{messageId}')
     .onCreate(async (snapshot, context) => {
         const message = snapshot.val();

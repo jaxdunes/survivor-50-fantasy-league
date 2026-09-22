@@ -77,31 +77,19 @@
         </div>
     </div>
     
+    <!-- Modular Application JS Scripts -->
+    <script src="js/config.js"></script>
+    <script src="js/scoring-engine.js"></script>
+    <script src="js/api.js"></script>
+    
     <script src="https://unpkg.com/lucide@latest"></script>
     
     <script>
-    // Firebase Configuration
-    const firebaseConfig = {
-        apiKey: "AIzaSyAls1zpuUGgNx7xhlpCjF4bDEXp8qfxQ3A",
-        authDomain: "survivorfantasy-cc908.firebaseapp.com",
-        databaseURL: "https://survivorfantasy-cc908-default-rtdb.firebaseio.com",
-        projectId: "survivorfantasy-cc908",
-        storageBucket: "survivorfantasy-cc908.firebasestorage.app",
-        messagingSenderId: "401357232113",
-        appId: "1:401357232113:web:a9980c49bde38ff981d650"
-    };
-    
-    let database;
-    let firebaseInitialized = false;
-    
-    try {
-        firebase.initializeApp(firebaseConfig);
-        database = firebase.database();
-        firebaseInitialized = true;
-        console.log('🔥 Firebase initialized');
-    } catch (error) {
-        console.error('Firebase error:', error);
-    }
+    const database = initFirebase();
+    var firebaseInitialized = window.firebaseInitialized;
+    const api = new SurvivorAPI(database);
+    const activeLeagueId = getActiveLeagueId();
+    const activeSeasonId = getActiveSeasonId();
     
     window.addEventListener('load', function() {
         setTimeout(function() {
@@ -251,7 +239,7 @@
             
             // Load data from Firebase
             useEffect(() => {
-                if (!firebaseInitialized) return;
+                if (!window.firebaseInitialized) return;
                 
                 database.ref('teams').on('value', (snapshot) => {
                     setPlayerTeams(snapshot.val() || {});
@@ -392,7 +380,7 @@
                     return;
                 }
                 
-                if (firebaseInitialized) {
+                if (window.firebaseInitialized) {
                     try {
                         await database.ref(`scores/${playerId}/${episode}/${scoreId}`).remove();
                         alert('Score deleted successfully!');
@@ -409,14 +397,14 @@
                     h('div', { className: 'text-center mb-8' },
                         h('div', { className: 'flex justify-center items-center gap-4 mb-4' },
                             h('a', {
-                                href: 'index.html',
+                                href: 'index.html?league=' + activeLeagueId,
                                 className: 'bg-white/90 backdrop-blur-md px-4 py-2 rounded-lg hover:bg-white transition flex items-center gap-2'
                             },
                                 h(Icons.Home, { size: 20 }),
                                 h('span', { className: 'font-bold' }, 'Draft')
                             ),
                             h('a', {
-                                href: 'chat.html',
+                                href: 'chat.html?league=' + activeLeagueId,
                                 className: 'bg-white/90 backdrop-blur-md px-4 py-2 rounded-lg hover:bg-white transition flex items-center gap-2'
                             },
                                 h(Icons.MessageCircle, { size: 20 }),
@@ -795,7 +783,7 @@
                                             const category = scoringCategories.find(c => c.id === categoryId);
                                             const scoreId = Date.now().toString();
                                             
-                                            if (firebaseInitialized) {
+                                            if (window.firebaseInitialized) {
                                                 database.ref(`scores/${playerId}/${episode}/${scoreId}`).set({
                                                     category: category.name,
                                                     points: points,
@@ -912,7 +900,7 @@
                                                 return;
                                             }
                                             
-                                            if (firebaseInitialized) {
+                                            if (window.firebaseInitialized) {
                                                 database.ref(`eliminationOrder/${playerId}`).set(parseInt(episode)).then(() => {
                                                     setShowMarkElimination(false);
                                                     alert(`Player eliminated in Episode ${episode}!`);
@@ -959,7 +947,7 @@
                                         h('button', {
                                             onClick: () => {
                                                 if (confirm('Are you sure you want to clear the current winner?')) {
-                                                    if (firebaseInitialized) {
+                                                    if (window.firebaseInitialized) {
                                                         database.ref('winner').set(null).then(() => {
                                                             setShowMarkWinner(false);
                                                             alert('Winner cleared!');
@@ -1000,7 +988,7 @@
                                                     return;
                                                 }
                                                 
-                                                if (firebaseInitialized) {
+                                                if (window.firebaseInitialized) {
                                                     database.ref('winner').set(parseInt(playerId)).then(() => {
                                                         setShowMarkWinner(false);
                                                         alert('Winner marked! 🎉');

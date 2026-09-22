@@ -1,0 +1,33 @@
+{
+  "id": "season-51",
+  "title": "Survivor 51",
+  "seasonNumber": 51,
+  "status": "upcoming",
+  "defaultScoringRules": {
+    "immunityWinIndiv": 15,
+    "immunityWinTribe": 5,
+    "rewardWinIndiv": 10,
+    "rewardWinTribe": 3,
+    "idolFound": 10,
+    "advantageFound": 5,
+    "survivedTribal": 2,
+    "confessional": 1,
+    "individualImmunityPlayed": 5,
+    "successfulIdolPlay": 10
+  },
+  "contestants": [
+    { "id": "s51_c01", "name": "Castaway 1", "startingTribe": "Vatu", "status": "active", "photoUrl": "icons/icon-192x192.png" },
+    { "id": "s51_c02", "name": "Castaway 2", "startingTribe": "Vatu", "status": "active", "photoUrl": "icons/icon-192x192.png" },
+    { "id": "s51_c03", "name": "Castaway 3", "startingTribe": "Vatu", "status": "active", "photoUrl": "icons/icon-192x192.png" },
+    { "id": "s51_c04", "name": "Castaway 4", "startingTribe": "Caka", "status": "active", "photoUrl": "icons/icon-192x192.png" },
+    { "id": "s51_c05", "name": "Castaway 5", "startingTribe": "Caka", "status": "active", "photoUrl": "icons/icon-192x192.png" },
+    { "id": "s51_c06", "name": "Castaway 6", "startingTribe": "Caka", "status": "active", "photoUrl": "icons/icon-192x192.png" }
+  ],
+  "episodes": [
+    { "number": 1, "title": "Episode 1", "airDate": "2027-02-24" },
+    { "number": 2, "title": "Episode 2", "airDate": "2027-03-03" },
+    { "number": 3, "title": "Episode 3", "airDate": "2027-03-10" },
+    { "number": 4, "title": "Episode 4", "airDate": "2027-03-17" },
+    { "number": 5, "title": "Episode 5", "airDate": "2027-03-24" }
+  ]
+}
