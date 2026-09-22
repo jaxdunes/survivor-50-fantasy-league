@@ -140,37 +140,43 @@
                     .catch(err => console.warn('Could not load season json, using fallback.', err));
             }, []);
 
-            // Firebase real-time sync
+            // Firebase real-time sync per league
             useEffect(() => {
                 if (!window.firebaseInitialized) {
-                    // Fallback to localStorage if Firebase not configured
-                    const saved = localStorage.getItem('survivor50-teams');
+                    const saved = localStorage.getItem('survivor-teams-' + activeLeagueId);
                     if (saved) {
                         setPlayerTeams(JSON.parse(saved));
                     }
                     return;
                 }
                 
-                const teamsRef = database.ref('teams');
+                const teamsRef = database.ref('leagues/' + activeLeagueId + '/teams');
                 
-                // Listen for changes
                 teamsRef.on('value', (snapshot) => {
                     const data = snapshot.val();
-                    // Update state even if data is null (empty state)
-                    setPlayerTeams(data || {});
+                    if (data) {
+                        setPlayerTeams(data);
+                    } else if (activeLeagueId === 'main-league-2026') {
+                        // Fallback to legacy global teams node for main league
+                        database.ref('teams').once('value').then(legacySnap => {
+                            setPlayerTeams(legacySnap.val() || {});
+                        });
+                    } else {
+                        setPlayerTeams({});
+                    }
                 });
                 
-                // Cleanup
                 return () => teamsRef.off();
-            }, []);
+            }, [activeLeagueId]);
             
-            // Save to Firebase when teams change
             const updateFirebase = (newTeams) => {
                 if (window.firebaseInitialized) {
-                    database.ref('teams').set(newTeams);
+                    database.ref('leagues/' + activeLeagueId + '/teams').set(newTeams);
+                    if (activeLeagueId === 'main-league-2026') {
+                        database.ref('teams').set(newTeams);
+                    }
                 } else {
-                    // Fallback to localStorage
-                    localStorage.setItem('survivor50-teams', JSON.stringify(newTeams));
+                    localStorage.setItem('survivor-teams-' + activeLeagueId, JSON.stringify(newTeams));
                 }
             };
             
