@@ -1,8 +1,8 @@
 {
   "id": "season-51",
-  "title": "Survivor 51",
+  "title": "Survivor 51: Open Era",
   "seasonNumber": 51,
-  "status": "upcoming",
+  "status": "active",
   "defaultScoringRules": {
     "immunityWinIndiv": 15,
     "immunityWinTribe": 5,
@@ -16,12 +16,27 @@
     "successfulIdolPlay": 10
   },
   "contestants": [
-    { "id": "s51_c01", "name": "Castaway 1", "startingTribe": "Vatu", "status": "active", "photoUrl": "icons/icon-192x192.png" },
-    { "id": "s51_c02", "name": "Castaway 2", "startingTribe": "Vatu", "status": "active", "photoUrl": "icons/icon-192x192.png" },
-    { "id": "s51_c03", "name": "Castaway 3", "startingTribe": "Vatu", "status": "active", "photoUrl": "icons/icon-192x192.png" },
-    { "id": "s51_c04", "name": "Castaway 4", "startingTribe": "Caka", "status": "active", "photoUrl": "icons/icon-192x192.png" },
-    { "id": "s51_c05", "name": "Castaway 5", "startingTribe": "Caka", "status": "active", "photoUrl": "icons/icon-192x192.png" },
-    { "id": "s51_c06", "name": "Castaway 6", "startingTribe": "Caka", "status": "active", "photoUrl": "icons/icon-192x192.png" }
+    { "id": "s51_c01", "name": "Aaliyah Puglia", "startingTribe": "Unassigned", "age": 24, "occupation": "Chef", "hometown": "Providence, RI", "status": "active", "photoUrl": "icons/icon-192x192.png" },
+    { "id": "s51_c02", "name": "Alexis Levine", "startingTribe": "Unassigned", "age": 34, "occupation": "Criminal Defense Attorney", "hometown": "Atlanta, GA", "status": "active", "photoUrl": "icons/icon-192x192.png" },
+    { "id": "s51_c03", "name": "An “Thien An” Nguyen", "startingTribe": "Unassigned", "age": 24, "occupation": "Medical Student", "hometown": "Fort Worth, TX", "status": "active", "photoUrl": "icons/icon-192x192.png" },
+    { "id": "s51_c04", "name": "Ana Sani", "startingTribe": "Unassigned", "age": 34, "occupation": "Voice Actress", "hometown": "Toronto, ON", "status": "active", "photoUrl": "icons/icon-192x192.png" },
+    { "id": "s51_c05", "name": "Angelica “Jelly” Loblack", "startingTribe": "Unassigned", "age": 29, "occupation": "Sociology Professor", "hometown": "Bloomington, IN", "status": "active", "photoUrl": "icons/icon-192x192.png" },
+    { "id": "s51_c06", "name": "Brady Booker", "startingTribe": "Unassigned", "age": 27, "occupation": "Professional Wrestler", "hometown": "Knoxville, TN", "status": "active", "photoUrl": "icons/icon-192x192.png" },
+    { "id": "s51_c07", "name": "Carter Krull", "startingTribe": "Unassigned", "age": 24, "occupation": "Livestock Farmer", "hometown": "Sioux Falls, SD", "status": "active", "photoUrl": "icons/icon-192x192.png" },
+    { "id": "s51_c08", "name": "Cristian Chavez", "startingTribe": "Unassigned", "age": 26, "occupation": "Head of HR", "hometown": "Salt Lake City, UT", "status": "active", "photoUrl": "icons/icon-192x192.png" },
+    { "id": "s51_c09", "name": "Danny “Kilby” Kilby", "startingTribe": "Unassigned", "age": 30, "occupation": "Game Designer", "hometown": "London, ON", "status": "active", "photoUrl": "icons/icon-192x192.png" },
+    { "id": "s51_c10", "name": "Devin Way", "startingTribe": "Unassigned", "age": 33, "occupation": "Actor", "hometown": "Los Angeles, CA", "status": "active", "photoUrl": "icons/icon-192x192.png" },
+    { "id": "s51_c11", "name": "Eric Macksoud", "startingTribe": "Unassigned", "age": 34, "occupation": "Mental Health Counselor", "hometown": "Windsor Locks, CT", "status": "active", "photoUrl": "icons/icon-192x192.png" },
+    { "id": "s51_c12", "name": "Jenna Doore", "startingTribe": "Unassigned", "age": 30, "occupation": "Wedding Photographer", "hometown": "Toledo, OH", "status": "active", "photoUrl": "icons/icon-192x192.png" },
+    { "id": "s51_c13", "name": "Kristin Flickinger", "startingTribe": "Unassigned", "age": 49, "occupation": "Crisis Management", "hometown": "Santa Barbara, CA", "status": "active", "photoUrl": "icons/icon-192x192.png" },
+    { "id": "s51_c14", "name": "Lewis Kelly", "startingTribe": "Unassigned", "age": 28, "occupation": "Farmer", "hometown": "Puerto Rico / Ireland", "status": "active", "photoUrl": "icons/icon-192x192.png" },
+    { "id": "s51_c15", "name": "Linnea Capobianco", "startingTribe": "Unassigned", "age": 25, "occupation": "Entrepreneur", "hometown": "Jersey City, NJ", "status": "active", "photoUrl": "icons/icon-192x192.png" },
+    { "id": "s51_c16", "name": "Maggie Nestor", "startingTribe": "Unassigned", "age": 40, "occupation": "Farmer", "hometown": "Charles Town, WV", "status": "active", "photoUrl": "icons/icon-192x192.png" },
+    { "id": "s51_c17", "name": "Mike Pinsky", "startingTribe": "Unassigned", "age": 32, "occupation": "Baseball Executive", "hometown": "New York City, NY", "status": "active", "photoUrl": "icons/icon-192x192.png" },
+    { "id": "s51_c18", "name": "Ori Jean-Charles", "startingTribe": "Unassigned", "age": 27, "occupation": "Personal Trainer", "hometown": "Spring Valley, NY", "status": "active", "photoUrl": "icons/icon-192x192.png" },
+    { "id": "s51_c19", "name": "Patt Cannaday", "startingTribe": "Unassigned", "age": 33, "occupation": "Federal Prosecutor", "hometown": "Washington, DC", "status": "active", "photoUrl": "icons/icon-192x192.png" },
+    { "id": "s51_c20", "name": "Rob Antonson", "startingTribe": "Unassigned", "age": 40, "occupation": "Airline Gate Agent", "hometown": "Cumberland, RI", "status": "active", "photoUrl": "icons/icon-192x192.png" },
+    { "id": "s51_c21", "name": "Sharonda Cox", "startingTribe": "Unassigned", "age": 34, "occupation": "OBGYN Resident", "hometown": "Richmond, KY", "status": "active", "photoUrl": "icons/icon-192x192.png" }
   ],
   "episodes": [
     { "number": 1, "title": "Episode 1", "airDate": "2027-02-24" },
