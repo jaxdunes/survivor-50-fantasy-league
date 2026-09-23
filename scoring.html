@@ -69,61 +69,135 @@
             margin-left: 8px;
         }
 
-        /* Tribal Council Theme */
-        body.theme-tribal {
-            background: radial-gradient(circle at 50% 0%, #1f1712 0%, #0c0e12 65%, #050608 100%) !important;
-            background-attachment: fixed !important;
-            color: #f1f5f9 !important;
+        /* Tribal Council Theme (Earthy Dark Brown & Faint Bottom Fire Glow) */
+        @keyframes fireFlicker {
+            0%, 100% {
+                opacity: 0.8;
+                transform: scaleY(1.0) translateY(0);
+                filter: drop-shadow(0 -10px 25px rgba(249, 115, 22, 0.4));
+            }
+            25% {
+                opacity: 0.95;
+                transform: scaleY(1.04) translateY(-4px);
+                filter: drop-shadow(0 -15px 35px rgba(245, 158, 11, 0.5));
+            }
+            50% {
+                opacity: 0.7;
+                transform: scaleY(0.96) translateY(2px);
+                filter: drop-shadow(0 -8px 20px rgba(239, 68, 68, 0.35));
+            }
+            75% {
+                opacity: 0.9;
+                transform: scaleY(1.02) translateY(-2px);
+                filter: drop-shadow(0 -12px 30px rgba(251, 146, 60, 0.45));
+            }
         }
 
+        body.theme-tribal {
+            background: radial-gradient(circle at 50% 10%, #291c14 0%, #160f0a 55%, #0a0604 100%) !important;
+            background-attachment: fixed !important;
+            color: #f3eae1 !important;
+        }
+
+        body.theme-tribal .grey-ombre-bg {
+            background: transparent !important;
+        }
+
+        /* Top Torchlight Ambient Glow */
         body.theme-tribal::before {
             content: '';
             position: fixed;
             top: 0;
             left: 0;
             right: 0;
-            height: 450px;
-            background: radial-gradient(circle at 50% -120px, rgba(249, 115, 22, 0.25), rgba(245, 158, 11, 0.08), transparent 75%);
+            height: 400px;
+            background: radial-gradient(circle at 50% -100px, rgba(249, 115, 22, 0.22), rgba(245, 158, 11, 0.08), transparent 75%);
             pointer-events: none;
             z-index: 1;
         }
 
-        body.theme-tribal .bg-white {
-            background-color: rgba(15, 23, 42, 0.92) !important;
-            color: #f8fafc !important;
-            border-color: rgba(245, 158, 11, 0.3) !important;
-            box-shadow: 0 10px 30px -5px rgba(0, 0, 0, 0.7), 0 0 20px rgba(245, 158, 11, 0.12) !important;
+        /* Faint Fire Flame Glow coming from Bottom of Screen */
+        body.theme-tribal::after {
+            content: '';
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            height: 260px;
+            background: radial-gradient(ellipse at 50% 120%, 
+                rgba(255, 100, 0, 0.35) 0%, 
+                rgba(245, 158, 11, 0.20) 35%, 
+                rgba(180, 50, 10, 0.08) 60%, 
+                transparent 80%);
+            pointer-events: none;
+            z-index: 1;
+            animation: fireFlicker 3.5s ease-in-out infinite;
+            transform-origin: bottom center;
         }
 
+        /* Dark Brown / Wood Cards */
+        body.theme-tribal .bg-white,
         body.theme-tribal .bg-white\/90,
         body.theme-tribal .bg-white\/95 {
-            background-color: rgba(15, 23, 42, 0.88) !important;
-            color: #f8fafc !important;
-            border-color: rgba(245, 158, 11, 0.25) !important;
+            background-color: rgba(26, 18, 13, 0.94) !important;
+            color: #f5ebe2 !important;
+            border-color: rgba(217, 119, 6, 0.35) !important;
+            box-shadow: 0 10px 30px -5px rgba(0, 0, 0, 0.8), 0 0 25px rgba(245, 158, 11, 0.12) !important;
         }
 
+        /* Inner containers / row backgrounds */
+        body.theme-tribal .bg-gray-50,
+        body.theme-tribal .bg-slate-50,
+        body.theme-tribal .bg-slate-100,
+        body.theme-tribal .bg-slate-900\/60,
+        body.theme-tribal .bg-amber-50 {
+            background-color: rgba(43, 30, 22, 0.75) !important;
+            border-color: rgba(217, 119, 6, 0.25) !important;
+            color: #e6dad0 !important;
+        }
+
+        /* Side Menu Drawer Dark Brown Styling */
+        body.theme-tribal .bg-slate-900 {
+            background-color: rgba(18, 12, 8, 0.97) !important;
+            border-color: rgba(217, 119, 6, 0.3) !important;
+        }
+
+        body.theme-tribal .bg-slate-950\/80,
+        body.theme-tribal .bg-slate-950\/60,
+        body.theme-tribal .bg-slate-900\/90 {
+            background-color: rgba(12, 8, 5, 0.9) !important;
+        }
+
+        /* Headings & Text Colors */
         body.theme-tribal h1,
         body.theme-tribal h2,
-        body.theme-tribal h3 {
+        body.theme-tribal h3,
+        body.theme-tribal h4 {
             color: #fef3c7 !important;
-            text-shadow: 0 0 15px rgba(245, 158, 11, 0.4) !important;
+            text-shadow: 0 0 15px rgba(245, 158, 11, 0.45) !important;
         }
 
         body.theme-tribal .text-gray-900,
         body.theme-tribal .text-gray-800,
-        body.theme-tribal .text-gray-700 {
-            color: #e2e8f0 !important;
+        body.theme-tribal .text-gray-700,
+        body.theme-tribal .text-slate-900,
+        body.theme-tribal .text-slate-800,
+        body.theme-tribal .text-slate-700 {
+            color: #eeded1 !important;
         }
 
         body.theme-tribal .text-gray-600,
-        body.theme-tribal .text-gray-500 {
-            color: #94a3b8 !important;
+        body.theme-tribal .text-gray-500,
+        body.theme-tribal .text-slate-600,
+        body.theme-tribal .text-slate-500 {
+            color: #bfaea2 !important;
         }
 
-        body.theme-tribal .bg-gray-50,
-        body.theme-tribal .bg-slate-50 {
-            background-color: rgba(30, 41, 59, 0.7) !important;
-            border-color: rgba(245, 158, 11, 0.2) !important;
+        body.theme-tribal .border-gray-200,
+        body.theme-tribal .border-gray-100,
+        body.theme-tribal .border-slate-200,
+        body.theme-tribal .border-slate-100 {
+            border-color: rgba(180, 83, 9, 0.25) !important;
         }
     </style>
 </head>
@@ -566,7 +640,7 @@
             const [showMarkWinner, setShowMarkWinner] = useState(false);
             const [showSideMenu, setShowSideMenu] = useState(false);
             const [expandedTeams, setExpandedTeams] = useState({});
-            const [theme, setTheme] = useState(() => localStorage.getItem('survivor_theme') || 'classic');
+            const [theme, setTheme] = useState(() => localStorage.getItem('survivor_theme') || 'tribal');
 
             useEffect(() => {
                 document.body.classList.toggle('theme-tribal', theme === 'tribal');
