@@ -26,6 +26,10 @@ var AVAILABLE_LEAGUES = {
             { id: 'jackson-ray', name: 'Jackson/Ray', color: 'from-purple-500 to-violet-600', bgColor: 'bg-purple-50', textColor: 'text-purple-700' },
             { id: 'maura', name: 'Maura', color: 'from-pink-500 to-fuchsia-600', bgColor: 'bg-pink-50', textColor: 'text-pink-700' },
             { id: 'ryan-jordan', name: 'Ryan/Jordan', color: 'from-amber-500 to-orange-600', bgColor: 'bg-amber-50', textColor: 'text-amber-700' }
+        ],
+        seasons: [
+            { id: 'season-51', name: 'Season 51: Open Era', status: 'current', label: 'Season 51' },
+            { id: 'season-50', name: 'Season 50: In the Hands of the Gods', status: 'previous', label: 'Season 50' }
         ]
     },
     'jordan-denver-league': {
@@ -37,6 +41,9 @@ var AVAILABLE_LEAGUES = {
             { id: 'scott', name: 'Scott', color: 'from-blue-500 to-indigo-600', bgColor: 'bg-blue-50', textColor: 'text-blue-700' },
             { id: 'hayley', name: 'Hayley', color: 'from-emerald-500 to-teal-600', bgColor: 'bg-emerald-50', textColor: 'text-emerald-700' },
             { id: 'ashlynn', name: 'Ashlynn', color: 'from-red-500 to-rose-600', bgColor: 'bg-red-50', textColor: 'text-red-700' }
+        ],
+        seasons: [
+            { id: 'season-51', name: 'Season 51: Open Era', status: 'current', label: 'Season 51' }
         ]
     }
 };
@@ -100,13 +107,43 @@ function setActiveLeagueId(leagueId) {
     localStorage.setItem('survivor_active_league_id', leagueId);
     const url = new URL(window.location.href);
     url.searchParams.set('league', leagueId);
+    url.searchParams.delete('season'); // Reset to default season for this league
     window.location.href = url.toString();
 }
 
 /**
- * Get active season ID (defaults to season-51)
+ * Get active season ID for a given league (defaults to season-51)
  */
-function getActiveSeasonId() {
+function getActiveSeasonId(leagueId) {
+    const activeLeague = leagueId || getActiveLeagueId();
+    const leagueConfig = AVAILABLE_LEAGUES[activeLeague] || AVAILABLE_LEAGUES[DEFAULT_LEAGUE_ID];
+    const allowedSeasonIds = (leagueConfig.seasons || []).map(s => s.id);
+    
     const urlParams = new URLSearchParams(window.location.search);
-    return urlParams.get('season') || DEFAULT_SEASON_ID;
+    let seasonParam = urlParams.get('season');
+    
+    if (!seasonParam || !allowedSeasonIds.includes(seasonParam)) {
+        seasonParam = DEFAULT_SEASON_ID;
+    }
+    
+    return seasonParam;
+}
+
+/**
+ * Set active league AND season ID and update URL / localStorage
+ */
+function setActiveLeagueAndSeason(leagueId, seasonId) {
+    if (!AVAILABLE_LEAGUES[leagueId]) return;
+    localStorage.setItem('survivor_active_league_id', leagueId);
+    if (seasonId) {
+        localStorage.setItem('survivor_active_season_id_' + leagueId, seasonId);
+    }
+    const url = new URL(window.location.href);
+    url.searchParams.set('league', leagueId);
+    if (seasonId && seasonId !== DEFAULT_SEASON_ID) {
+        url.searchParams.set('season', seasonId);
+    } else {
+        url.searchParams.delete('season');
+    }
+    window.location.href = url.toString();
 }
