@@ -686,8 +686,8 @@
                                                         ...breakdown.map((item, idx) => 
                                                             h('div', { key: idx, className: 'flex justify-between items-center text-gray-600 group' },
                                                                 h('span', {}, `E${item.episode}: ${item.category}${item.note ? ` - ${item.note}` : ''}`),
-                                                                h('div', { className: 'flex items-center gap-2' },
-                                                                    h('span', { className: 'font-bold' }, `+${item.points}`),
+                                                                 h('div', { className: 'flex items-center gap-2' },
+                                                                    h('span', { className: `font-bold ${item.points < 0 ? 'text-red-600' : 'text-gray-700'}` }, `${item.points > 0 ? '+' : ''}${item.points}`),
                                                                     item.canDelete && h('button', {
                                                                         onClick: (e) => {
                                                                             e.stopPropagation();
@@ -898,7 +898,7 @@
                                                 h('option', { 
                                                     key: cat.id, 
                                                     value: cat.id 
-                                                }, `${cat.name} (+${cat.points} pts)`)
+                                                }, `${cat.name} (${cat.points > 0 ? '+' : ''}${cat.points} pts)`)
                                             )
                                         )
                                     ),
