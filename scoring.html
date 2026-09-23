@@ -551,15 +551,6 @@
                     // Header
                     h('div', { className: 'text-center mb-8' },
                         h('div', { className: 'flex justify-center items-center gap-3 mb-4 flex-wrap' },
-                            h('button', {
-                                onClick: () => setShowSideMenu(!showSideMenu),
-                                className: `px-4 py-2 rounded-lg transition flex items-center gap-2 font-bold shadow-md cursor-pointer ${
-                                    showSideMenu ? 'bg-slate-800 text-white hover:bg-slate-700' : 'bg-orange-500 text-white hover:bg-orange-600'
-                                }`
-                            },
-                                h(Icons.Menu, { size: 20 }),
-                                h('span', {}, showSideMenu ? 'Close Menu' : 'Leagues Menu')
-                            ),
                             h('a', {
                                 href: 'index.html?league=' + activeLeagueId + '&season=' + activeSeasonId,
                                 className: 'bg-white/90 backdrop-blur-md px-4 py-2 rounded-lg hover:bg-white transition flex items-center gap-2'
@@ -1290,41 +1281,6 @@
                                         onClick: () => setShowSideMenu(false),
                                         className: 'p-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-400 hover:text-white transition cursor-pointer'
                                     }, h(Icons.X, { size: 18 }))
-                                ),
-
-                                // Navigation Section
-                                h('div', { className: 'mb-6' },
-                                    h('div', { className: 'text-[11px] font-bold text-slate-400 uppercase tracking-wider mb-2.5 px-1' }, 'Navigation'),
-                                    h('div', { className: 'space-y-1' },
-                                        h('a', {
-                                            href: 'index.html?league=' + activeLeagueId + '&season=' + activeSeasonId,
-                                            className: 'w-full flex items-center justify-between px-3.5 py-2.5 rounded-xl text-xs font-bold text-slate-300 hover:bg-slate-800 hover:text-white transition'
-                                        },
-                                            h('div', { className: 'flex items-center gap-2.5' },
-                                                h(Icons.Home, { size: 16 }),
-                                                h('span', {}, 'Draft Dashboard')
-                                            )
-                                        ),
-                                        h('a', {
-                                            href: 'scoring.html?league=' + activeLeagueId + '&season=' + activeSeasonId,
-                                            className: 'w-full flex items-center justify-between px-3.5 py-2.5 rounded-xl text-xs font-bold bg-gradient-to-r from-orange-500 to-amber-600 text-white shadow-md'
-                                        },
-                                            h('div', { className: 'flex items-center gap-2.5' },
-                                                h(Icons.Trophy, { size: 16 }),
-                                                h('span', {}, 'Scoring & Rules')
-                                            ),
-                                            h('span', { className: 'text-[10px] bg-white/20 px-2 py-0.5 rounded-full uppercase tracking-wider font-extrabold' }, 'Current')
-                                        ),
-                                        h('a', {
-                                            href: 'chat.html?league=' + activeLeagueId + '&season=' + activeSeasonId,
-                                            className: 'w-full flex items-center justify-between px-3.5 py-2.5 rounded-xl text-xs font-bold text-slate-300 hover:bg-slate-800 hover:text-white transition'
-                                        },
-                                            h('div', { className: 'flex items-center gap-2.5' },
-                                                h(Icons.MessageCircle, { size: 16 }),
-                                                h('span', {}, 'Chat & Episode Spoilers')
-                                            )
-                                        )
-                                    )
                                 ),
 
                                 // Leagues & Seasons List
