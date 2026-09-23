@@ -294,6 +294,13 @@
             const [showMarkWinner, setShowMarkWinner] = useState(false);
             const [showSideMenu, setShowSideMenu] = useState(false);
             const [expandedTeams, setExpandedTeams] = useState({});
+            const [selectedAddScoreLeagues, setSelectedAddScoreLeagues] = useState(Object.keys(LEAGUES_DATA));
+            
+            useEffect(() => {
+                if (showAddScore) {
+                    setSelectedAddScoreLeagues(Object.keys(LEAGUES_DATA));
+                }
+            }, [showAddScore]);
             
             // Load season preset data
             useEffect(() => {
@@ -852,6 +859,50 @@
                                 ),
                                 
                                 h('div', { className: 'space-y-4' },
+                                    // Multi-League Selection Section
+                                    h('div', { className: 'bg-orange-50/70 border border-orange-200 rounded-xl p-4' },
+                                        h('div', { className: 'flex justify-between items-center mb-2' },
+                                            h('label', { className: 'block text-sm font-bold text-gray-800' }, 'Apply Points To Leagues'),
+                                            h('div', { className: 'flex gap-2' },
+                                                h('button', {
+                                                    type: 'button',
+                                                    onClick: () => setSelectedAddScoreLeagues(Object.keys(LEAGUES_DATA)),
+                                                    className: 'text-xs bg-orange-500 text-white font-bold px-3 py-1 rounded-lg hover:bg-orange-600 transition shadow-sm'
+                                                }, 'Select All'),
+                                                h('button', {
+                                                    type: 'button',
+                                                    onClick: () => setSelectedAddScoreLeagues([]),
+                                                    className: 'text-xs bg-gray-200 text-gray-700 font-bold px-3 py-1 rounded-lg hover:bg-gray-300 transition shadow-sm'
+                                                }, 'Deselect All')
+                                            )
+                                        ),
+                                        h('div', { className: 'flex flex-wrap gap-2 mt-3' },
+                                            Object.values(LEAGUES_DATA).map(league => {
+                                                const isSelected = selectedAddScoreLeagues.includes(league.id);
+                                                return h('button', {
+                                                    key: league.id,
+                                                    type: 'button',
+                                                    onClick: () => {
+                                                        if (isSelected) {
+                                                            setSelectedAddScoreLeagues(prev => prev.filter(id => id !== league.id));
+                                                        } else {
+                                                            setSelectedAddScoreLeagues(prev => [...prev, league.id]);
+                                                        }
+                                                    },
+                                                    className: `px-3.5 py-2 rounded-xl text-xs font-extrabold flex items-center gap-2 border-2 transition shadow-sm ${
+                                                        isSelected 
+                                                            ? 'bg-gradient-to-r from-orange-500 to-amber-600 text-white border-orange-600 ring-2 ring-orange-300' 
+                                                            : 'bg-white text-gray-600 border-gray-300 hover:bg-gray-100'
+                                                    }`
+                                                },
+                                                    h(Icons.Check, { size: 14, className: isSelected ? 'opacity-100' : 'opacity-0' }),
+                                                    h('span', {}, league.name)
+                                                );
+                                            })
+                                        ),
+                                        selectedAddScoreLeagues.length === 0 && h('div', { className: 'text-xs text-red-600 font-bold mt-2' }, '⚠️ Please select at least one league to apply points.')
+                                    ),
+                                    
                                     // Player Selection
                                     h('div', {},
                                         h('label', { className: 'block text-sm font-bold text-gray-700 mb-2' }, 'Select Player'),
@@ -909,7 +960,6 @@
                                         h('input', {
                                             id: 'points-input',
                                             type: 'number',
-                                            min: 0,
                                             className: 'w-full px-4 py-3 border-2 border-gray-300 rounded-xl focus:border-orange-500 focus:outline-none',
                                             placeholder: 'Auto-filled by category'
                                         })
@@ -929,13 +979,18 @@
                                     // Submit Button
                                     h('button', {
                                         onClick: () => {
+                                            if (!selectedAddScoreLeagues.length) {
+                                                alert('Please select at least one league to apply points.');
+                                                return;
+                                            }
+                                            
                                             const playerId = document.getElementById('player-select').value;
                                             const episode = document.getElementById('episode-select').value;
                                             const categoryId = document.getElementById('category-select').value;
                                             const points = parseInt(document.getElementById('points-input').value);
                                             const note = document.getElementById('note-input').value;
                                             
-                                            if (!playerId || !episode || !categoryId || !points) {
+                                            if (!playerId || !episode || !categoryId || isNaN(points)) {
                                                 alert('Please fill in all required fields');
                                                 return;
                                             }
@@ -944,20 +999,40 @@
                                             const scoreId = Date.now().toString();
                                             
                                             if (window.firebaseInitialized) {
-                                                database.ref(`leagues/${activeLeagueId}/seasons/${activeSeasonId}/scores/${playerId}/${episode}/${scoreId}`).set({
-                                                    category: category.name,
-                                                    points: points,
-                                                    note: note || ''
-                                                }).then(() => {
-                                                    // Clear form
+                                                const promises = selectedAddScoreLeagues.map(leagueId => {
+                                                    return database.ref(`leagues/${leagueId}/seasons/${activeSeasonId}/scores/${playerId}/${episode}/${scoreId}`).set({
+                                                        category: category ? category.name : 'Custom',
+                                                        points: points,
+                                                        note: note || ''
+                                                    });
+                                                });
+                                                
+                                                Promise.all(promises).then(() => {
                                                     document.getElementById('player-select').value = '';
                                                     document.getElementById('episode-select').value = '';
                                                     document.getElementById('category-select').value = '';
                                                     document.getElementById('points-input').value = '';
                                                     document.getElementById('note-input').value = '';
+                                                    setShowAddScore(false);
                                                     
-                                                    alert('Points added successfully!');
+                                                    const leagueNames = selectedAddScoreLeagues.map(id => (LEAGUES_DATA[id] || {}).name || id).join(', ');
+                                                    alert(`Points added successfully to: ${leagueNames}! 🎉`);
                                                 });
+                                            } else {
+                                                selectedAddScoreLeagues.forEach(leagueId => {
+                                                    const key = `survivor-scores-${leagueId}-${activeSeasonId}`;
+                                                    const existing = JSON.parse(localStorage.getItem(key) || '{}');
+                                                    if (!existing[playerId]) existing[playerId] = {};
+                                                    if (!existing[playerId][episode]) existing[playerId][episode] = {};
+                                                    existing[playerId][episode][scoreId] = {
+                                                        category: category ? category.name : 'Custom',
+                                                        points: points,
+                                                        note: note || ''
+                                                    };
+                                                    localStorage.setItem(key, JSON.stringify(existing));
+                                                });
+                                                setShowAddScore(false);
+                                                alert('Points added locally to selected leagues!');
                                             }
                                         },
                                         className: 'w-full px-6 py-3 bg-gradient-to-r from-orange-500 to-amber-600 text-white rounded-xl font-bold hover:shadow-lg transition text-lg'
