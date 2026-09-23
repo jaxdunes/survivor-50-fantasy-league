@@ -567,33 +567,27 @@
                             )
                         ),
                         h('h1', { 
-                            className: 'text-5xl md:text-7xl font-black mb-2 text-gray-900 drop-shadow-lg',
+                            className: 'text-5xl md:text-7xl font-black mb-3 text-gray-900 drop-shadow-lg',
                             style: { fontFamily: '"Bebas Neue", cursive' }
                         }, `📊 ${(seasonData && seasonData.title) ? seasonData.title.toUpperCase() : (activeSeasonId === 'season-50' ? 'SURVIVOR 50' : 'SURVIVOR 51')} SCORING`),
-                        h('p', { 
-                            className: 'text-xl md:text-2xl text-gray-800 font-semibold drop-shadow-md mb-3',
-                            style: { fontFamily: '"Playfair Display", serif' }
-                        }, `Episode ${currentEpisode} • ${(seasonData && seasonData.title) ? seasonData.title : (activeSeasonId === 'season-50' ? 'In the Hands of the Gods' : 'Open Era')}`),
-                        h('div', { className: 'flex justify-center items-center gap-2 flex-wrap mb-2' },
+                        
+                        h('div', { className: 'flex justify-center items-center gap-2 flex-wrap mb-4' },
                             h('div', { className: 'inline-flex items-center gap-2 bg-orange-500 text-white font-bold px-4 py-1.5 rounded-full text-sm shadow-md' },
                                 h(Icons.Award, { size: 16 }),
                                 h('span', {}, currentLeagueConfig.name)
                             ),
                             h('div', { className: 'inline-flex items-center gap-2 bg-slate-800 text-white font-bold px-4 py-1.5 rounded-full text-sm shadow-md' },
                                 h('span', {}, activeSeasonId === 'season-50' ? '📜 Season 50' : '🔥 Season 51')
-                            )
-                        ),
-                        currentLeagueConfig.seasons && currentLeagueConfig.seasons.length > 1 && h('div', { className: 'flex justify-center items-center gap-2 mt-3' },
-                            currentLeagueConfig.seasons.map(s => 
-                                h('button', {
-                                    key: s.id,
-                                    onClick: () => setActiveLeagueAndSeason(activeLeagueId, s.id),
-                                    className: `px-4 py-1.5 rounded-full text-xs font-bold transition shadow-sm ${
-                                        activeSeasonId === s.id 
-                                            ? 'bg-gradient-to-r from-orange-500 to-amber-600 text-white ring-2 ring-orange-300' 
-                                            : 'bg-white/90 text-gray-800 hover:bg-white border border-gray-200'
-                                    }`
-                                }, s.label || s.name)
+                            ),
+                            h('div', { 
+                                className: `inline-flex items-center gap-1.5 font-black px-4 py-1.5 rounded-full text-xs shadow-md uppercase tracking-wider ${
+                                    isFinishedSeason 
+                                        ? 'bg-slate-900 text-amber-300 border border-amber-500/40' 
+                                        : 'bg-emerald-600 text-white'
+                                }` 
+                            },
+                                h('span', { className: `w-2 h-2 rounded-full ${isFinishedSeason ? 'bg-amber-400' : 'bg-emerald-200 animate-pulse'}` }),
+                                h('span', {}, isFinishedSeason ? 'Finished' : 'Active')
                             )
                         )
                     ),
