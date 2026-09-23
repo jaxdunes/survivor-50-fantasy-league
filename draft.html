@@ -48,6 +48,14 @@
             width: 100%;
         }
 
+        /* Mobile GPU Composition & Hardware Acceleration for Player Photos */
+        .player-photo-avatar {
+            -webkit-backface-visibility: hidden;
+            backface-visibility: hidden;
+            transform: translateZ(0);
+            isolation: isolate;
+        }
+
         /* Tribal Council Theme (Earthy Dark Brown & Faint Bottom Fire Glow) */
         @keyframes fireFlicker {
             0%, 100% {
@@ -138,6 +146,8 @@
             z-index: 1;
             animation: fireFlicker 3.5s ease-in-out infinite;
             transform-origin: bottom center;
+            will-change: transform, opacity;
+            transform: translateZ(0);
         }
 
         /* Dark Brown / Wood Cards */
@@ -815,12 +825,7 @@
                 return 'from-amber-600 to-orange-700';
             };
             
-            const PlayerCard = ({ player }) => {
-                const assignedTeam = playerTeams[player.id] ? teams.find(t => t.id === playerTeams[player.id]) : null;
-                const isBackfilled = draftState.backfilledPlayers && draftState.backfilledPlayers[player.id];
-                const isOnClock = draftState.status === 'open' && draftState.onTheClockTeamId;
-                const canAssign = draftState.status === 'open' && !assignedTeam;
-                
+            const PlayerCard = React.memo(({ player, assignedTeam, isBackfilled, canAssign, draftStateStatus, activeSeasonId, onRemove, onDraft }) => {
                 return h('div', { 
                     className: 'bg-white rounded-2xl shadow-lg overflow-hidden hover:shadow-xl transition-all duration-300 border-2 border-gray-100'
                 },
@@ -828,7 +833,8 @@
                         h('img', {
                             src: player.image,
                             alt: player.name,
-                            className: 'absolute top-2 right-2 w-20 h-20 rounded-full border-3 border-white shadow-lg object-cover'
+                            decoding: 'async',
+                            className: 'absolute top-2 right-2 w-20 h-20 rounded-full border-3 border-white shadow-lg object-cover player-photo-avatar'
                         }),
                         h('div', { className: 'flex justify-between items-start mb-2 flex-wrap gap-1' },
                             assignedTeam ? 
@@ -864,18 +870,18 @@
                         ),
                         h('div', { className: 'flex gap-2' },
                             assignedTeam ?
-                                (draftState.status !== 'finalized' && h('button', {
-                                    onClick: () => removePlayer(player.id),
+                                (draftStateStatus !== 'finalized' && h('button', {
+                                    onClick: () => onRemove(player.id),
                                     className: 'w-full px-4 py-2 bg-red-500 text-white rounded-lg font-bold hover:bg-red-600 transition text-sm'
                                 }, 'Remove')) :
                                 (canAssign ? h('button', {
-                                    onClick: () => openTeamModal(player.id),
+                                    onClick: () => onDraft(player.id),
                                     className: 'w-full px-4 py-2 bg-gradient-to-r from-orange-500 to-amber-600 text-white rounded-lg font-bold hover:shadow-lg transition text-sm flex items-center justify-center gap-1.5'
                                 }, h(Icons.Flame, { size: 16 }), 'Draft Player') : null)
                         )
                     )
                 );
-            };
+            });
 
             
             return h('div', { className: 'min-h-screen grey-ombre-bg p-4 md:p-8' },
@@ -1122,7 +1128,22 @@
                             ),
                             
                             h('div', { className: 'grid md:grid-cols-2 lg:grid-cols-3 gap-6' },
-                                ...filteredPlayers.map(player => h(PlayerCard, { key: player.id, player }))
+                                ...filteredPlayers.map(player => {
+                                    const assignedTeam = playerTeams[player.id] ? teams.find(t => t.id === playerTeams[player.id]) : null;
+                                    const isBackfilled = draftState.backfilledPlayers && draftState.backfilledPlayers[player.id];
+                                    const canAssign = draftState.status === 'open' && !assignedTeam;
+                                    return h(PlayerCard, {
+                                        key: player.id,
+                                        player,
+                                        assignedTeam,
+                                        isBackfilled,
+                                        canAssign,
+                                        draftStateStatus: draftState.status,
+                                        activeSeasonId,
+                                        onRemove: removePlayer,
+                                        onDraft: openTeamModal
+                                    });
+                                })
                             )
                         ) :
                         h('div', { className: 'grid md:grid-cols-2 lg:grid-cols-3 gap-6' },
