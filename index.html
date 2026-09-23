@@ -388,7 +388,7 @@
                         h('div', { className: 'text-white pr-24' },
                             h('h3', { className: 'text-2xl font-black mb-1', style: { fontFamily: '"Bebas Neue", cursive' }}, player.name),
                             h('div', { className: 'flex gap-2 items-center flex-wrap' },
-                                h('div', { className: 'text-xs font-semibold bg-white/20 backdrop-blur-sm px-3 py-1 rounded-full' }, player.era || 'New Era'),
+                                activeSeasonId === 'season-50' && player.era && h('div', { className: 'text-xs font-semibold bg-white/20 backdrop-blur-sm px-3 py-1 rounded-full' }, player.era),
                                 player.tribe && player.tribe !== 'Unassigned' && h('div', { className: `text-xs font-semibold px-3 py-1 rounded-full ${getTribeBadgeColor(player.tribe)} backdrop-blur-sm shadow-sm` },
                                     player.tribe === 'Cila' ? '🔥 ' : player.tribe === 'Kalo' ? '🌊 ' : '⚡ ',
                                     player.tribe
@@ -545,7 +545,7 @@
                     viewMode === 'players' ? 
                         h(Fragment, {},
                             h('div', { className: 'bg-white/95 backdrop-blur-md rounded-2xl p-6 mb-8 shadow-xl' },
-                                h('div', { className: 'grid md:grid-cols-4 gap-4' },
+                                h('div', { className: `grid md:grid-cols-${activeSeasonId === 'season-50' ? '4' : '3'} gap-4` },
                                     h('input', {
                                         type: 'text',
                                         placeholder: 'Search players...',
@@ -553,7 +553,7 @@
                                         onChange: (e) => setSearchTerm(e.target.value),
                                         className: 'px-4 py-3 border-2 border-gray-300 rounded-xl focus:border-orange-500 focus:outline-none'
                                     }),
-                                    h('select', {
+                                    activeSeasonId === 'season-50' && h('select', {
                                         value: filterEra,
                                         onChange: (e) => setFilterEra(e.target.value),
                                         className: 'px-4 py-3 border-2 border-gray-300 rounded-xl focus:border-orange-500 focus:outline-none'
@@ -596,14 +596,8 @@
                                     key: team.id,
                                     className: `bg-white rounded-2xl shadow-xl p-6 ${team.bgColor}`
                                 },
-                                    h('div', { className: 'mb-4' },
-                                        h('div', { className: 'flex items-center justify-between' },
-                                            h('h2', { 
-                                                className: `text-3xl font-black ${team.textColor}`,
-                                                style: { fontFamily: '"Bebas Neue", cursive' }
-                                            }, team.name),
-                                            roster.length >= 4 && h('div', { className: 'bg-green-500 text-white px-3 py-1 rounded-full text-xs font-bold' }, 'FULL')
-                                        ),
+                                    h('div', { className: 'flex justify-between items-center mb-4 pb-3 border-b border-gray-200' },
+                                        h('h3', { className: `text-2xl font-black ${team.textColor}` }, team.name),
                                         h('div', { className: 'text-sm text-gray-600 font-semibold' }, 
                                             `${roster.length} / 4 Players`
                                         )
@@ -623,7 +617,7 @@
                                                             h('div', {},
                                                                 h('div', { className: 'font-bold text-gray-900' }, player.name),
                                                                 h('div', { className: 'text-xs text-gray-600' }, 
-                                                                    `${player.tribe} • ${player.era}`
+                                                                    player.occupation ? `${player.occupation}${player.hometown ? ' • ' + player.hometown : ''}` : (player.tribe || '')
                                                                 )
                                                             )
                                                         ),

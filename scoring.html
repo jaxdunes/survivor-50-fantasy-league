@@ -295,12 +295,40 @@
             const [showSideMenu, setShowSideMenu] = useState(false);
             const [expandedTeams, setExpandedTeams] = useState({});
             const [selectedAddScoreLeagues, setSelectedAddScoreLeagues] = useState(Object.keys(LEAGUES_DATA));
+            const [categorySearchTerm, setCategorySearchTerm] = useState('');
+            const [selectedCategoryId, setSelectedCategoryId] = useState('');
+            const [rulesSearchTerm, setRulesSearchTerm] = useState('');
             
             useEffect(() => {
                 if (showAddScore) {
                     setSelectedAddScoreLeagues(Object.keys(LEAGUES_DATA));
+                    setCategorySearchTerm('');
+                    setSelectedCategoryId('');
                 }
             }, [showAddScore]);
+
+            const filteredScoringCategories = useMemo(() => {
+                if (!categorySearchTerm.trim()) return scoringCategories;
+                const q = categorySearchTerm.toLowerCase();
+                return scoringCategories.filter(cat => 
+                    cat.name.toLowerCase().includes(q) || 
+                    cat.category.toLowerCase().includes(q)
+                );
+            }, [categorySearchTerm, scoringCategories]);
+
+            const groupedRules = useMemo(() => {
+                const q = rulesSearchTerm.toLowerCase().trim();
+                const filtered = !q ? scoringCategories : scoringCategories.filter(cat => 
+                    cat.name.toLowerCase().includes(q) || 
+                    cat.category.toLowerCase().includes(q)
+                );
+                const groups = {};
+                filtered.forEach(cat => {
+                    if (!groups[cat.category]) groups[cat.category] = [];
+                    groups[cat.category].push(cat);
+                });
+                return groups;
+            }, [rulesSearchTerm, scoringCategories]);
             
             // Load season preset data
             useEffect(() => {
@@ -725,7 +753,7 @@
                             onClick: (e) => e.stopPropagation()
                         },
                             h('div', { className: 'p-6' },
-                                h('div', { className: 'flex justify-between items-center mb-6' },
+                                h('div', { className: 'flex justify-between items-center mb-4' },
                                     h('h2', { 
                                         className: 'text-3xl font-black',
                                         style: { fontFamily: '"Bebas Neue", cursive' }
@@ -736,102 +764,37 @@
                                     }, h(Icons.X, { size: 28 }))
                                 ),
                                 
-                                h('div', { className: 'space-y-4 text-gray-800' },
-                                    // First to Drop
-                                    h('div', { className: 'rules-section' },
-                                        h('h3', { className: 'text-xl font-bold mb-3 text-pink-600' }, '🏆 First to Drop'),
-                                        h('ul', { className: 'space-y-2' },
-                                            h('li', {}, 'Wins Solo Immunity', h('span', { className: 'point-badge' }, '+25')),
-                                            h('li', {}, 'Wins Tribe Immunity', h('span', { className: 'point-badge' }, '+15')),
-                                            h('li', {}, 'Second Place Tribe Immunity', h('span', { className: 'point-badge' }, '+10')),
-                                            h('li', {}, 'Wins Tribe Reward', h('span', { className: 'point-badge' }, '+10')),
-                                            h('li', {}, 'Second Place Tribe Reward', h('span', { className: 'point-badge' }, '+5')),
-                                            h('li', {}, 'Wins Solo Reward', h('span', { className: 'point-badge' }, '+15')),
-                                            h('li', {}, 'Chosen to Go On Reward', h('span', { className: 'point-badge' }, '+3')),
-                                            h('li', {}, 'First to Drop', h('span', { className: 'point-badge bg-red-100 text-red-700' }, '-2')),
-                                            h('li', {}, 'Makes It to the Merge', h('span', { className: 'point-badge' }, '+10'))
+                                h('div', { className: 'relative mb-6' },
+                                    h('input', {
+                                        type: 'text',
+                                        placeholder: '🔍 Search rules (e.g., Idol, Immunity, Showmance, Voted out)...',
+                                        value: rulesSearchTerm,
+                                        onChange: (e) => setRulesSearchTerm(e.target.value),
+                                        className: 'w-full px-4 py-3 border-2 border-orange-200 rounded-xl focus:border-orange-500 focus:outline-none bg-orange-50/30 font-semibold text-sm'
+                                    }),
+                                    rulesSearchTerm && h('button', {
+                                        type: 'button',
+                                        onClick: () => setRulesSearchTerm(''),
+                                        className: 'absolute right-3 top-3 text-gray-400 hover:text-gray-600 text-xs font-bold'
+                                    }, 'Clear')
+                                ),
+                                
+                                h('div', { className: 'space-y-4 text-gray-800 max-h-[60vh] overflow-y-auto pr-1' },
+                                    Object.keys(groupedRules).length === 0 ? 
+                                        h('div', { className: 'text-center py-8 text-gray-500 italic font-semibold' }, 'No matching scoring rules found.') :
+                                        Object.entries(groupedRules).map(([catName, items]) => 
+                                            h('div', { key: catName, className: 'rules-section' },
+                                                h('h3', { className: 'text-xl font-bold mb-3 text-orange-600' }, catName),
+                                                h('ul', { className: 'space-y-2' },
+                                                    items.map(cat => 
+                                                        h('li', { key: cat.id, className: 'flex justify-between items-center py-1 border-b border-gray-100 last:border-0' },
+                                                            h('span', { className: 'font-medium text-sm' }, cat.name),
+                                                            h('span', { className: `point-badge ${cat.points < 0 ? 'bg-red-100 text-red-700' : ''}` }, `${cat.points > 0 ? '+' : ''}${cat.points}`)
+                                                        )
+                                                    )
+                                                )
+                                            )
                                         )
-                                    ),
-                                    
-                                    // Gameplay
-                                    h('div', { className: 'rules-section' },
-                                        h('h3', { className: 'text-xl font-bold mb-3 text-orange-600' }, '🎯 Gameplay'),
-                                        h('ul', { className: 'space-y-2' },
-                                            h('li', {}, 'Starts a Showmance', h('span', { className: 'point-badge' }, '+5')),
-                                            h('li', {}, 'Ends a Showmance', h('span', { className: 'point-badge bg-red-100 text-red-700' }, '-3')),
-                                            h('li', {}, 'Finds a Hidden Immunity Idol', h('span', { className: 'point-badge' }, '+10')),
-                                            h('li', {}, 'Makes a named alliance', h('span', { className: 'point-badge' }, '+5')),
-                                            h('li', {}, 'Makes It to Jury', h('span', { className: 'point-badge' }, '+10'))
-                                        )
-                                    ),
-                                    
-                                    // Tribal Council
-                                    h('div', { className: 'rules-section' },
-                                        h('h3', { className: 'text-xl font-bold mb-3 text-blue-600' }, '🗳️ Tribal Council'),
-                                        h('ul', { className: 'space-y-2' },
-                                            h('li', {}, 'Uses Hidden Immunity Idol On Self', h('span', { className: 'point-badge' }, '+5')),
-                                            h('li', {}, 'Uses Hidden Immunity Idol Correctly', h('span', { className: 'point-badge' }, '+5')),
-                                            h('li', {}, 'Uses Hidden Immunity Idol On Somebody Else', h('span', { className: 'point-badge' }, '+3')),
-                                            h('li', {}, 'Has Hidden Immunity Idol Used On Them', h('span', { className: 'point-badge' }, '+5')),
-                                            h('li', {}, 'Gets Voted Out', h('span', { className: 'point-badge bg-red-100 text-red-700' }, '-25')),
-                                            h('li', {}, 'Gets Votes and Survives (0.5 × # of votes)', h('span', { className: 'point-badge' }, '+0.5')),
-                                            h('li', {}, 'Pulls a Rock', h('span', { className: 'point-badge' }, '+1')),
-                                            h('li', {}, 'First Voted Out', h('span', { className: 'point-badge bg-red-100 text-red-700' }, '-10')),
-                                            h('li', {}, 'Wins Fire Making Challenge', h('span', { className: 'point-badge' }, '+5')),
-                                            h('li', {}, 'Plays shot in the dark correctly', h('span', { className: 'point-badge' }, '+15')),
-                                            h('li', {}, 'Voted out with idol in pocket', h('span', { className: 'point-badge bg-red-100 text-red-700' }, '-10')),
-                                            h('li', {}, 'Does not have a vote during tribal', h('span', { className: 'point-badge bg-red-100 text-red-700' }, '-5'))
-                                        )
-                                    ),
-                                    
-                                    // Misc.
-                                    h('div', { className: 'rules-section' },
-                                        h('h3', { className: 'text-xl font-bold mb-3 text-red-600' }, '📺 Misc.'),
-                                        h('ul', { className: 'space-y-2' },
-                                            h('li', {}, 'Inspires an on-screen hashtag', h('span', { className: 'point-badge' }, '+1')),
-                                            h('li', {}, 'Mentions a Player from a Previous Season', h('span', { className: 'point-badge bg-red-100 text-red-700' }, '-1')),
-                                            h('li', {}, 'Says the title of the episode', h('span', { className: 'point-badge' }, '+10'))
-                                        )
-                                    ),
-                                    
-                                    // Emotions
-                                    h('div', { className: 'rules-section' },
-                                        h('h3', { className: 'text-xl font-bold mb-3 text-green-600' }, '😢 Emotions'),
-                                        h('ul', { className: 'space-y-2' },
-                                            h('li', {}, 'Calls a Camp Meeting to Confront Someone', h('span', { className: 'point-badge bg-red-100 text-red-700' }, '-5')),
-                                            h('li', {}, 'Gets in a Yelling Match', h('span', { className: 'point-badge bg-red-100 text-red-700' }, '-5')),
-                                            h('li', {}, 'Cries in Confessional', h('span', { className: 'point-badge bg-red-100 text-red-700' }, '-1')),
-                                            h('li', {}, 'Cries in Front of Player', h('span', { className: 'point-badge bg-red-100 text-red-700' }, '-3')),
-                                            h('li', {}, 'Expelled from the Island', h('span', { className: 'point-badge' }, '+25')),
-                                            h('li', {}, 'Medical Removed from Island', h('span', { className: 'point-badge bg-red-100 text-red-700' }, '-25'))
-                                        )
-                                    ),
-                                    
-                                    // Advantages / Idols
-                                    h('div', { className: 'rules-section' },
-                                        h('h3', { className: 'text-xl font-bold mb-3 text-purple-600' }, '🎴 Advantages / Idols'),
-                                        h('ul', { className: 'space-y-2' },
-                                            h('li', {}, 'Voted out with idol', h('span', { className: 'point-badge bg-red-100 text-red-700' }, '-10')),
-                                            h('li', {}, 'Voted out with advantage', h('span', { className: 'point-badge bg-red-100 text-red-700' }, '-10')),
-                                            h('li', {}, 'Finds a Special Power/Advantage', h('span', { className: 'point-badge' }, '+5')),
-                                            h('li', {}, 'Is Given a Special Power from Somebody', h('span', { className: 'point-badge' }, '+5')),
-                                            h('li', {}, 'Uses advantage correctly', h('span', { className: 'point-badge' }, '+10')),
-                                            h('li', {}, 'Fails the advantage challenge', h('span', { className: 'point-badge bg-red-100 text-red-700' }, '-10'))
-                                        )
-                                    ),
-                                    
-                                    // End of Season
-                                    h('div', { className: 'rules-section' },
-                                        h('h3', { className: 'text-xl font-bold mb-3 text-blue-500' }, '🏅 End of Season'),
-                                        h('ul', { className: 'space-y-2' },
-                                            h('li', {}, 'Most votes against at end of season', h('span', { className: 'point-badge' }, '+15')),
-                                            h('li', {}, 'Least votes against (Post-Merge)', h('span', { className: 'point-badge' }, '+15')),
-                                            h('li', {}, 'Most individual immunities won', h('span', { className: 'point-badge' }, '+20')),
-                                            h('li', {}, 'Most idols/advantages found', h('span', { className: 'point-badge' }, '+20')),
-                                            h('li', {}, 'Sole Survivor', h('span', { className: 'point-badge bg-yellow-100 text-yellow-800 font-black' }, '+75')),
-                                            h('li', {}, 'Runner-ups', h('span', { className: 'point-badge' }, '+25'))
-                                        )
-                                    )
                                 )
                             )
                         )
@@ -931,26 +894,74 @@
                                         )
                                     ),
                                     
-                                    // Category Selection
+                                    // Category Selection with Search
                                     h('div', {},
-                                        h('label', { className: 'block text-sm font-bold text-gray-700 mb-2' }, 'Scoring Category'),
+                                        h('div', { className: 'flex justify-between items-center mb-2' },
+                                            h('label', { className: 'block text-sm font-bold text-gray-700' }, 'Scoring Category'),
+                                            selectedCategoryId && h('span', { className: 'text-xs text-orange-600 font-extrabold' }, 
+                                                `Selected: ${(scoringCategories.find(c => c.id === selectedCategoryId) || {}).name}`
+                                            )
+                                        ),
+                                        h('div', { className: 'relative mb-2' },
+                                            h('input', {
+                                                type: 'text',
+                                                placeholder: '🔍 Search category (e.g., Idol, Immunity, Voted Out, Tears)...',
+                                                value: categorySearchTerm,
+                                                onChange: (e) => setCategorySearchTerm(e.target.value),
+                                                className: 'w-full px-4 py-2.5 border-2 border-orange-200 rounded-xl text-sm focus:border-orange-500 focus:outline-none bg-orange-50/40'
+                                            }),
+                                            categorySearchTerm && h('button', {
+                                                type: 'button',
+                                                onClick: () => setCategorySearchTerm(''),
+                                                className: 'absolute right-3 top-2.5 text-gray-400 hover:text-gray-600 text-xs font-bold'
+                                            }, 'Clear')
+                                        ),
                                         h('select', {
                                             id: 'category-select',
-                                            className: 'w-full px-4 py-3 border-2 border-gray-300 rounded-xl focus:border-orange-500 focus:outline-none',
+                                            value: selectedCategoryId,
+                                            className: 'w-full px-4 py-3 border-2 border-gray-300 rounded-xl focus:border-orange-500 focus:outline-none text-sm',
                                             onChange: (e) => {
-                                                const selected = scoringCategories.find(c => c.id === e.target.value);
+                                                const catId = e.target.value;
+                                                setSelectedCategoryId(catId);
+                                                const selected = scoringCategories.find(c => c.id === catId);
                                                 if (selected) {
                                                     document.getElementById('points-input').value = selected.points;
                                                 }
                                             }
                                         },
-                                            h('option', { value: '' }, 'Choose category...'),
-                                            ...scoringCategories.map(cat => 
+                                            h('option', { value: '' }, categorySearchTerm ? `Matching categories (${filteredScoringCategories.length})...` : 'Choose category...'),
+                                            ...filteredScoringCategories.map(cat => 
                                                 h('option', { 
                                                     key: cat.id, 
                                                     value: cat.id 
-                                                }, `${cat.name} (${cat.points > 0 ? '+' : ''}${cat.points} pts)`)
+                                                }, `[${cat.category}] ${cat.name} (${cat.points > 0 ? '+' : ''}${cat.points} pts)`)
                                             )
+                                        ),
+                                        categorySearchTerm.trim() !== '' && h('div', { className: 'max-h-48 overflow-y-auto border-2 border-orange-200 bg-white rounded-xl p-2 mt-2 space-y-1 shadow-inner' },
+                                            filteredScoringCategories.length === 0 ?
+                                                h('div', { className: 'text-xs text-gray-500 text-center py-2 italic' }, 'No matching scoring categories found.') :
+                                                filteredScoringCategories.map(cat => 
+                                                    h('button', {
+                                                        key: cat.id,
+                                                        type: 'button',
+                                                        onClick: () => {
+                                                            setSelectedCategoryId(cat.id);
+                                                            document.getElementById('points-input').value = cat.points;
+                                                            setCategorySearchTerm('');
+                                                        },
+                                                        className: `w-full text-left p-2 rounded-lg text-xs font-semibold transition flex items-center justify-between ${
+                                                            selectedCategoryId === cat.id ? 'bg-orange-500 text-white font-bold' : 'hover:bg-orange-50 text-gray-800 border border-gray-100'
+                                                        }`
+                                                    },
+                                                        h('div', { className: 'flex items-center gap-2' },
+                                                            h('span', { className: 'opacity-75 text-[10px] uppercase font-mono px-1.5 py-0.5 rounded bg-black/10' }, cat.category),
+                                                            h('span', {}, cat.name)
+                                                        ),
+                                                        h('span', { className: `font-bold px-2 py-0.5 rounded-full text-[11px] ${
+                                                            selectedCategoryId === cat.id ? 'bg-white/20 text-white' : cat.points > 0 ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'
+                                                        }` }, `${cat.points > 0 ? '+' : ''}${cat.points}`)
+                                                    )
+                                                )
                                         )
                                     ),
                                     
