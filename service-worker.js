@@ -1,8 +1,9 @@
 // Service Worker for Survivor 51 Fantasy League
-const CACHE_NAME = 'survivor-51-v6';
+const CACHE_NAME = 'survivor-51-v7';
 const urlsToCache = [
     './',
     './index.html',
+    './draft.html',
     './chat.html',
     './scoring.html',
     './notifications.html',
