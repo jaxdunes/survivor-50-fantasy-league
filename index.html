@@ -44,10 +44,65 @@
         .modal-content {
             background: white;
             border-radius: 20px;
-            max-width: 900px;
-            max-height: 90vh;
             overflow-y: auto;
             width: 100%;
+        }
+
+        /* Tribal Council Theme */
+        body.theme-tribal {
+            background: radial-gradient(circle at 50% 0%, #1f1712 0%, #0c0e12 65%, #050608 100%) !important;
+            background-attachment: fixed !important;
+            color: #f1f5f9 !important;
+        }
+
+        body.theme-tribal::before {
+            content: '';
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 450px;
+            background: radial-gradient(circle at 50% -120px, rgba(249, 115, 22, 0.25), rgba(245, 158, 11, 0.08), transparent 75%);
+            pointer-events: none;
+            z-index: 1;
+        }
+
+        body.theme-tribal .bg-white {
+            background-color: rgba(15, 23, 42, 0.92) !important;
+            color: #f8fafc !important;
+            border-color: rgba(245, 158, 11, 0.3) !important;
+            box-shadow: 0 10px 30px -5px rgba(0, 0, 0, 0.7), 0 0 20px rgba(245, 158, 11, 0.12) !important;
+        }
+
+        body.theme-tribal .bg-white\/90,
+        body.theme-tribal .bg-white\/95 {
+            background-color: rgba(15, 23, 42, 0.88) !important;
+            color: #f8fafc !important;
+            border-color: rgba(245, 158, 11, 0.25) !important;
+        }
+
+        body.theme-tribal h1,
+        body.theme-tribal h2,
+        body.theme-tribal h3 {
+            color: #fef3c7 !important;
+            text-shadow: 0 0 15px rgba(245, 158, 11, 0.4) !important;
+        }
+
+        body.theme-tribal .text-gray-900,
+        body.theme-tribal .text-gray-800,
+        body.theme-tribal .text-gray-700 {
+            color: #e2e8f0 !important;
+        }
+
+        body.theme-tribal .text-gray-600,
+        body.theme-tribal .text-gray-500 {
+            color: #94a3b8 !important;
+        }
+
+        body.theme-tribal .bg-gray-50,
+        body.theme-tribal .bg-slate-50 {
+            background-color: rgba(30, 41, 59, 0.7) !important;
+            border-color: rgba(245, 158, 11, 0.2) !important;
         }
     </style>
 </head>
@@ -201,6 +256,11 @@
             const [playerToAssign, setPlayerToAssign] = useState(null);
             const [showSideMenu, setShowSideMenu] = useState(false);
             const [connected, setConnected] = useState(window.firebaseInitialized);
+            const [theme, setTheme] = useState(() => localStorage.getItem('survivor_theme') || 'classic');
+
+            useEffect(() => {
+                document.body.classList.toggle('theme-tribal', theme === 'tribal');
+            }, [theme]);
             
             // Load season preset data
             useEffect(() => {
@@ -742,13 +802,41 @@
                                 )
                             ),
 
-                            // Sidebar Footer
-                            h('div', { className: 'p-4 border-t border-slate-800 bg-slate-950/60 text-center text-[11px] text-slate-500 font-semibold' },
-                                h('div', { className: 'flex items-center justify-center gap-2 mb-1 text-slate-400' },
-                                    h('span', { className: 'w-2 h-2 rounded-full bg-emerald-500 animate-pulse' }),
-                                    h('span', {}, `${(LEAGUES_DATA[activeLeagueId] || {}).name} • ${activeSeasonId.toUpperCase()}`)
+                            // Sidebar Footer with Theme Toggle
+                            h('div', { className: 'p-4 border-t border-slate-800 bg-slate-950/80' },
+                                h('div', { className: 'flex items-center justify-between mb-3 bg-slate-900/90 p-2.5 rounded-xl border border-slate-800 shadow-inner' },
+                                    h('div', { className: 'flex items-center gap-2.5' },
+                                        h('span', { className: 'text-lg' }, '🔥'),
+                                        h('div', {},
+                                            h('div', { className: 'text-xs font-bold text-slate-200 leading-none mb-0.5' }, 'Tribal Council Theme'),
+                                            h('div', { className: 'text-[10px] text-amber-400 font-semibold' }, theme === 'tribal' ? 'Torchlight Mode' : 'Classic Mode')
+                                        )
+                                    ),
+                                    h('button', {
+                                        type: 'button',
+                                        onClick: () => {
+                                            const nextTheme = theme === 'tribal' ? 'classic' : 'tribal';
+                                            setTheme(nextTheme);
+                                            localStorage.setItem('survivor_theme', nextTheme);
+                                        },
+                                        className: `relative w-11 h-6 rounded-full transition-colors cursor-pointer p-0.5 ${
+                                            theme === 'tribal' ? 'bg-gradient-to-r from-orange-500 to-amber-500 ring-2 ring-orange-400/40' : 'bg-slate-700'
+                                        }`
+                                    },
+                                        h('div', {
+                                            className: `w-5 h-5 rounded-full bg-white shadow-md transform transition-transform ${
+                                                theme === 'tribal' ? 'translate-x-5' : 'translate-x-0'
+                                            }`
+                                        })
+                                    )
                                 ),
-                                'Survivor 51 Fantasy App'
+                                h('div', { className: 'text-center text-[10px] text-slate-500 font-semibold' },
+                                    h('div', { className: 'flex items-center justify-center gap-2 mb-1 text-slate-400' },
+                                        h('span', { className: 'w-2 h-2 rounded-full bg-emerald-500 animate-pulse' }),
+                                        h('span', {}, `${(LEAGUES_DATA[activeLeagueId] || {}).name} • ${activeSeasonId.toUpperCase()}`)
+                                    ),
+                                    'Survivor 51 Fantasy App'
+                                )
                             )
                         )
                     ),
