@@ -15,7 +15,7 @@ const FIREBASE_CONFIG = {
 const DEFAULT_SEASON_ID = "season-51";
 const DEFAULT_LEAGUE_ID = "jackson-ryan-league";
 
-const AVAILABLE_LEAGUES = {
+var AVAILABLE_LEAGUES = {
     'jackson-ryan-league': {
         id: 'jackson-ryan-league',
         name: 'Jackson / Ryan League',
@@ -41,6 +41,9 @@ const AVAILABLE_LEAGUES = {
     }
 };
 
+window.AVAILABLE_LEAGUES = AVAILABLE_LEAGUES;
+window.LEAGUES = AVAILABLE_LEAGUES;
+var LEAGUES = AVAILABLE_LEAGUES;
 var firebaseInitialized = false;
 window.firebaseInitialized = false;
 

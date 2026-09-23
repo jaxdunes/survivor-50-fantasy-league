@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Survivor 50 - Scoring</title>
+    <title>Survivor 51 - Scoring</title>
     <script src="https://cdn.jsdelivr.net/npm/react@18.2.0/umd/react.production.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/react-dom@18.2.0/umd/react-dom.production.min.js"></script>
     <script src="https://cdn.tailwindcss.com"></script>
@@ -18,7 +18,7 @@
     <link rel="apple-touch-icon" href="icons/icon-192x192.png">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="default">
-    <meta name="apple-mobile-web-app-title" content="Survivor 50">
+    <meta name="apple-mobile-web-app-title" content="Survivor 51">
     
     <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Playfair+Display:wght@700&display=swap" rel="stylesheet">
     <style>
@@ -73,7 +73,7 @@
 <body>
     <div id="root">
         <div style="display: flex; justify-content: center; align-items: center; min-height: 100vh; font-size: 24px; color: #f97316; font-weight: bold;">
-            🔥 Loading Survivor 50 Scoring...
+            🔥 Loading Survivor 51 Scoring...
         </div>
     </div>
     
@@ -97,6 +97,32 @@
         }, 500);
     });
     
+    const LEAGUES_DATA = (typeof AVAILABLE_LEAGUES !== 'undefined' ? AVAILABLE_LEAGUES : window.AVAILABLE_LEAGUES) || {
+        'jackson-ryan-league': {
+            id: 'jackson-ryan-league',
+            name: 'Jackson / Ryan League',
+            teams: [
+                { id: 'austin', name: 'Austin', color: 'from-blue-500 to-indigo-600', bgColor: 'bg-blue-50', textColor: 'text-blue-700' },
+                { id: 'sandra', name: 'Sandra', color: 'from-green-500 to-emerald-600', bgColor: 'bg-green-50', textColor: 'text-green-700' },
+                { id: 'ashlynn', name: 'Ashlynn', color: 'from-red-500 to-rose-600', bgColor: 'bg-red-50', textColor: 'text-red-700' },
+                { id: 'jackson-ray', name: 'Jackson/Ray', color: 'from-purple-500 to-violet-600', bgColor: 'bg-purple-50', textColor: 'text-purple-700' },
+                { id: 'maura', name: 'Maura', color: 'from-pink-500 to-fuchsia-600', bgColor: 'bg-pink-50', textColor: 'text-pink-700' },
+                { id: 'ryan-jordan', name: 'Ryan/Jordan', color: 'from-amber-500 to-orange-600', bgColor: 'bg-amber-50', textColor: 'text-amber-700' }
+            ]
+        },
+        'jordan-denver-league': {
+            id: 'jordan-denver-league',
+            name: 'Jordan / Denver League',
+            teams: [
+                { id: 'ryan', name: 'Ryan', color: 'from-amber-500 to-orange-600', bgColor: 'bg-amber-50', textColor: 'text-amber-700' },
+                { id: 'jordan', name: 'Jordan', color: 'from-purple-500 to-violet-600', bgColor: 'bg-purple-50', textColor: 'text-purple-700' },
+                { id: 'scott', name: 'Scott', color: 'from-blue-500 to-indigo-600', bgColor: 'bg-blue-50', textColor: 'text-blue-700' },
+                { id: 'hayley', name: 'Hayley', color: 'from-emerald-500 to-teal-600', bgColor: 'bg-emerald-50', textColor: 'text-emerald-700' },
+                { id: 'ashlynn', name: 'Ashlynn', color: 'from-red-500 to-rose-600', bgColor: 'bg-red-50', textColor: 'text-red-700' }
+            ]
+        }
+    };
+
     function initializeApp() {
         const { createElement: h, useState, useMemo, Fragment, useEffect } = React;
         
@@ -123,44 +149,26 @@
             Award: createIcon('<circle cx="12" cy="8" r="7"></circle><polyline points="8.21 13.89 7 23 12 20 17 23 15.79 13.88"></polyline>'),
             X: createIcon('<path d="M18 6 6 18"></path><path d="m6 6 12 12"></path>'),
             ChevronDown: createIcon('<polyline points="6 9 12 15 18 9"></polyline>'),
-            Home: createIcon('<path d="m3 9 9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path><polyline points="9 22 9 12 15 12 15 22"></polyline>')
+            Home: createIcon('<path d="m3 9 9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path><polyline points="9 22 9 12 15 12 15 22"></polyline>'),
+            Menu: createIcon('<line x1="4" x2="20" y1="12" y2="12"></line><line x1="4" x2="20" y1="6" y2="6"></line><line x1="4" x2="20" y1="18" y2="18"></line>'),
+            Check: createIcon('<polyline points="20 6 9 17 4 12"></polyline>')
         };
         
         function ScoringPage() {
-            const teams = [
-                { id: 'austin', name: 'Austin', color: 'from-blue-500 to-indigo-600', bgColor: 'bg-blue-50', textColor: 'text-blue-700' },
-                { id: 'sandra', name: 'Sandra', color: 'from-green-500 to-emerald-600', bgColor: 'bg-green-50', textColor: 'text-green-700' },
-                { id: 'ashlynn', name: 'Ashlynn', color: 'from-red-500 to-rose-600', bgColor: 'bg-red-50', textColor: 'text-red-700' },
-                { id: 'jackson-ray', name: 'Jackson/Ray', color: 'from-purple-500 to-violet-600', bgColor: 'bg-purple-50', textColor: 'text-purple-700' },
-                { id: 'maura', name: 'Maura', color: 'from-pink-500 to-fuchsia-600', bgColor: 'bg-pink-50', textColor: 'text-pink-700' },
-                { id: 'ryan-jordan', name: 'Ryan/Jordan', color: 'from-amber-500 to-orange-600', bgColor: 'bg-amber-50', textColor: 'text-amber-700' }
-            ];
+            const currentLeagueConfig = LEAGUES_DATA[activeLeagueId] || LEAGUES_DATA['jackson-ryan-league'];
+            const teams = currentLeagueConfig.teams;
             
-            const players = [
-                { id: 1, name: "Jenna Lewis-Dougherty" },
-                { id: 2, name: "Cirie Fields" },
-                { id: 3, name: "Ozzy Lusth" },
-                { id: 4, name: "Christian Hubicki" },
-                { id: 5, name: "Rick Devens" },
-                { id: 6, name: "Emily Flippen" },
-                { id: 7, name: "Joe Hunter" },
-                { id: 8, name: "Savannah Louie" },
-                { id: 9, name: "Coach Wade" },
-                { id: 10, name: "Chrissy Hofbeck" },
-                { id: 11, name: "Mike White" },
-                { id: 12, name: "Jonathan Young" },
-                { id: 13, name: "Charlie Davis" },
-                { id: 14, name: "Tiffany Ervin" },
-                { id: 15, name: "Kamilla Karthigesu" },
-                { id: 16, name: "Dee Valladares" },
-                { id: 17, name: "Colby Donaldson" },
-                { id: 18, name: "Stephenie LaGrossa" },
-                { id: 19, name: "Aubry Bracco" },
-                { id: 20, name: "Angelina Keeley" },
-                { id: 21, name: "Genevieve Mushaluk" },
-                { id: 22, name: "Q Burdette" },
-                { id: 23, name: "Rizo Velovic" },
-                { id: 24, name: "Kyle Fraser" }
+            const defaultPlayers = [
+                { id: 1, name: "Aaliyah Puglia" },
+                { id: 2, name: "Alexis Levine" },
+                { id: 3, name: "An “Thien An” Nguyen" },
+                { id: 4, name: "Ana Sani" },
+                { id: 5, name: "Angelica “Jelly” Loblack" },
+                { id: 6, name: "Brady Booker" },
+                { id: 7, name: "Carter Krull" },
+                { id: 8, name: "Cristian Chavez" },
+                { id: 9, name: "Danny “Kilby” Kilby" },
+                { id: 10, name: "Devin Way" }
             ];
             
             const scoringCategories = [
@@ -227,6 +235,7 @@
             ];
             
             const [playerTeams, setPlayerTeams] = useState({});
+            const [seasonData, setSeasonData] = useState(null);
             const [scores, setScores] = useState({});
             const [eliminationOrder, setEliminationOrder] = useState({});
             const [winner, setWinner] = useState(null); // Single winner ID
@@ -235,14 +244,39 @@
             const [showAddScore, setShowAddScore] = useState(false);
             const [showMarkElimination, setShowMarkElimination] = useState(false);
             const [showMarkWinner, setShowMarkWinner] = useState(false);
+            const [showSideMenu, setShowSideMenu] = useState(false);
             const [expandedTeams, setExpandedTeams] = useState({});
             
+            // Load season preset data
+            useEffect(() => {
+                fetch('seasons/' + activeSeasonId + '.json')
+                    .then(res => res.json())
+                    .then(data => setSeasonData(data))
+                    .catch(err => console.warn('Could not load season json in scoring', err));
+            }, []);
+
+            const players = (seasonData && seasonData.contestants) ? seasonData.contestants : defaultPlayers;
+
             // Load data from Firebase
             useEffect(() => {
-                if (!window.firebaseInitialized) return;
+                if (!window.firebaseInitialized) {
+                    const saved = localStorage.getItem('survivor-teams-' + activeLeagueId);
+                    if (saved) {
+                        setPlayerTeams(JSON.parse(saved));
+                    }
+                    return;
+                }
                 
-                database.ref('teams').on('value', (snapshot) => {
-                    setPlayerTeams(snapshot.val() || {});
+                const teamsRef = database.ref('leagues/' + activeLeagueId + '/teams');
+                teamsRef.on('value', (snapshot) => {
+                    const val = snapshot.val();
+                    if (val) {
+                        setPlayerTeams(val);
+                    } else if (activeLeagueId === 'jackson-ryan-league' || activeLeagueId === 'main-league-2026') {
+                        database.ref('teams').once('value').then(snap => setPlayerTeams(snap.val() || {}));
+                    } else {
+                        setPlayerTeams({});
+                    }
                 });
                 
                 database.ref('scores').on('value', (snapshot) => {
@@ -262,13 +296,13 @@
                 });
                 
                 return () => {
-                    database.ref('teams').off();
+                    teamsRef.off();
                     database.ref('scores').off();
                     database.ref('eliminationOrder').off();
                     database.ref('winner').off();
                     database.ref('currentEpisode').off();
                 };
-            }, []);
+            }, [activeLeagueId]);
             
             // Calculate team scores
             const getTeamScore = (teamId) => {
@@ -395,7 +429,14 @@
                 h('div', { className: 'max-w-7xl mx-auto' },
                     // Header
                     h('div', { className: 'text-center mb-8' },
-                        h('div', { className: 'flex justify-center items-center gap-4 mb-4' },
+                        h('div', { className: 'flex justify-center items-center gap-3 mb-4 flex-wrap' },
+                            h('button', {
+                                onClick: () => setShowSideMenu(true),
+                                className: 'bg-orange-500 text-white px-4 py-2 rounded-lg hover:bg-orange-600 transition flex items-center gap-2 font-bold shadow-md'
+                            },
+                                h(Icons.Menu, { size: 20 }),
+                                h('span', {}, 'Leagues Menu')
+                            ),
                             h('a', {
                                 href: 'index.html?league=' + activeLeagueId,
                                 className: 'bg-white/90 backdrop-blur-md px-4 py-2 rounded-lg hover:bg-white transition flex items-center gap-2'
@@ -412,13 +453,17 @@
                             )
                         ),
                         h('h1', { 
-                            className: 'text-5xl md:text-7xl font-black mb-4 text-gray-900 drop-shadow-lg',
+                            className: 'text-5xl md:text-7xl font-black mb-2 text-gray-900 drop-shadow-lg',
                             style: { fontFamily: '"Bebas Neue", cursive' }
-                        }, '📊 SCORING TRACKER'),
+                        }, '📊 SURVIVOR 51 SCORING'),
                         h('p', { 
-                            className: 'text-xl md:text-2xl text-gray-800 font-semibold drop-shadow-md',
+                            className: 'text-xl md:text-2xl text-gray-800 font-semibold drop-shadow-md mb-3',
                             style: { fontFamily: '"Playfair Display", serif' }
-                        }, `Episode ${currentEpisode} • In the Hands of the Fans`)
+                        }, `Episode ${currentEpisode} • Open Era`),
+                        h('div', { className: 'inline-flex items-center gap-2 bg-orange-500 text-white font-bold px-4 py-1.5 rounded-full text-sm shadow-md' },
+                            h(Icons.Award, { size: 16 }),
+                            h('span', {}, currentLeagueConfig.name)
+                        )
                     ),
                     
                     // Action Buttons
@@ -1002,9 +1047,59 @@
                         )
                     ),
                     
+                    // Side Menu Drawer Overlay
+                    showSideMenu && h('div', {
+                        className: 'fixed inset-0 bg-black/60 backdrop-blur-sm z-50 flex justify-start transition-opacity',
+                        onClick: () => setShowSideMenu(false)
+                    },
+                        h('div', {
+                            className: 'bg-white w-80 max-w-[85vw] h-full shadow-2xl p-6 flex flex-col justify-between overflow-y-auto',
+                            onClick: (e) => e.stopPropagation()
+                        },
+                            h('div', {},
+                                h('div', { className: 'flex justify-between items-center mb-6 pb-4 border-b border-gray-100' },
+                                    h('div', { className: 'flex items-center gap-2' },
+                                        h(Icons.Trophy, { size: 24, className: 'text-orange-500' }),
+                                        h('h2', { className: 'text-xl font-black text-gray-900' }, 'Select League')
+                                    ),
+                                    h('button', {
+                                        onClick: () => setShowSideMenu(false),
+                                        className: 'p-2 rounded-full hover:bg-gray-100 text-gray-500'
+                                    }, h(Icons.X, { size: 20 }))
+                                ),
+                                h('div', { className: 'space-y-3' },
+                                    Object.values(LEAGUES_DATA).map(league => {
+                                        const isActive = league.id === activeLeagueId;
+                                        return h('button', {
+                                            key: league.id,
+                                            onClick: () => {
+                                                setShowSideMenu(false);
+                                                setActiveLeagueId(league.id);
+                                            },
+                                            className: `w-full text-left p-4 rounded-xl font-bold transition flex items-center justify-between ${
+                                                isActive 
+                                                    ? 'bg-orange-500 text-white shadow-md' 
+                                                    : 'bg-gray-100 text-gray-800 hover:bg-gray-200'
+                                            }`
+                                        },
+                                            h('div', {},
+                                                h('div', { className: 'font-extrabold text-base' }, league.name),
+                                                h('div', { className: `text-xs mt-1 ${isActive ? 'text-orange-100' : 'text-gray-500'}` }, `${league.teams.length} Teams`)
+                                            ),
+                                            isActive && h(Icons.Check, { size: 20 })
+                                        );
+                                    })
+                                )
+                            ),
+                            h('div', { className: 'pt-6 border-t border-gray-100 text-center text-xs text-gray-400 font-semibold' },
+                                'Survivor 51 Score Sheet'
+                            )
+                        )
+                    ),
+
                     // Footer
                     h('div', { className: 'mt-12 text-center text-gray-900' },
-                        h('p', { className: 'text-sm text-gray-700' }, 'Season Premiere: February 25, 2026 • Episode airs Wednesdays on CBS')
+                        h('p', { className: 'text-sm text-gray-700' }, 'Survivor 51: Open Era • Scoring Tracker & Leaderboard')
                     )
                 )
             );

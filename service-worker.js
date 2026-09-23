@@ -1,5 +1,5 @@
-// Service Worker for Survivor 50 Fantasy League
-const CACHE_NAME = 'survivor-50-v4';
+// Service Worker for Survivor 51 Fantasy League
+const CACHE_NAME = 'survivor-51-v6';
 const urlsToCache = [
     './',
     './index.html',
@@ -16,6 +16,7 @@ const urlsToCache = [
 
 // Install event
 self.addEventListener('install', (event) => {
+    self.skipWaiting();
     event.waitUntil(
         caches.open(CACHE_NAME)
             .then((cache) => cache.addAll(urlsToCache))
@@ -25,23 +26,35 @@ self.addEventListener('install', (event) => {
 // Activate event
 self.addEventListener('activate', (event) => {
     event.waitUntil(
-        caches.keys().then((cacheNames) => {
-            return Promise.all(
-                cacheNames.map((cacheName) => {
-                    if (cacheName !== CACHE_NAME) {
-                        return caches.delete(cacheName);
-                    }
-                })
-            );
-        })
+        Promise.all([
+            self.clients.claim(),
+            caches.keys().then((cacheNames) => {
+                return Promise.all(
+                    cacheNames.map((cacheName) => {
+                        if (cacheName !== CACHE_NAME) {
+                            return caches.delete(cacheName);
+                        }
+                    })
+                );
+            })
+        ])
     );
 });
 
-// Fetch event
+// Fetch event (Network first for scripts and HTML, cache fallback)
 self.addEventListener('fetch', (event) => {
     event.respondWith(
-        caches.match(event.request)
-            .then((response) => response || fetch(event.request))
+        fetch(event.request)
+            .then((response) => {
+                if (response && response.status === 200 && event.request.method === 'GET') {
+                    const responseToCache = response.clone();
+                    caches.open(CACHE_NAME).then((cache) => {
+                        cache.put(event.request, responseToCache);
+                    });
+                }
+                return response;
+            })
+            .catch(() => caches.match(event.request))
     );
 });
 
