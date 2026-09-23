@@ -446,20 +446,24 @@
                 return total;
             };
             
+            const isFinishedSeason = (seasonData && seasonData.status === 'finished') || (seasonConfig && seasonConfig.status === 'previous') || activeSeasonId === 'season-50';
+
             const getPlayerBreakdown = (playerId) => {
                 const playerScores = scores[playerId] || {};
                 const breakdown = [];
                 
-                Object.entries(playerScores).forEach(([episode, episodeScores]) => {
-                    Object.entries(episodeScores).forEach(([scoreId, score]) => {
+                Object.keys(playerScores).forEach(ep => {
+                    const episodeScores = playerScores[ep] || {};
+                    Object.keys(episodeScores).forEach(scoreId => {
+                        const score = episodeScores[scoreId];
                         breakdown.push({
-                            episode: parseInt(episode),
+                            episode: parseInt(ep),
+                            scoreId: scoreId,
+                            playerId: playerId,
                             category: score.category,
                             points: score.points,
                             note: score.note,
-                            scoreId: scoreId,
-                            playerId: playerId,
-                            canDelete: true
+                            canDelete: !isFinishedSeason
                         });
                     });
                 });
@@ -491,6 +495,7 @@
             
             // Delete a score entry
             const deleteScore = async (playerId, episode, scoreId) => {
+                if (isFinishedSeason) return;
                 if (!confirm('Are you sure you want to delete this score entry?')) {
                     return;
                 }
@@ -566,7 +571,7 @@
                     ),
                     
                     // Action Buttons
-                    h('div', { className: 'flex flex-wrap justify-center gap-4 mb-8' },
+                    !isFinishedSeason ? h('div', { className: 'flex flex-wrap justify-center gap-4 mb-8' },
                         h('button', {
                             onClick: () => setShowRules(true),
                             className: 'bg-white/95 backdrop-blur-md px-6 py-3 rounded-xl font-bold hover:shadow-lg transition flex items-center gap-2'
@@ -594,6 +599,17 @@
                         },
                             h(Icons.Trophy, { size: 20 }),
                             'Mark Winner'
+                        )
+                    ) : h('div', { className: 'flex flex-wrap justify-center gap-4 mb-8' },
+                        h('button', {
+                            onClick: () => setShowRules(true),
+                            className: 'bg-white/95 backdrop-blur-md px-6 py-3 rounded-xl font-bold hover:shadow-lg transition flex items-center gap-2'
+                        },
+                            h(Icons.Book, { size: 20 }),
+                            'View Rules'
+                        ),
+                        h('div', { className: 'bg-slate-900/90 text-amber-300 px-6 py-3 rounded-xl font-bold border border-amber-500/30 flex items-center gap-2 shadow-lg text-sm' },
+                            h('span', {}, '🔒 Season 50 Complete • Scores Final & Locked')
                         )
                     ),
                     
