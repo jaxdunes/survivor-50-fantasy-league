@@ -756,6 +756,22 @@
 
             const players = (seasonData && seasonData.contestants) ? seasonData.contestants : defaultPlayers;
 
+            const [draftState, setDraftState] = useState({});
+
+            // Load draftState from Firebase / localStorage
+            useEffect(() => {
+                if (!window.firebaseInitialized) {
+                    const savedDS = localStorage.getItem(`survivor-draftState-${activeLeagueId}-${activeSeasonId}`);
+                    if (savedDS) setDraftState(JSON.parse(savedDS));
+                    return;
+                }
+                const dsRef = database.ref(`leagues/${activeLeagueId}/seasons/${activeSeasonId}/draftState`);
+                dsRef.on('value', (snap) => {
+                    setDraftState(snap.val() || {});
+                });
+                return () => dsRef.off();
+            }, [activeLeagueId, activeSeasonId]);
+
             // Load data from Firebase
             useEffect(() => {
                 if (!window.firebaseInitialized) {
@@ -1090,6 +1106,7 @@
                                                 const breakdown = getPlayerBreakdown(player.id);
                                                 const isEliminated = eliminationOrder[player.id];
                                                 const isWinner = winner && parseInt(winner) === player.id;
+                                                const isBackfilled = draftState.backfilledPlayers && draftState.backfilledPlayers[player.id];
                                                 
                                                 return h('div', {
                                                     key: player.id,
@@ -1097,13 +1114,16 @@
                                                 },
                                                     h('div', { className: 'flex justify-between items-start mb-2' },
                                                         h('div', {},
-                                                            h('div', { className: 'font-bold text-gray-900' }, 
+                                                            h('div', { className: 'font-bold text-gray-900 flex items-center gap-1.5 flex-wrap' }, 
                                                                 player.name,
-                                                                isWinner && h('span', { className: 'ml-2 text-xs text-yellow-600 font-bold' }, 
+                                                                isWinner && h('span', { className: 'text-xs text-yellow-600 font-bold' }, 
                                                                     '👑 SOLE SURVIVOR'
                                                                 ),
-                                                                isEliminated && !isWinner && h('span', { className: 'ml-2 text-xs text-red-600' }, 
+                                                                isEliminated && !isWinner && h('span', { className: 'text-xs text-red-600 font-semibold' }, 
                                                                     `(Eliminated E${isEliminated})`
+                                                                ),
+                                                                isBackfilled && h('span', { className: 'text-[10px] bg-amber-400 text-amber-950 font-black px-1.5 py-0.5 rounded shadow-sm' }, 
+                                                                    '↩️ BACKFILLED'
                                                                 )
                                                             )
                                                         ),
@@ -1419,6 +1439,32 @@
                                                     );
                                                     if (isElimination) {
                                                         promises.push(database.ref(`${baseRef}/eliminationOrder/${playerId}`).set(parseInt(episode)));
+                                                        
+                                                        // Post-draft Auto-Backfill Engine
+                                                        promises.push(
+                                                            database.ref(`${baseRef}/draftState`).once('value').then(dsSnap => {
+                                                                const ds = dsSnap.val() || {};
+                                                                if (ds.status === 'finalized' && ds.backfillEnabled !== false) {
+                                                                    return database.ref(`${baseRef}/teams`).once('value').then(tSnap => {
+                                                                        const currentTeams = tSnap.val() || {};
+                                                                        const eliminatedTeamId = currentTeams[playerId];
+                                                                        if (eliminatedTeamId) {
+                                                                            const unassigned = players.filter(p => !currentTeams[p.id]).sort((a,b) => parseInt(a.id) - parseInt(b.id));
+                                                                            if (unassigned.length > 0) {
+                                                                                const backfillP = unassigned[0];
+                                                                                currentTeams[backfillP.id] = eliminatedTeamId;
+                                                                                ds.backfilledPlayers = ds.backfilledPlayers || {};
+                                                                                ds.backfilledPlayers[backfillP.id] = true;
+                                                                                return Promise.all([
+                                                                                    database.ref(`${baseRef}/teams`).set(currentTeams),
+                                                                                    database.ref(`${baseRef}/draftState`).set(ds)
+                                                                                ]);
+                                                                            }
+                                                                        }
+                                                                    });
+                                                                }
+                                                            })
+                                                        );
                                                     }
                                                     if (isWinner) {
                                                         promises.push(database.ref(`${baseRef}/winner`).set(parseInt(playerId)));
@@ -1437,7 +1483,7 @@
                                                     
                                                     const leagueNames = selectedAddScoreLeagues.map(id => (LEAGUES_DATA[id] || {}).name || id).join(', ');
                                                     let msg = `Points added successfully to: ${leagueNames}! 🎉`;
-                                                    if (isElimination) msg += ' (Player marked as eliminated)';
+                                                    if (isElimination) msg += ' (Player marked as eliminated & lowest Cast ID backfilled!)';
                                                     if (isWinner) msg += ' (Player marked as Sole Survivor!)';
                                                     alert(msg);
                                                 });

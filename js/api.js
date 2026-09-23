@@ -129,4 +129,26 @@ class SurvivorAPI {
         await this.db.ref(`episodeScores/episode-${episodeNum}`).set(scoresData);
         return true;
     }
+
+    /**
+     * Subscribe to real-time draftState updates
+     */
+    subscribeDraftState(leagueId, seasonId, callback) {
+        if (!this.db) return () => {};
+        const ref = this.db.ref(`leagues/${leagueId}/seasons/${seasonId}/draftState`);
+        const listener = ref.on('value', snap => {
+            callback(snap.val() || null);
+        });
+        return () => ref.off('value', listener);
+    }
+
+    /**
+     * Update draftState object in database
+     */
+    async updateDraftState(leagueId, seasonId, draftState) {
+        if (!this.db) return false;
+        await this.db.ref(`leagues/${leagueId}/seasons/${seasonId}/draftState`).set(draftState);
+        return true;
+    }
 }
+

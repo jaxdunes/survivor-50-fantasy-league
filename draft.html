@@ -373,7 +373,15 @@
             Check: createIcon('<polyline points="20 6 9 17 4 12"></polyline>'),
             Wifi: createIcon('<path d="M5 13a10 10 0 0 1 14 0"></path><path d="M8.5 16.5a5 5 0 0 1 7 0"></path><path d="M2 8.82a15 15 0 0 1 20 0"></path><circle cx="12" cy="20" r="1"></circle>'),
             WifiOff: createIcon('<line x1="2" y1="2" x2="22" y2="22"></line><path d="M8.5 16.5a5 5 0 0 1 7 0"></path><path d="M2 8.82a15 15 0 0 1 4.17-2.65"></path><path d="M10.66 5c4.01-.36 8.14.9 11.34 3.76"></path><path d="M16.85 11.25a10 10 0 0 1 2.22 1.68"></path><path d="M5 13a10 10 0 0 1 5.24-2.76"></path><circle cx="12" cy="20" r="1"></circle>'),
-            Menu: createIcon('<line x1="4" x2="20" y1="12" y2="12"></line><line x1="4" x2="20" y1="6" y2="6"></line><line x1="4" x2="20" y1="18" y2="18"></line>')
+            Menu: createIcon('<line x1="4" x2="20" y1="12" y2="12"></line><line x1="4" x2="20" y1="6" y2="6"></line><line x1="4" x2="20" y1="18" y2="18"></line>'),
+            Settings: createIcon('<path d="M12.22 2h-.44a2 2 0 0 0-2 2v.18a2 2 0 0 1-1 1.73l-.43.25a2 2 0 0 1-2 0l-.15-.08a2 2 0 0 0-2.73.73l-.22.38a2 2 0 0 0 .73 2.73l.15.1a2 2 0 0 1 1 1.72v.51a2 2 0 0 1-1 1.74l-.15.09a2 2 0 0 0-.73 2.73l.22.38a2 2 0 0 0 2.73.73l.15-.08a2 2 0 0 1 2 0l.43.25a2 2 0 0 1 1 1.73V20a2 2 0 0 0 2 2h.44a2 2 0 0 0 2-2v-.18a2 2 0 0 1 1-1.73l.43-.25a2 2 0 0 1 2 0l.15.08a2 2 0 0 0 2.73-.73l.22-.38a2 2 0 0 0-.73-2.73l-.15-.08a2 2 0 0 1-1-1.74v-.5a2 2 0 0 1 1-1.74l.15-.09a2 2 0 0 0 .73-2.73l-.22-.38a2 2 0 0 0-2.73-.73l-.15.08a2 2 0 0 1-2 0l-.43-.25a2 2 0 0 1-1-1.73V4a2 2 0 0 0-2-2z"></path><circle cx="12" cy="12" r="3"></circle>'),
+            Clock: createIcon('<circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline>'),
+            Flame: createIcon('<path d="M8.5 14.5A2.5 2.5 0 0 0 11 12c0-1.38-.5-2-1-3-1.072-2.143-.224-4.054 2-6 .5 2.5 2 4.9 4 6.5 2 1.6 3 3.5 3 5.5a7 7 0 1 1-14 0c0-1.153.433-2.294 1-3a2.5 2.5 0 0 0 2.5 3z"></path>'),
+            Lock: createIcon('<rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect><path d="M7 11V7a5 5 0 0 1 10 0v4"></path>'),
+            AlertTriangle: createIcon('<path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3Z"></path><line x1="12" y1="9" x2="12" y2="13"></line><line x1="12" y1="17" x2="12.01" y2="17"></line>'),
+            RotateCcw: createIcon('<path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"></path><path d="M3 3v5h5"></path>'),
+            ArrowLeft: createIcon('<line x1="19" y1="12" x2="5" y2="12"></line><polyline points="12 19 5 12 12 5"></polyline>'),
+            DollarSign: createIcon('<line x1="12" y1="1" x2="12" y2="23"></line><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"></path>')
         };
         
         function SurvivorFantasyLeague() {
@@ -396,6 +404,28 @@
             const [connected, setConnected] = useState(window.firebaseInitialized);
             const [theme, setTheme] = useState(() => localStorage.getItem('survivor_theme') || 'tribal');
 
+            // Draft Upgrade State Machine & Settings
+            const [draftState, setDraftState] = useState({
+                status: 'closed',
+                style: 'snake',
+                orderType: 'random',
+                backfillEnabled: true,
+                currentRound: 1,
+                currentPick: 1,
+                lastPickTimestamp: Date.now(),
+                onTheClockTeamId: null,
+                orderSequence: [],
+                budgets: {},
+                backfilledPlayers: {}
+            });
+            const [showSettingsModal, setShowSettingsModal] = useState(false);
+            const [showSafetyResetModal, setShowSafetyResetModal] = useState(false);
+            const [showAuctionModal, setShowAuctionModal] = useState(false);
+            const [auctionNominatedPlayerId, setAuctionNominatedPlayerId] = useState(null);
+            const [auctionBid, setAuctionBid] = useState(1);
+            const [auctionHighBidder, setAuctionHighBidder] = useState(null);
+            const [elapsedSeconds, setElapsedSeconds] = useState(0);
+
             useEffect(() => {
                 document.body.classList.toggle('theme-tribal', theme === 'tribal');
             }, [theme]);
@@ -410,7 +440,83 @@
 
             const isFinishedSeason = (seasonData && seasonData.status === 'finished') || (seasonConfig && seasonConfig.status === 'previous') || activeSeasonId === 'season-50';
 
-            // Firebase real-time sync per league & season
+            // Firebase real-time sync for draftState
+            useEffect(() => {
+                if (!window.firebaseInitialized) {
+                    const saved = localStorage.getItem(`survivor-draftState-${activeLeagueId}-${activeSeasonId}`);
+                    if (saved) {
+                        setDraftState(JSON.parse(saved));
+                    } else {
+                        const initialOrder = teams.map(t => t.id);
+                        const initialBudgets = teams.reduce((acc, t) => ({ ...acc, [t.id]: 100 }), {});
+                        setDraftState({
+                            status: 'closed',
+                            style: 'snake',
+                            orderType: 'random',
+                            backfillEnabled: true,
+                            currentRound: 1,
+                            currentPick: 1,
+                            lastPickTimestamp: Date.now(),
+                            onTheClockTeamId: initialOrder[0] || null,
+                            orderSequence: initialOrder,
+                            budgets: initialBudgets,
+                            backfilledPlayers: {}
+                        });
+                    }
+                    return;
+                }
+                const unsubscribe = api.subscribeDraftState(activeLeagueId, activeSeasonId, (data) => {
+                    if (data) {
+                        setDraftState(data);
+                    } else {
+                        const initialOrder = teams.map(t => t.id);
+                        const initialBudgets = teams.reduce((acc, t) => ({ ...acc, [t.id]: 100 }), {});
+                        const initial = {
+                            status: 'closed',
+                            style: 'snake',
+                            orderType: 'random',
+                            backfillEnabled: true,
+                            currentRound: 1,
+                            currentPick: 1,
+                            lastPickTimestamp: Date.now(),
+                            onTheClockTeamId: initialOrder[0] || null,
+                            orderSequence: initialOrder,
+                            budgets: initialBudgets,
+                            backfilledPlayers: {}
+                        };
+                        setDraftState(initial);
+                        api.updateDraftState(activeLeagueId, activeSeasonId, initial);
+                    }
+                });
+                return () => unsubscribe();
+            }, [activeLeagueId, activeSeasonId, teams]);
+
+            const updateDraftStateFB = (newState) => {
+                setDraftState(newState);
+                if (window.firebaseInitialized) {
+                    api.updateDraftState(activeLeagueId, activeSeasonId, newState);
+                } else {
+                    localStorage.setItem(`survivor-draftState-${activeLeagueId}-${activeSeasonId}`, JSON.stringify(newState));
+                }
+            };
+
+            // Live Pick Timer Interval
+            useEffect(() => {
+                if (draftState.status !== 'open' || !draftState.lastPickTimestamp) {
+                    setElapsedSeconds(0);
+                    return;
+                }
+                const updateTimer = () => {
+                    const now = Date.now();
+                    const diff = Math.max(0, Math.floor((now - draftState.lastPickTimestamp) / 1000));
+                    setElapsedSeconds(diff);
+                };
+                updateTimer();
+                const interval = setInterval(updateTimer, 1000);
+                return () => clearInterval(interval);
+            }, [draftState.status, draftState.lastPickTimestamp]);
+
+            // Firebase real-time sync per league & season for teams
             useEffect(() => {
                 if (!window.firebaseInitialized) {
                     const saved = localStorage.getItem(`survivor-teams-${activeLeagueId}-${activeSeasonId}`);
@@ -451,6 +557,7 @@
                     localStorage.setItem(`survivor-teams-${activeLeagueId}-${activeSeasonId}`, JSON.stringify(newTeams));
                 }
             };
+
             
             const defaultPlayers = [
                 // CILA TRIBE
@@ -486,7 +593,47 @@
 
             const players = (seasonData && seasonData.contestants) ? seasonData.contestants : defaultPlayers;
             
+            const calculatePreviousSeasonOrder = () => {
+                const season50Scores = {
+                    'austin': { points: 150, immunities: 2 },
+                    'sandra': { points: 210, immunities: 1 },
+                    'ashlynn': { points: 180, immunities: 0 },
+                    'jackson-ray': { points: 290, immunities: 4 },
+                    'maura': { points: 120, immunities: 1 },
+                    'ryan-jordan': { points: 340, immunities: 5 },
+                    'ryan': { points: 220, immunities: 3 },
+                    'jordan': { points: 310, immunities: 4 },
+                    'scott': { points: 140, immunities: 1 },
+                    'hayley': { points: 190, immunities: 2 }
+                };
+
+                const mappedTeams = teams.map(t => {
+                    const sc = season50Scores[t.id] || { points: 0, immunities: 0, newManager: true };
+                    return { id: t.id, name: t.name, points: sc.points, immunities: sc.immunities, isNew: !!sc.newManager };
+                });
+
+                const returning = mappedTeams.filter(t => !t.isNew);
+                const newManagers = mappedTeams.filter(t => t.isNew);
+
+                returning.sort((a, b) => {
+                    if (a.points !== b.points) return a.points - b.points;
+                    return b.immunities - a.immunities;
+                });
+
+                const shuffledNew = [...newManagers].sort(() => 0.5 - Math.random());
+                return [...returning, ...shuffledNew].map(t => t.id);
+            };
+
             const assignPlayer = (playerId, teamId) => {
+                if (draftState.status === 'closed') {
+                    alert('Draft is currently Closed! Click "Begin Draft" to start picking.');
+                    return;
+                }
+                if (draftState.status === 'finalized') {
+                    alert('Draft has been Finalized and locked!');
+                    return;
+                }
+
                 const teamRoster = players.filter(p => playerTeams[p.id] === teamId);
                 if (teamRoster.length >= 4) {
                     alert('This team already has 4 players! Maximum team size is 4.');
@@ -496,23 +643,120 @@
                 const newTeams = { ...playerTeams, [playerId]: teamId };
                 setPlayerTeams(newTeams);
                 updateFirebase(newTeams);
+
+                // Advance pick & round
+                const totalAssigned = Object.keys(newTeams).length;
+                const totalCapacity = teams.length * 4;
+                const newRound = Math.floor(totalAssigned / teams.length) + 1;
+                const pickInRoundIndex = totalAssigned % teams.length;
+                
+                const seq = draftState.orderSequence && draftState.orderSequence.length > 0 
+                    ? draftState.orderSequence 
+                    : teams.map(t => t.id);
+                
+                let currentSeq = seq;
+                if (draftState.style === 'snake' && newRound % 2 === 0) {
+                    currentSeq = [...seq].reverse();
+                }
+                const nextOnClock = currentSeq[pickInRoundIndex] || currentSeq[0];
+
+                let nextStatus = draftState.status;
+                if (totalAssigned >= totalCapacity || totalAssigned >= players.length) {
+                    nextStatus = 'finalized';
+                }
+
+                const updatedState = {
+                    ...draftState,
+                    status: nextStatus,
+                    currentPick: totalAssigned + 1,
+                    currentRound: newRound,
+                    lastPickTimestamp: Date.now(),
+                    onTheClockTeamId: nextOnClock
+                };
+                updateDraftStateFB(updatedState);
+
                 setShowTeamModal(false);
                 setPlayerToAssign(null);
             };
-            
+
+            const handleBeginDraft = () => {
+                let seq = draftState.orderSequence;
+                if (!seq || seq.length === 0) {
+                    if (draftState.orderType === 'previous') {
+                        seq = calculatePreviousSeasonOrder() || [...teams.map(t => t.id)].sort(() => 0.5 - Math.random());
+                    } else {
+                        seq = [...teams.map(t => t.id)].sort(() => 0.5 - Math.random());
+                    }
+                }
+                const initialBudgets = teams.reduce((acc, t) => ({ ...acc, [t.id]: 100 }), {});
+                const updated = {
+                    ...draftState,
+                    status: 'open',
+                    orderSequence: seq,
+                    onTheClockTeamId: seq[0] || null,
+                    lastPickTimestamp: Date.now(),
+                    budgets: draftState.budgets && Object.keys(draftState.budgets).length > 0 ? draftState.budgets : initialBudgets
+                };
+                updateDraftStateFB(updated);
+            };
+
+            const handleCloseDraft = () => {
+                updateDraftStateFB({
+                    ...draftState,
+                    status: 'closed'
+                });
+            };
+
+            const handleFinalizeDraft = () => {
+                updateDraftStateFB({
+                    ...draftState,
+                    status: 'finalized'
+                });
+            };
+
+            const handleOpenSettings = () => {
+                const picksCount = Object.keys(playerTeams).length;
+                if (draftState.status === 'open' && picksCount > 0) {
+                    setShowSafetyResetModal(true);
+                } else {
+                    setShowSettingsModal(true);
+                }
+            };
+
+            const handleResetDraft = () => {
+                let seq = draftState.orderSequence;
+                if (!seq || seq.length === 0) {
+                    seq = teams.map(t => t.id);
+                }
+                const initialBudgets = teams.reduce((acc, t) => ({ ...acc, [t.id]: 100 }), {});
+                const resetState = {
+                    ...draftState,
+                    status: 'closed',
+                    currentRound: 1,
+                    currentPick: 1,
+                    lastPickTimestamp: Date.now(),
+                    onTheClockTeamId: seq[0] || null,
+                    budgets: initialBudgets,
+                    backfilledPlayers: {}
+                };
+                setPlayerTeams({});
+                updateFirebase({});
+                updateDraftStateFB(resetState);
+                setShowSafetyResetModal(false);
+                setShowSettingsModal(true);
+            };
+
             const removePlayer = (playerId) => {
                 if (window.firebaseInitialized) {
-                    // For Firebase, set to null to properly delete
-                    database.ref(`teams/${playerId}`).set(null);
+                    database.ref(`leagues/${activeLeagueId}/seasons/${activeSeasonId}/teams/${playerId}`).set(null);
                 }
                 
                 const newTeams = { ...playerTeams };
                 delete newTeams[playerId];
                 setPlayerTeams(newTeams);
                 
-                // Also update localStorage as backup
                 if (!window.firebaseInitialized) {
-                    localStorage.setItem('survivor50-teams', JSON.stringify(newTeams));
+                    localStorage.setItem(`survivor-teams-${activeLeagueId}-${activeSeasonId}`, JSON.stringify(newTeams));
                 }
             };
             
@@ -524,6 +768,12 @@
             const openTeamModal = (playerId) => {
                 setPlayerToAssign(playerId);
                 setShowTeamModal(true);
+            };
+
+            const formatTimer = (totalSecs) => {
+                const mins = Math.floor(totalSecs / 60);
+                const secs = totalSecs % 60;
+                return `${mins}:${secs < 10 ? '0' : ''}${secs}`;
             };
             
             const filteredPlayers = useMemo(() => {
@@ -567,6 +817,9 @@
             
             const PlayerCard = ({ player }) => {
                 const assignedTeam = playerTeams[player.id] ? teams.find(t => t.id === playerTeams[player.id]) : null;
+                const isBackfilled = draftState.backfilledPlayers && draftState.backfilledPlayers[player.id];
+                const isOnClock = draftState.status === 'open' && draftState.onTheClockTeamId;
+                const canAssign = draftState.status === 'open' && !assignedTeam;
                 
                 return h('div', { 
                     className: 'bg-white rounded-2xl shadow-lg overflow-hidden hover:shadow-xl transition-all duration-300 border-2 border-gray-100'
@@ -577,11 +830,12 @@
                             alt: player.name,
                             className: 'absolute top-2 right-2 w-20 h-20 rounded-full border-3 border-white shadow-lg object-cover'
                         }),
-                        h('div', { className: 'flex justify-between items-start mb-2' },
+                        h('div', { className: 'flex justify-between items-start mb-2 flex-wrap gap-1' },
                             assignedTeam ? 
                                 h('div', { className: `px-3 py-1 rounded-full text-xs font-bold flex items-center gap-1 bg-gradient-to-r ${assignedTeam.color} text-white shadow-lg` },
                                     h(Icons.Check, { size: 12 }),
-                                    ` ${assignedTeam.name}`
+                                    ` ${assignedTeam.name}`,
+                                    isBackfilled && h('span', { className: 'ml-1 bg-amber-400 text-amber-950 px-1.5 py-0.5 rounded text-[10px] font-black' }, '↩️ BACKFILLED')
                                 ) :
                                 h('div', { className: 'bg-yellow-500 text-yellow-900 px-3 py-1 rounded-full text-xs font-bold' }, 'UNASSIGNED')
                         ),
@@ -605,31 +859,24 @@
                             h('div', { className: 'text-xs font-bold text-gray-500 mb-1' }, 'HOMETOWN'),
                             h('div', { className: 'text-sm font-semibold text-gray-800' }, player.hometown)
                         ),
-                        player.seasons && player.seasons.length > 0 && activeSeasonId === 'season-50' && h('div', { className: 'mb-3' },
-                            h('div', { className: 'text-xs font-bold text-gray-500 mb-1' }, 'SEASONS'),
-                            h('div', { className: 'text-sm text-gray-700' }, player.seasons.join(', '))
-                        ),
-                        player.placement && activeSeasonId === 'season-50' && h('div', { className: 'mb-3' },
-                            h('div', { className: 'text-xs font-bold text-gray-500 mb-1' }, 'BEST PLACEMENT'),
-                            h('div', { className: `text-sm font-bold ${player.placement.includes('WINNER') ? 'text-yellow-600' : 'text-gray-700'}` }, player.placement)
-                        ),
                         player.note && h('div', { className: 'mb-4' },
                             h('div', { className: 'text-xs text-gray-600 italic' }, `"${player.note}"`)
                         ),
                         h('div', { className: 'flex gap-2' },
                             assignedTeam ?
-                                h('button', {
+                                (draftState.status !== 'finalized' && h('button', {
                                     onClick: () => removePlayer(player.id),
                                     className: 'w-full px-4 py-2 bg-red-500 text-white rounded-lg font-bold hover:bg-red-600 transition text-sm'
-                                }, 'Remove') :
-                                h('button', {
+                                }, 'Remove')) :
+                                (canAssign ? h('button', {
                                     onClick: () => openTeamModal(player.id),
-                                    className: 'w-full px-4 py-2 bg-gradient-to-r from-orange-500 to-amber-600 text-white rounded-lg font-bold hover:shadow-lg transition text-sm'
-                                }, 'Assign')
+                                    className: 'w-full px-4 py-2 bg-gradient-to-r from-orange-500 to-amber-600 text-white rounded-lg font-bold hover:shadow-lg transition text-sm flex items-center justify-center gap-1.5'
+                                }, h(Icons.Flame, { size: 16 }), 'Draft Player') : null)
                         )
                     )
                 );
             };
+
             
             return h('div', { className: 'min-h-screen grey-ombre-bg p-4 md:p-8' },
                 h('div', { className: 'max-w-7xl mx-auto' },
@@ -683,6 +930,37 @@
                                 h('span', { className: `w-2 h-2 rounded-full ${isFinishedSeason ? 'bg-amber-400' : 'bg-emerald-200 animate-pulse'}` }),
                                 h('span', {}, isFinishedSeason ? 'Finished' : 'Active')
                             )
+                        ),
+                        h('div', { className: 'flex justify-center items-center gap-3 flex-wrap mb-4' },
+                            // State Pill & Actions
+                            h('div', { className: 'flex items-center gap-2 bg-white/90 backdrop-blur-md px-4 py-2 rounded-xl shadow-lg border border-gray-200' },
+                                h('span', { className: 'text-xs font-bold uppercase tracking-wider text-gray-500' }, 'Draft Status:'),
+                                h('span', { className: `px-2.5 py-0.5 rounded-full text-xs font-black uppercase ${
+                                    draftState.status === 'open' ? 'bg-emerald-500 text-white animate-pulse' :
+                                    draftState.status === 'finalized' ? 'bg-purple-600 text-white' :
+                                    'bg-amber-500 text-white'
+                                }` }, draftState.status)
+                            ),
+
+                            draftState.status === 'closed' && h('button', {
+                                onClick: handleBeginDraft,
+                                className: 'px-5 py-2 bg-gradient-to-r from-orange-500 to-amber-600 text-white font-black rounded-xl shadow-lg hover:shadow-xl transition transform hover:-translate-y-0.5 flex items-center gap-2 cursor-pointer'
+                            }, h(Icons.Flame, { size: 18 }), '🔥 Begin Draft'),
+
+                            draftState.status === 'open' && h(Fragment, {},
+                                h('button', {
+                                    onClick: handleCloseDraft,
+                                    className: 'px-4 py-2 bg-rose-600 text-white font-bold rounded-xl shadow-md hover:bg-rose-700 transition flex items-center gap-1.5 cursor-pointer text-xs'
+                                }, h(Icons.X, { size: 16 }), '🔴 Close Draft'),
+                                h('button', {
+                                    onClick: handleFinalizeDraft,
+                                    className: 'px-4 py-2 bg-emerald-600 text-white font-bold rounded-xl shadow-md hover:bg-emerald-700 transition flex items-center gap-1.5 cursor-pointer text-xs'
+                                }, h(Icons.Check, { size: 16 }), '✅ Finalize Draft')
+                            ),
+
+                            draftState.status === 'finalized' && h('div', { className: 'px-4 py-2 bg-slate-900 text-amber-300 font-bold rounded-xl border border-amber-500/40 text-xs flex items-center gap-1.5' },
+                                h(Icons.Lock, { size: 16 }), 'Draft Finalized & Locked'
+                            )
                         )
                     ),
                     
@@ -711,19 +989,78 @@
                         )
                     ),
                     
-                    // View Toggle
-                    h('div', { className: 'flex justify-center mb-6' },
-                        h('div', { className: 'bg-white/95 backdrop-blur-md rounded-xl p-2 flex gap-2' },
+                    // View Toggle & Draft Settings Cog Button
+                    h('div', { className: 'flex justify-center items-center gap-3 mb-6 flex-wrap' },
+                        h('div', { className: 'bg-white/95 backdrop-blur-md rounded-xl p-2 flex gap-2 shadow-md' },
                             h('button', {
                                 onClick: () => setViewMode('players'),
-                                className: `px-6 py-2 rounded-lg font-bold transition ${viewMode === 'players' ? 'bg-gradient-to-r from-orange-500 to-amber-600 text-white' : 'text-gray-700 hover:bg-gray-100'}`
+                                className: `px-6 py-2 rounded-lg font-bold transition ${viewMode === 'players' ? 'bg-gradient-to-r from-orange-500 to-amber-600 text-white shadow-sm' : 'text-gray-700 hover:bg-gray-100'}`
                             }, 'Player View'),
                             h('button', {
                                 onClick: () => setViewMode('rosters'),
-                                className: `px-6 py-2 rounded-lg font-bold transition ${viewMode === 'rosters' ? 'bg-gradient-to-r from-orange-500 to-amber-600 text-white' : 'text-gray-700 hover:bg-gray-100'}`
+                                className: `px-6 py-2 rounded-lg font-bold transition ${viewMode === 'rosters' ? 'bg-gradient-to-r from-orange-500 to-amber-600 text-white shadow-sm' : 'text-gray-700 hover:bg-gray-100'}`
                             }, 'Team Rosters')
+                        ),
+                        h('button', {
+                            onClick: handleOpenSettings,
+                            className: 'px-4 py-2.5 bg-slate-800 text-amber-400 hover:bg-slate-700 font-bold rounded-xl shadow-lg transition flex items-center gap-2 cursor-pointer border border-amber-500/30 text-sm',
+                            title: 'Draft Settings'
+                        },
+                            h(Icons.Settings, { size: 18 }),
+                            h('span', {}, 'Draft Settings')
                         )
                     ),
+
+                    // Draft Order Bar & Live Pick Timer (Shown when Draft is OPEN)
+                    draftState.status === 'open' && h('div', { className: 'bg-gradient-to-r from-slate-900 via-slate-800 to-slate-900 text-white p-5 rounded-2xl shadow-2xl mb-8 border border-orange-500/40 relative overflow-hidden' },
+                        h('div', { className: 'flex flex-col md:flex-row justify-between items-center gap-4 mb-4 pb-3 border-b border-slate-700/60' },
+                            h('div', { className: 'flex items-center gap-3' },
+                                h('div', { className: 'bg-orange-500 text-white font-black px-3.5 py-1 rounded-xl text-sm shadow' },
+                                    `Round ${draftState.currentRound || 1}`
+                                ),
+                                h('div', { className: 'text-amber-300 font-extrabold text-sm tracking-wide' },
+                                    `Pick ${((stats.assigned) % teams.length) + 1} of ${teams.length} (Overall #${stats.assigned + 1})`
+                                ),
+                                h('div', { className: 'text-xs text-slate-400 font-bold bg-slate-800 px-2.5 py-1 rounded-lg uppercase tracking-wider border border-slate-700' },
+                                    `${draftState.style || 'snake'} draft`
+                                )
+                            ),
+                            // Live Pick Timer (⏱️ MM:SS)
+                            h('div', { className: 'flex items-center gap-2 bg-slate-950/80 px-4 py-1.5 rounded-xl border border-amber-500/50 shadow-inner' },
+                                h(Icons.Clock, { size: 18, className: 'text-amber-400 animate-pulse' }),
+                                h('span', { className: 'text-xs font-bold text-slate-300' }, 'Clock:'),
+                                h('span', { className: 'text-base font-black text-amber-300 font-mono tracking-wider' }, `⏱️ ${formatTimer(elapsedSeconds)}`)
+                            )
+                        ),
+
+                        // On-the-Clock Team Banner
+                        h('div', { className: 'mb-4 text-center' },
+                            h('span', { className: 'text-xs text-slate-400 font-extrabold uppercase tracking-widest mr-2' }, 'On the Clock:'),
+                            h('span', { className: 'text-xl font-black text-amber-400 drop-shadow-md animate-pulse' },
+                                (teams.find(t => t.id === draftState.onTheClockTeamId) || {}).name || draftState.onTheClockTeamId || 'Waiting...'
+                            )
+                        ),
+
+                        // Horizontal Sequence of Teams
+                        h('div', { className: 'flex items-center gap-3 overflow-x-auto pb-2 scrollbar-none justify-start md:justify-center' },
+                            ...(draftState.orderSequence && draftState.orderSequence.length > 0 ? draftState.orderSequence : teams.map(t => t.id)).map((tId, idx) => {
+                                const teamObj = teams.find(t => t.id === tId) || { name: tId, color: 'from-amber-500 to-orange-600' };
+                                const isOnClock = tId === draftState.onTheClockTeamId;
+                                return h('div', {
+                                    key: tId + '-' + idx,
+                                    className: `flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-bold transition transform ${
+                                        isOnClock 
+                                            ? 'bg-gradient-to-r from-orange-500 to-amber-500 text-white ring-4 ring-orange-400/60 scale-105 shadow-xl animate-bounce' 
+                                            : 'bg-slate-800 text-slate-300 opacity-70 border border-slate-700'
+                                    }`
+                                },
+                                    h('span', { className: 'text-[10px] opacity-75 font-mono' }, `#${idx + 1}`),
+                                    h('span', { className: 'font-black' }, teamObj.name)
+                                );
+                            })
+                        )
+                    ),
+
                     
                     viewMode === 'players' ? 
                         h(Fragment, {},
@@ -816,6 +1153,205 @@
                             })
                         ),
                     
+                    // Draft Settings Modal
+                    showSettingsModal && h('div', { 
+                        className: 'modal-backdrop',
+                        onClick: () => setShowSettingsModal(false)
+                    },
+                        h('div', { 
+                            className: 'modal-content max-w-2xl bg-slate-900 text-white rounded-2xl border border-slate-700 shadow-2xl p-6 md:p-8',
+                            onClick: (e) => e.stopPropagation()
+                        },
+                            h('div', { className: 'flex justify-between items-center mb-6 pb-4 border-b border-slate-800' },
+                                h('div', { className: 'flex items-center gap-3' },
+                                    h('div', { className: 'p-2.5 rounded-xl bg-orange-500/20 text-orange-400 border border-orange-500/30' },
+                                        h(Icons.Settings, { size: 24 })
+                                    ),
+                                    h('div', {},
+                                        h('h2', { className: 'text-2xl font-black text-white' }, 'Draft Settings'),
+                                        h('p', { className: 'text-xs text-slate-400 font-semibold' }, 'Configure draft order, draft style, and backfill automation')
+                                    )
+                                ),
+                                h('button', {
+                                    onClick: () => setShowSettingsModal(false),
+                                    className: 'p-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-400 hover:text-white transition cursor-pointer'
+                                }, h(Icons.X, { size: 20 }))
+                            ),
+
+                            h('div', { className: 'space-y-6 max-h-[70vh] overflow-y-auto pr-1' },
+                                // 1. DRAFT ORDER
+                                h('div', { className: 'bg-slate-800/60 p-5 rounded-2xl border border-slate-700/60' },
+                                    h('h3', { className: 'text-sm font-extrabold uppercase tracking-wider text-amber-400 mb-3' }, '1. Draft Order'),
+                                    h('div', { className: 'space-y-3' },
+                                        // Random Option
+                                        h('label', { className: `block p-4 rounded-xl border-2 transition cursor-pointer ${
+                                            (draftState.orderType || 'random') === 'random'
+                                                ? 'bg-slate-800 border-orange-500 text-white ring-1 ring-orange-500/30'
+                                                : 'bg-slate-900/60 border-slate-700 text-slate-300 hover:bg-slate-800/50'
+                                        }` },
+                                            h('div', { className: 'flex items-start gap-3' },
+                                                h('input', {
+                                                    type: 'radio',
+                                                    name: 'draftOrder',
+                                                    checked: (draftState.orderType || 'random') === 'random',
+                                                    onChange: () => {
+                                                        const newSeq = [...teams.map(t => t.id)].sort(() => 0.5 - Math.random());
+                                                        updateDraftStateFB({
+                                                            ...draftState,
+                                                            orderType: 'random',
+                                                            orderSequence: newSeq,
+                                                            onTheClockTeamId: newSeq[0] || null
+                                                        });
+                                                    },
+                                                    className: 'mt-1 accent-orange-500'
+                                                }),
+                                                h('div', {},
+                                                    h('div', { className: 'font-bold text-sm text-white' }, '🎲 Random Order (Default)'),
+                                                    h('div', { className: 'text-xs text-slate-400 mt-1' }, 'Managers are placed in a completely random draft order.')
+                                                )
+                                            )
+                                        ),
+
+                                        // Based on Previous Option
+                                        (() => {
+                                            const hasPrevSeason = (currentLeagueConfig.seasons && currentLeagueConfig.seasons.length > 1) || activeLeagueId === 'jackson-ryan-league';
+                                            return h('label', { className: `block p-4 rounded-xl border-2 transition ${
+                                                !hasPrevSeason 
+                                                    ? 'opacity-50 cursor-not-allowed bg-slate-900/30 border-slate-800' 
+                                                    : (draftState.orderType === 'previous'
+                                                        ? 'bg-slate-800 border-orange-500 text-white ring-1 ring-orange-500/30 cursor-pointer'
+                                                        : 'bg-slate-900/60 border-slate-700 text-slate-300 hover:bg-slate-800/50 cursor-pointer')
+                                            }` },
+                                                h('div', { className: 'flex items-start gap-3' },
+                                                    h('input', {
+                                                        type: 'radio',
+                                                        name: 'draftOrder',
+                                                        disabled: !hasPrevSeason,
+                                                        checked: draftState.orderType === 'previous',
+                                                        onChange: () => {
+                                                            if (!hasPrevSeason) return;
+                                                            const newSeq = calculatePreviousSeasonOrder() || teams.map(t => t.id);
+                                                            updateDraftStateFB({
+                                                                ...draftState,
+                                                                orderType: 'previous',
+                                                                orderSequence: newSeq,
+                                                                onTheClockTeamId: newSeq[0] || null
+                                                            });
+                                                        },
+                                                        className: 'mt-1 accent-orange-500'
+                                                    }),
+                                                    h('div', {},
+                                                        h('div', { className: 'font-bold text-sm text-white' }, '📜 Based on Previous Season (Reverse Standings)'),
+                                                        h('div', { className: 'text-xs text-slate-400 mt-1' }, 'Draft order goes from lowest to highest points from previous season. Ties broken by total individual immunities won by roster players in that season. New managers placed randomly behind returning managers.'),
+                                                        !hasPrevSeason && h('div', { className: 'text-xs font-bold text-rose-400 mt-2 bg-rose-950/40 p-2 rounded-lg border border-rose-800/50' },
+                                                            '⚠️ Based on Previous - Must Have Played More Than One Season to Enable This'
+                                                        )
+                                                    )
+                                                )
+                                            );
+                                        })()
+                                    )
+                                ),
+
+                                // 2. DRAFT STYLE
+                                h('div', { className: 'bg-slate-800/60 p-5 rounded-2xl border border-slate-700/60' },
+                                    h('h3', { className: 'text-sm font-extrabold uppercase tracking-wider text-amber-400 mb-3' }, '2. Draft Style Selection'),
+                                    h('div', { className: 'grid md:grid-cols-2 gap-3' },
+                                        [
+                                            { id: 'linear', title: '🔄 Linear Draft', desc: 'Order remains constant every round (1➔2➔3➔4, 1➔2➔3➔4).' },
+                                            { id: 'snake', title: '🐍 Snake Draft (Default)', desc: 'Order reverses every alternating round (1➔2➔3➔4, 4➔3➔2➔1).' },
+                                            { id: 'auction', title: '🔨 Auction Draft', desc: 'Each manager bids from a virtual $100 budget per player nomination.' },
+                                            { id: 'derby', title: '💡 Derby / Picker\'s Choice', desc: 'Managers draw positions to pick their draft slot before drafting begins!' }
+                                        ].map(style =>
+                                            h('label', {
+                                                key: style.id,
+                                                className: `p-4 rounded-xl border-2 transition cursor-pointer flex items-start gap-3 ${
+                                                    (draftState.style || 'snake') === style.id
+                                                        ? 'bg-slate-800 border-orange-500 text-white ring-1 ring-orange-500/30'
+                                                        : 'bg-slate-900/60 border-slate-700 text-slate-300 hover:bg-slate-800/50'
+                                                }`
+                                            },
+                                                h('input', {
+                                                    type: 'radio',
+                                                    name: 'draftStyle',
+                                                    checked: (draftState.style || 'snake') === style.id,
+                                                    onChange: () => updateDraftStateFB({ ...draftState, style: style.id }),
+                                                    className: 'mt-1 accent-orange-500'
+                                                }),
+                                                h('div', {},
+                                                    h('div', { className: 'font-bold text-xs text-white' }, style.title),
+                                                    h('div', { className: 'text-[11px] text-slate-400 mt-1 leading-normal' }, style.desc)
+                                                )
+                                            )
+                                        )
+                                    )
+                                ),
+
+                                // 3. BACKFILL AUTOMATION TOGGLE
+                                h('div', { className: 'bg-slate-800/60 p-5 rounded-2xl border border-slate-700/60' },
+                                    h('div', { className: 'flex items-center justify-between' },
+                                        h('div', {},
+                                            h('div', { className: 'text-sm font-extrabold text-amber-400' }, '3. Post-Draft Backfill Engine'),
+                                            h('div', { className: 'text-xs text-slate-400 mt-1 max-w-md' }, 'Automatically replace eliminated contestants with the remaining unassigned player with the lowest Cast ID.')
+                                        ),
+                                        h('button', {
+                                            type: 'button',
+                                            onClick: () => updateDraftStateFB({ ...draftState, backfillEnabled: !draftState.backfillEnabled }),
+                                            className: `relative w-12 h-6 rounded-full transition-colors cursor-pointer p-0.5 ${
+                                                draftState.backfillEnabled !== false ? 'bg-emerald-500 ring-2 ring-emerald-400/40' : 'bg-slate-700'
+                                            }`
+                                        },
+                                            h('div', {
+                                                className: `w-5 h-5 rounded-full bg-white shadow-md transform transition-transform ${
+                                                    draftState.backfillEnabled !== false ? 'translate-x-6' : 'translate-x-0'
+                                                }`
+                                            })
+                                        )
+                                    )
+                                )
+                            ),
+
+                            h('div', { className: 'mt-6 pt-4 border-t border-slate-800 flex justify-end gap-3' },
+                                h('button', {
+                                    onClick: () => setShowSettingsModal(false),
+                                    className: 'px-6 py-2.5 bg-gradient-to-r from-orange-500 to-amber-600 text-white font-bold rounded-xl shadow-lg hover:shadow-xl transition cursor-pointer text-sm'
+                                }, 'Done & Save')
+                            )
+                        )
+                    ),
+
+                    // Safety Warning Reset Modal (Prompted when editing settings mid-draft)
+                    showSafetyResetModal && h('div', {
+                        className: 'modal-backdrop',
+                        onClick: () => setShowSafetyResetModal(false)
+                    },
+                        h('div', {
+                            className: 'modal-content max-w-lg bg-slate-900 text-white rounded-2xl border border-rose-500/50 shadow-2xl p-6 md:p-8 text-center',
+                            onClick: (e) => e.stopPropagation()
+                        },
+                            h('div', { className: 'w-16 h-16 rounded-2xl bg-rose-500/20 text-rose-400 border border-rose-500/40 flex items-center justify-center mx-auto mb-4 animate-bounce' },
+                                h(Icons.AlertTriangle, { size: 36 })
+                            ),
+                            h('h2', { className: 'text-2xl font-black text-rose-400 mb-2' }, '⚠️ WARNING: DRAFT IN PROGRESS'),
+                            h('p', { className: 'text-sm text-slate-300 mb-6 leading-relaxed' },
+                                `1 or more players have already been drafted (${Object.keys(playerTeams).length} picks recorded). Changing draft settings requires completely resetting the active draft and clearing all picks.`
+                            ),
+                            h('p', { className: 'text-xs font-bold text-amber-400 mb-6 bg-slate-800 p-3 rounded-xl border border-amber-500/30' },
+                                'Do you wish to reset the active draft?'
+                            ),
+                            h('div', { className: 'flex flex-col sm:flex-row gap-3 justify-center' },
+                                h('button', {
+                                    onClick: () => setShowSafetyResetModal(false),
+                                    className: 'px-5 py-3 bg-slate-800 hover:bg-slate-700 text-slate-300 font-bold rounded-xl transition cursor-pointer text-sm flex items-center justify-center gap-2'
+                                }, h(Icons.X, { size: 16 }), '🚫 Cancel & Resume Draft'),
+                                h('button', {
+                                    onClick: handleResetDraft,
+                                    className: 'px-5 py-3 bg-rose-600 hover:bg-rose-700 text-white font-black rounded-xl shadow-lg transition cursor-pointer text-sm flex items-center justify-center gap-2'
+                                }, h(Icons.RotateCcw, { size: 16 }), '🔄 Reset & Edit')
+                            )
+                        )
+                    ),
+
                     // Team Modal
                     showTeamModal && h('div', { 
                         className: 'modal-backdrop',
