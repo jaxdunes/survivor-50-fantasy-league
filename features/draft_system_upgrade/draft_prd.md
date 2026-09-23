@@ -2,7 +2,7 @@
 
 **Version**: 1.1 (Finalized Design)  
 **Status**: Approved Specification  
-**Location**: `features/draft_prd.md`  
+**Location**: `features/draft_system_upgrade/draft_prd.md`  
 **Target Page**: `draft.html` (Draft Board & Player Roster)
 
 ---

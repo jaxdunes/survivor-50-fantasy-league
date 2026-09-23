@@ -1,6 +1,6 @@
 # Implementation Plan - Survivor Fantasy League Draft System Upgrade
 
-Implement the full draft system specified in [`features/draft_prd.md`](file:///Users/ryantaylor/Desktop/survivor-50-fantasy-league/features/draft_prd.md), introducing a real-time state machine (`Closed`, `Open`, `Finalized`), a live `DraftOrderBar` with elapsed pick timer (`⏱️ 0:00`), interactive Draft Settings drawer, safety warning reset modal, backfill automation engine, and `↩️ BACKFILLED` badges across draft rosters and leaderboards.
+Implement the full draft system specified in [`features/draft_system_upgrade/draft_prd.md`](file:///Users/ryantaylor/Desktop/survivor-50-fantasy-league/features/draft_system_upgrade/draft_prd.md), introducing a real-time state machine (`Closed`, `Open`, `Finalized`), a live `DraftOrderBar` with elapsed pick timer (`⏱️ 0:00`), interactive Draft Settings drawer, safety warning reset modal, backfill automation engine, and `↩️ BACKFILLED` badges across draft rosters and leaderboards.
 
 ---
 
