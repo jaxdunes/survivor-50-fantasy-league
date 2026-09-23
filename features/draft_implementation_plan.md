@@ -48,11 +48,11 @@ Implement the full draft system specified in [`features/draft_prd.md`](file:///U
      - `Closed`: **"🔥 Begin Draft"** button.
      - `Open`: **"🔴 Close Draft"** & **"✅ Finalize Draft"** buttons.
      - `Finalized`: **"🔒 Draft Finalized"** status badge.
-2. **Draft Order Bar & Live Pick Timer**:
-   - Appears above player cards when draft is `Open`.
+2. **"The Voting Booth" Draft Order Box & Live Pick Timer**:
+   - Titled **"🗳️ THE VOTING BOOTH"**, appearing above player cards when draft is `Open`.
    - Displays current Round & Pick (e.g., `Round 1 • Pick 3 (Overall #3)`).
    - Shows live digital timer `⏱️ MM:SS` counting up from `lastPickTimestamp`. Timer resets to `0:00` automatically on every pick.
-   - Renders sequence of teams with glowing amber border on the **On-The-Clock Team**.
+   - Renders sequence of teams with glowing amber border and a **burning torch icon (🔥)** on the **On-The-Clock Manager (`TORCH LIT`)**.
 3. **Turn-Based Player Assignment**:
    - When draft is `Open`, player cards show an active **"Draft Player"** or **"Assign"** button only for the team currently on the clock (or for any team if manually selected).
    - Assigning a player updates `playerTeams`, advances `currentPick`, recalculates `onTheClockTeamId` based on `style` (Linear vs Snake), and sets `lastPickTimestamp = Date.now()`.

@@ -15,7 +15,7 @@ Key capabilities:
 - **Draft Status State Machine**: `Closed` ➔ `Open` ➔ `Finalized`.
 - **Dynamic Draft Styles**: Linear, Snake, and Auction drafts (plus custom recommendations like *Derby/Picker's Choice*).
 - **Intelligent Draft Orders**: Pure Random or Based on Previous Season (Reverse Standings with individual immunity tie-breakers).
-- **Live On-the-Clock Bar & Pick Timer**: Displays manager order, current pick, round, on-the-clock highlight, and a **pick timer (`⏱️ 0:00`)** tracking elapsed time since the last pick.
+- **"The Voting Booth" Draft Order Box & Pick Timer**: Titled **"The Voting Booth"**, this live tracker displays manager order sequence with a **burning torch icon (🔥)** on the active drafting manager, current pick, round, on-the-clock highlight, and a **pick timer (`⏱️ 0:00`)** tracking elapsed time since the last pick.
 - **Safety Safeguards & Soft Resets**: Protects active drafts from accidental setting changes with explicit warnings and full reset options.
 - **Post-Draft Backfill Automation**: Automatically assigns leftover unassigned players (by lowest Cast ID) when drafted contestants are eliminated.
 - **Firebase Realtime Synchronization**: Synchronizes picks, turns, timers, and draft state across all connected league managers in real-time.
@@ -39,7 +39,7 @@ stateDiagram-v2
 | Feature / UI Element | `Closed` State | `Open` State | `Finalized` State |
 | :--- | :--- | :--- | :--- |
 | **Assign Buttons on Player Cards** | Hidden / Disabled | **Active** for On-the-Clock turn | **Removed** |
-| **Draft Order Bar & Pick Timer** | Hidden | **Visible** (`⏱️ 0:00` timer restarts on each pick) | Hidden (Replaced by Final Roster view) |
+| **The Voting Booth & Pick Timer** | Hidden | **Visible** (`⏱️ 0:00` timer restarts on each pick, torch icon on active manager) | Hidden (Replaced by Final Roster view) |
 | **Header Primary Action** | `🔥 Begin Draft` button | `🔴 Close Draft` & `🏆 Finalize Draft` buttons | `🔒 Draft Finalized` badge |
 | **Settings Cog** | **Editable** (No warning if 0 picks) | **Protected** (Requires confirmation warning to edit/reset) | **Locked** (Read-only review) |
 | **Unassigned Player Pool** | Visible | Visible | **Removed / Hidden** (Stored for Backfill) |
@@ -57,13 +57,14 @@ stateDiagram-v2
   - When `Open`: Displays **"🔴 Close Draft"** button and **"✅ Finalize Draft"** button (enabled when teams meet min roster capacity).
   - When `Finalized`: Displays **"🔒 Draft Finalized"** badge.
 
-### 3.2 Draft Order Bar (On-The-Clock Header & Pick Timer)
+### 3.2 "The Voting Booth" Draft Order Box & Pick Timer
 - Appears above the player cards grid whenever draft status is `Open`.
+- **Title**: Prominently displays **"🗳️ THE VOTING BOOTH"**.
 - **Content & Functionality**:
   - Current Round & Pick Number (e.g., `Round 2 • Pick 3 (Overall #10)`).
   - **Pick Timer (`⏱️ 0:00`)**: Digital timer tracking elapsed time since the last pick was made. Restarts at `0:00` immediately whenever a pick occurs.
   - Horizontal scrolling list of managers in draft sequence order.
-  - Glowing Amber border & pulse animation around the **On-The-Clock Manager**.
+  - **Torch Icon (🔥)**: Displayed prominently beside the manager currently on the clock, accompanied by a glowing amber border and pulse animation (`TORCH LIT`).
 
 ### 3.3 Draft Settings Drawer / Modal
 Accessible via the **⚙️ Settings Cog** next to the View Mode toggles.

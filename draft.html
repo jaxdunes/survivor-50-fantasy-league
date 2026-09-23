@@ -1011,10 +1011,27 @@
                         )
                     ),
 
-                    // Draft Order Bar & Live Pick Timer (Shown when Draft is OPEN)
-                    draftState.status === 'open' && h('div', { className: 'bg-gradient-to-r from-slate-900 via-slate-800 to-slate-900 text-white p-5 rounded-2xl shadow-2xl mb-8 border border-orange-500/40 relative overflow-hidden' },
+                    // Draft Order Box - "The Voting Booth" & Live Pick Timer (Shown when Draft is OPEN)
+                    draftState.status === 'open' && h('div', { className: 'bg-gradient-to-r from-slate-900 via-slate-800 to-slate-900 text-white p-6 rounded-2xl shadow-2xl mb-8 border-2 border-orange-500/50 relative overflow-hidden' },
+                        // Title Header: The Voting Booth
+                        h('div', { className: 'flex justify-between items-center mb-4 pb-3 border-b border-amber-500/30 flex-wrap gap-2' },
+                            h('div', { className: 'flex items-center gap-2.5' },
+                                h('span', { className: 'text-3xl' }, '🗳️'),
+                                h('div', {},
+                                    h('h3', { className: 'text-3xl font-black text-amber-400 tracking-wider uppercase leading-none', style: { fontFamily: '"Bebas Neue", cursive' } }, 'THE VOTING BOOTH'),
+                                    h('p', { className: 'text-[11px] text-slate-400 font-bold uppercase tracking-widest mt-0.5' }, 'Live Draft Order & Turn Tracker')
+                                )
+                            ),
+                            // Live Pick Timer (⏱️ MM:SS)
+                            h('div', { className: 'flex items-center gap-2 bg-slate-950/90 px-4 py-2 rounded-xl border border-amber-500/60 shadow-inner' },
+                                h(Icons.Clock, { size: 18, className: 'text-amber-400 animate-pulse' }),
+                                h('span', { className: 'text-xs font-bold text-slate-300' }, 'Clock:'),
+                                h('span', { className: 'text-base font-black text-amber-300 font-mono tracking-wider' }, `⏱️ ${formatTimer(elapsedSeconds)}`)
+                            )
+                        ),
+
                         h('div', { className: 'flex flex-col md:flex-row justify-between items-center gap-4 mb-4 pb-3 border-b border-slate-700/60' },
-                            h('div', { className: 'flex items-center gap-3' },
+                            h('div', { className: 'flex items-center gap-3 flex-wrap' },
                                 h('div', { className: 'bg-orange-500 text-white font-black px-3.5 py-1 rounded-xl text-sm shadow' },
                                     `Round ${draftState.currentRound || 1}`
                                 ),
@@ -1024,38 +1041,38 @@
                                 h('div', { className: 'text-xs text-slate-400 font-bold bg-slate-800 px-2.5 py-1 rounded-lg uppercase tracking-wider border border-slate-700' },
                                     `${draftState.style || 'snake'} draft`
                                 )
-                            ),
-                            // Live Pick Timer (⏱️ MM:SS)
-                            h('div', { className: 'flex items-center gap-2 bg-slate-950/80 px-4 py-1.5 rounded-xl border border-amber-500/50 shadow-inner' },
-                                h(Icons.Clock, { size: 18, className: 'text-amber-400 animate-pulse' }),
-                                h('span', { className: 'text-xs font-bold text-slate-300' }, 'Clock:'),
-                                h('span', { className: 'text-base font-black text-amber-300 font-mono tracking-wider' }, `⏱️ ${formatTimer(elapsedSeconds)}`)
                             )
                         ),
 
-                        // On-the-Clock Team Banner
-                        h('div', { className: 'mb-4 text-center' },
-                            h('span', { className: 'text-xs text-slate-400 font-extrabold uppercase tracking-widest mr-2' }, 'On the Clock:'),
-                            h('span', { className: 'text-xl font-black text-amber-400 drop-shadow-md animate-pulse' },
+                        // On-the-Clock Manager Banner with Torch Flame Icon
+                        h('div', { className: 'mb-5 text-center bg-slate-950/60 p-4 rounded-xl border border-amber-500/30' },
+                            h('div', { className: 'flex items-center justify-center gap-2 mb-1' },
+                                h('span', { className: 'text-2xl animate-bounce' }, '🔥'),
+                                h('span', { className: 'text-xs text-amber-400 font-black uppercase tracking-widest' }, 'Torch Lit • On the Clock:'),
+                                h('span', { className: 'text-2xl animate-bounce' }, '🔥')
+                            ),
+                            h('div', { className: 'text-3xl font-black text-amber-300 drop-shadow-md tracking-wide', style: { fontFamily: '"Bebas Neue", cursive' } },
                                 (teams.find(t => t.id === draftState.onTheClockTeamId) || {}).name || draftState.onTheClockTeamId || 'Waiting...'
                             )
                         ),
 
-                        // Horizontal Sequence of Teams
+                        // Horizontal Sequence of Teams with Torch Icon for Drafting Manager
                         h('div', { className: 'flex items-center gap-3 overflow-x-auto pb-2 scrollbar-none justify-start md:justify-center' },
                             ...(draftState.orderSequence && draftState.orderSequence.length > 0 ? draftState.orderSequence : teams.map(t => t.id)).map((tId, idx) => {
                                 const teamObj = teams.find(t => t.id === tId) || { name: tId, color: 'from-amber-500 to-orange-600' };
                                 const isOnClock = tId === draftState.onTheClockTeamId;
                                 return h('div', {
                                     key: tId + '-' + idx,
-                                    className: `flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-bold transition transform ${
+                                    className: `flex items-center gap-2 px-4 py-2.5 rounded-xl text-xs font-bold transition transform ${
                                         isOnClock 
-                                            ? 'bg-gradient-to-r from-orange-500 to-amber-500 text-white ring-4 ring-orange-400/60 scale-105 shadow-xl animate-bounce' 
-                                            : 'bg-slate-800 text-slate-300 opacity-70 border border-slate-700'
+                                            ? 'bg-gradient-to-r from-orange-500 via-amber-500 to-orange-600 text-white ring-4 ring-orange-400/80 scale-105 shadow-2xl animate-pulse border border-amber-300' 
+                                            : 'bg-slate-800/80 text-slate-300 opacity-70 border border-slate-700'
                                     }`
                                 },
+                                    isOnClock && h('span', { className: 'text-base animate-bounce' }, '🔥'),
                                     h('span', { className: 'text-[10px] opacity-75 font-mono' }, `#${idx + 1}`),
-                                    h('span', { className: 'font-black' }, teamObj.name)
+                                    h('span', { className: 'font-black' }, teamObj.name),
+                                    isOnClock && h('span', { className: 'text-[10px] bg-amber-950 text-amber-300 px-1.5 py-0.5 rounded font-black border border-amber-400/40 uppercase tracking-wider' }, 'TORCH LIT')
                                 );
                             })
                         )
