@@ -82,50 +82,35 @@
             background: transparent !important;
         }
 
-        @keyframes starTwinkle {
-            0%, 100% {
-                opacity: 0.6;
-                filter: drop-shadow(0 0 2px rgba(255, 255, 255, 0.4));
-            }
-            50% {
-                opacity: 1;
-                filter: drop-shadow(0 0 5px rgba(254, 243, 199, 0.9));
-            }
-        }
-
-        /* Top Arched Night Sky Canopy with Faint Glowing Stars & Torch Ambient Glow */
+        /* Top Dark Black Night Sky with Faint Stars fading gradually into theme */
         body.theme-tribal::before {
             content: '';
             position: fixed;
             top: 0;
             left: 0;
             right: 0;
-            height: 420px;
+            height: 380px;
             background: 
-                /* Glowing Star Field */
-                radial-gradient(1.5px 1.5px at 10% 15%, rgba(255, 255, 255, 0.95), transparent),
-                radial-gradient(2px 2px at 24% 8%, rgba(254, 243, 199, 1), transparent),
-                radial-gradient(1px 1px at 38% 22%, rgba(255, 255, 255, 0.8), transparent),
-                radial-gradient(1.5px 1.5px at 52% 10%, rgba(253, 230, 138, 0.95), transparent),
-                radial-gradient(2.5px 2.5px at 68% 18%, rgba(255, 255, 255, 1), transparent),
-                radial-gradient(1px 1px at 82% 12%, rgba(254, 243, 199, 0.85), transparent),
-                radial-gradient(1.5px 1.5px at 92% 26%, rgba(255, 255, 255, 0.75), transparent),
-                radial-gradient(2px 2px at 16% 32%, rgba(255, 255, 255, 0.85), transparent),
-                radial-gradient(1px 1px at 31% 36%, rgba(254, 243, 199, 0.7), transparent),
-                radial-gradient(1.5px 1.5px at 61% 30%, rgba(255, 255, 255, 0.9), transparent),
-                radial-gradient(1px 1px at 76% 38%, rgba(253, 230, 138, 0.8), transparent),
-                radial-gradient(2px 2px at 88% 34%, rgba(255, 255, 255, 0.85), transparent),
-                /* Night Sky Midnight Arc Canopy Gradient */
-                radial-gradient(ellipse 130% 90% at 50% -30%, 
-                    #030611 0%, 
-                    #0a1024 40%, 
-                    rgba(30, 20, 14, 0.7) 72%, 
-                    transparent 100%),
-                /* Torchlight Accent Overlay */
-                radial-gradient(circle at 50% -80px, rgba(249, 115, 22, 0.2), rgba(245, 158, 11, 0.05), transparent 75%);
+                /* Faint Stars */
+                radial-gradient(1.5px 1.5px at 10% 12%, rgba(255, 255, 255, 0.75), transparent),
+                radial-gradient(2px 2px at 24% 6%, rgba(254, 243, 199, 0.8), transparent),
+                radial-gradient(1px 1px at 38% 18%, rgba(255, 255, 255, 0.6), transparent),
+                radial-gradient(1.5px 1.5px at 52% 8%, rgba(253, 230, 138, 0.75), transparent),
+                radial-gradient(2px 2px at 68% 14%, rgba(255, 255, 255, 0.8), transparent),
+                radial-gradient(1px 1px at 82% 10%, rgba(254, 243, 199, 0.65), transparent),
+                radial-gradient(1.5px 1.5px at 92% 22%, rgba(255, 255, 255, 0.6), transparent),
+                radial-gradient(1.5px 1.5px at 16% 26%, rgba(255, 255, 255, 0.65), transparent),
+                radial-gradient(1px 1px at 31% 30%, rgba(254, 243, 199, 0.5), transparent),
+                radial-gradient(1.5px 1.5px at 61% 24%, rgba(255, 255, 255, 0.7), transparent),
+                radial-gradient(1px 1px at 76% 32%, rgba(253, 230, 138, 0.6), transparent),
+                /* Dark Black Sky Arc fading down into dark brown theme */
+                radial-gradient(ellipse 140% 100% at 50% -35%, 
+                    #000000 0%, 
+                    #030202 35%, 
+                    rgba(12, 8, 5, 0.85) 65%, 
+                    transparent 100%);
             pointer-events: none;
             z-index: 1;
-            animation: starTwinkle 4s ease-in-out infinite alternate;
         }
 
         /* Faint Fire Flame Glow coming from Bottom of Screen */
