@@ -358,18 +358,11 @@
                 return 'bg-gray-100 text-gray-800';
             };
             
-            const getThreatColor = (threat) => {
-                if (threat.includes('EXTREMELY')) return 'from-red-500 to-rose-600';
-                if (threat.includes('VERY')) return 'from-orange-500 to-amber-600';
-                if (threat.includes('High')) return 'from-yellow-500 to-orange-500';
-                return 'from-green-500 to-emerald-600';
-            };
-            
             const getTribeColor = (tribe) => {
                 if (tribe === 'Cila') return 'from-orange-500 to-amber-600';
                 if (tribe === 'Kalo') return 'from-teal-500 to-cyan-600';
                 if (tribe === 'Vatu') return 'from-purple-500 to-pink-600';
-                return 'from-gray-500 to-slate-600';
+                return 'from-amber-600 to-orange-700';
             };
             
             const PlayerCard = ({ player }) => {
@@ -395,8 +388,8 @@
                         h('div', { className: 'text-white pr-24' },
                             h('h3', { className: 'text-2xl font-black mb-1', style: { fontFamily: '"Bebas Neue", cursive' }}, player.name),
                             h('div', { className: 'flex gap-2 items-center flex-wrap' },
-                                h('div', { className: 'text-xs font-semibold bg-white/20 backdrop-blur-sm px-3 py-1 rounded-full' }, player.era),
-                                h('div', { className: `text-xs font-semibold px-3 py-1 rounded-full ${getTribeBadgeColor(player.tribe)} backdrop-blur-sm shadow-sm` },
+                                h('div', { className: 'text-xs font-semibold bg-white/20 backdrop-blur-sm px-3 py-1 rounded-full' }, player.era || 'New Era'),
+                                player.tribe && player.tribe !== 'Unassigned' && h('div', { className: `text-xs font-semibold px-3 py-1 rounded-full ${getTribeBadgeColor(player.tribe)} backdrop-blur-sm shadow-sm` },
                                     player.tribe === 'Cila' ? '🔥 ' : player.tribe === 'Kalo' ? '🌊 ' : '⚡ ',
                                     player.tribe
                                 )
@@ -404,19 +397,23 @@
                         )
                     ),
                     h('div', { className: 'p-4' },
-                        h('div', { className: 'mb-3' },
+                        player.occupation && h('div', { className: 'mb-3' },
+                            h('div', { className: 'text-xs font-bold text-gray-500 mb-1' }, 'AGE & OCCUPATION'),
+                            h('div', { className: 'text-sm font-semibold text-gray-800' }, `${player.age ? player.age + ' • ' : ''}${player.occupation}`)
+                        ),
+                        player.hometown && h('div', { className: 'mb-3' },
+                            h('div', { className: 'text-xs font-bold text-gray-500 mb-1' }, 'HOMETOWN'),
+                            h('div', { className: 'text-sm font-semibold text-gray-800' }, player.hometown)
+                        ),
+                        player.seasons && player.seasons.length > 0 && activeSeasonId === 'season-50' && h('div', { className: 'mb-3' },
                             h('div', { className: 'text-xs font-bold text-gray-500 mb-1' }, 'SEASONS'),
-                            h('div', { className: 'text-sm text-gray-700' }, (player.seasons || [player.era || 'S51']).join(', '))
+                            h('div', { className: 'text-sm text-gray-700' }, player.seasons.join(', '))
                         ),
-                        h('div', { className: 'mb-3' },
+                        player.placement && activeSeasonId === 'season-50' && h('div', { className: 'mb-3' },
                             h('div', { className: 'text-xs font-bold text-gray-500 mb-1' }, 'BEST PLACEMENT'),
-                            h('div', { className: `text-sm font-bold ${(player.placement || 'TBD').includes('WINNER') ? 'text-yellow-600' : 'text-gray-700'}` }, player.placement || 'TBD')
+                            h('div', { className: `text-sm font-bold ${player.placement.includes('WINNER') ? 'text-yellow-600' : 'text-gray-700'}` }, player.placement)
                         ),
-                        h('div', { className: 'mb-3' },
-                            h('div', { className: 'text-xs font-bold text-gray-500 mb-1' }, 'THREAT LEVEL'),
-                            h('div', { className: `inline-block text-xs font-black px-3 py-1 rounded-full bg-gradient-to-r ${getThreatColor(player.threat || 'Medium')} text-white` }, player.threat || 'Medium')
-                        ),
-                        h('div', { className: 'mb-4' },
+                        player.note && h('div', { className: 'mb-4' },
                             h('div', { className: 'text-xs text-gray-600 italic' }, `"${player.note}"`)
                         ),
                         h('div', { className: 'flex gap-2' },
