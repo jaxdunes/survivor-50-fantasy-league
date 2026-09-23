@@ -200,6 +200,221 @@
             Menu: createIcon('<line x1="4" x2="20" y1="12" y2="12"></line><line x1="4" x2="20" y1="6" y2="6"></line><line x1="4" x2="20" y1="18" y2="18"></line>'),
             Check: createIcon('<polyline points="20 6 9 17 4 12"></polyline>')
         };
+
+        function TeamScoreGraph({ leaderboard, scores, eliminationOrder, winner, playerTeams, players }) {
+            const { useState, useMemo } = React;
+            const [hoveredPoint, setHoveredPoint] = useState(null);
+
+            const maxEpisode = useMemo(() => {
+                let maxEp = 1;
+                Object.values(scores || {}).forEach(playerScores => {
+                    Object.keys(playerScores || {}).forEach(ep => {
+                        const num = parseInt(ep);
+                        if (!isNaN(num) && num > maxEp) maxEp = num;
+                    });
+                });
+                return Math.max(maxEp, 1);
+            }, [scores]);
+
+            const episodes = useMemo(() => {
+                const arr = [];
+                for (let i = 1; i <= maxEpisode; i++) arr.push(i);
+                return arr;
+            }, [maxEpisode]);
+
+            const teamColors = [
+                { stroke: '#f97316', bg: 'bg-orange-500' },
+                { stroke: '#6366f1', bg: 'bg-indigo-500' },
+                { stroke: '#10b981', bg: 'bg-emerald-500' },
+                { stroke: '#ec4899', bg: 'bg-pink-500' },
+                { stroke: '#8b5cf6', bg: 'bg-purple-500' },
+                { stroke: '#3b82f6', bg: 'bg-blue-500' },
+                { stroke: '#f59e0b', bg: 'bg-amber-500' }
+            ];
+
+            const { series, maxVal } = useMemo(() => {
+                let maxScoreVal = 40;
+
+                const teamSeries = leaderboard.map((team, index) => {
+                    const teamStyle = teamColors[index % teamColors.length];
+                    const roster = players.filter(p => playerTeams[p.id] === team.id);
+                    
+                    let cumulative = 0;
+                    const history = episodes.map(ep => {
+                        roster.forEach(player => {
+                            const playerScores = (scores[player.id] || {})[ep] || {};
+                            Object.values(playerScores).forEach(score => {
+                                cumulative += (score.points || 0);
+                            });
+                            if (eliminationOrder[player.id] === ep) {
+                                cumulative += ep;
+                            }
+                        });
+                        if (winner && ep >= 14 && roster.some(p => p.id === parseInt(winner))) {
+                            if (ep === 14) cumulative += 20;
+                        }
+                        if (cumulative > maxScoreVal) maxScoreVal = cumulative;
+                        return { episode: ep, score: cumulative };
+                    });
+
+                    return {
+                        id: team.id,
+                        name: team.name,
+                        style: teamStyle,
+                        currentScore: team.score,
+                        history: history
+                    };
+                });
+
+                const roundedMax = Math.ceil((maxScoreVal + 10) / 20) * 20;
+                return { series: teamSeries, maxVal: Math.max(roundedMax, 40) };
+            }, [leaderboard, scores, episodes, eliminationOrder, winner, playerTeams, players]);
+
+            const width = 800;
+            const height = 280;
+            const paddingLeft = 50;
+            const paddingRight = 30;
+            const paddingTop = 25;
+            const paddingBottom = 40;
+            const plotWidth = width - paddingLeft - paddingRight;
+            const plotHeight = height - paddingTop - paddingBottom;
+
+            const getX = (epIndex) => {
+                if (episodes.length <= 1) return paddingLeft + plotWidth / 2;
+                return paddingLeft + (epIndex / (episodes.length - 1)) * plotWidth;
+            };
+
+            const getY = (scoreVal) => {
+                const ratio = scoreVal / maxVal;
+                return paddingTop + plotHeight - ratio * plotHeight;
+            };
+
+            const yGridSteps = [0, Math.round(maxVal * 0.25), Math.round(maxVal * 0.5), Math.round(maxVal * 0.75), maxVal];
+
+            return h('div', { className: 'bg-white/95 backdrop-blur-md rounded-2xl p-6 mb-8 shadow-xl border border-gray-100' },
+                h('div', { className: 'flex justify-between items-center mb-4 flex-wrap gap-2' },
+                    h('div', {},
+                        h('h2', { className: 'text-2xl font-black text-gray-900 flex items-center gap-2', style: { fontFamily: '"Bebas Neue", cursive' } }, 
+                            '📈 WEEKLY TEAM POINT TRAJECTORY'
+                        ),
+                        h('p', { className: 'text-xs text-gray-500 font-semibold' }, 'Overall cumulative score progression updated episode by episode')
+                    ),
+                    h('div', { className: 'flex items-center gap-2 flex-wrap text-xs font-bold' },
+                        series.map(s => h('div', { key: s.id, className: 'flex items-center gap-1.5 bg-gray-50 px-2.5 py-1 rounded-lg border border-gray-200' },
+                            h('span', { className: `w-3 h-3 rounded-full ${s.style.bg}` }),
+                            h('span', { className: 'text-gray-800' }, `${s.name}:`),
+                            h('span', { className: 'font-extrabold text-orange-600' }, `${s.currentScore} pts`)
+                        ))
+                    )
+                ),
+
+                h('div', { className: 'relative w-full overflow-x-auto' },
+                    h('svg', { 
+                        viewBox: `0 0 ${width} ${height}`, 
+                        className: 'w-full h-auto max-h-[320px] min-w-[500px]'
+                    },
+                        yGridSteps.map((val, idx) => {
+                            const yPos = getY(val);
+                            return h('g', { key: idx },
+                                h('line', {
+                                    x1: paddingLeft,
+                                    y1: yPos,
+                                    x2: width - paddingRight,
+                                    y2: yPos,
+                                    stroke: '#f1f5f9',
+                                    strokeWidth: 1.5,
+                                    strokeDasharray: idx === 0 ? undefined : '4 4'
+                                }),
+                                h('text', {
+                                    x: paddingLeft - 10,
+                                    y: yPos + 4,
+                                    textAnchor: 'end',
+                                    className: 'text-[11px] font-bold fill-slate-400 font-mono'
+                                }, val)
+                            );
+                        }),
+
+                        episodes.map((ep, idx) => {
+                            const xPos = getX(idx);
+                            return h('g', { key: ep },
+                                h('line', {
+                                    x1: xPos,
+                                    y1: paddingTop,
+                                    x2: xPos,
+                                    y2: paddingTop + plotHeight,
+                                    stroke: '#f8fafc',
+                                    strokeWidth: 1
+                                }),
+                                h('text', {
+                                    x: xPos,
+                                    y: height - 12,
+                                    textAnchor: 'middle',
+                                    className: 'text-[11px] font-extrabold fill-slate-600 font-mono'
+                                }, `Ep ${ep}`)
+                            );
+                        }),
+
+                        series.map(team => {
+                            const points = team.history.map((pt, idx) => `${getX(idx)},${getY(pt.score)}`).join(' ');
+                            
+                            return h('g', { key: team.id },
+                                h('polyline', {
+                                    fill: 'none',
+                                    stroke: team.style.stroke,
+                                    strokeWidth: 3.5,
+                                    strokeLinecap: 'round',
+                                    strokeLinejoin: 'round',
+                                    points: points
+                                }),
+                                
+                                team.history.map((pt, idx) => {
+                                    const cx = getX(idx);
+                                    const cy = getY(pt.score);
+                                    const isHovered = hoveredPoint && hoveredPoint.teamId === team.id && hoveredPoint.ep === pt.episode;
+                                    
+                                    return h('circle', {
+                                        key: idx,
+                                        cx: cx,
+                                        cy: cy,
+                                        r: isHovered ? 7 : 4.5,
+                                        fill: team.style.stroke,
+                                        stroke: '#ffffff',
+                                        strokeWidth: 2,
+                                        className: 'cursor-pointer transition-all duration-150',
+                                        onMouseEnter: () => setHoveredPoint({ teamId: team.id, teamName: team.name, ep: pt.episode, score: pt.score, x: cx, y: cy }),
+                                        onMouseLeave: () => setHoveredPoint(null)
+                                    });
+                                })
+                            );
+                        }),
+
+                        hoveredPoint && h('g', { transform: `translate(${Math.min(Math.max(hoveredPoint.x, 80), width - 80)}, ${Math.max(hoveredPoint.y - 45, 25)})` },
+                            h('rect', {
+                                x: -65,
+                                y: -20,
+                                width: 130,
+                                height: 36,
+                                rx: 8,
+                                fill: '#0f172a',
+                                className: 'shadow-xl opacity-95'
+                            }),
+                            h('text', {
+                                x: 0,
+                                y: -5,
+                                textAnchor: 'middle',
+                                className: 'text-[10px] font-extrabold fill-slate-300 uppercase tracking-wider'
+                            }, `Ep ${hoveredPoint.ep} • ${hoveredPoint.teamName}`),
+                            h('text', {
+                                x: 0,
+                                y: 9,
+                                textAnchor: 'middle',
+                                className: 'text-[12px] font-black fill-white'
+                            }, `${hoveredPoint.score} pts`)
+                        )
+                    )
+                )
+            );
+        }
         
         function ScoringPage() {
             const currentLeagueConfig = LEAGUES_DATA[activeLeagueId] || LEAGUES_DATA['jackson-ryan-league'];
@@ -603,24 +818,10 @@
                         ),
                         h('button', {
                             onClick: () => setShowAddScore(true),
-                            className: 'bg-gradient-to-r from-orange-500 to-amber-600 text-white px-6 py-3 rounded-xl font-bold hover:shadow-lg transition flex items-center gap-2'
+                            className: 'bg-gradient-to-r from-orange-500 to-amber-600 text-white px-6 py-3 rounded-xl font-bold hover:shadow-lg transition flex items-center gap-2 cursor-pointer'
                         },
                             h(Icons.Plus, { size: 20 }),
                             'Add Points'
-                        ),
-                        h('button', {
-                            onClick: () => setShowMarkElimination(true),
-                            className: 'bg-gradient-to-r from-red-500 to-rose-600 text-white px-6 py-3 rounded-xl font-bold hover:shadow-lg transition flex items-center gap-2'
-                        },
-                            h(Icons.X, { size: 20 }),
-                            'Mark Elimination'
-                        ),
-                        h('button', {
-                            onClick: () => setShowMarkWinner(true),
-                            className: 'bg-gradient-to-r from-yellow-500 to-amber-500 text-white px-6 py-3 rounded-xl font-bold hover:shadow-lg transition flex items-center gap-2'
-                        },
-                            h(Icons.Trophy, { size: 20 }),
-                            'Mark Winner'
                         )
                     ) : h('div', { className: 'flex flex-wrap justify-center gap-4 mb-8' },
                         h('button', {
@@ -635,6 +836,16 @@
                         )
                     ),
                     
+                    // Weekly Team Point Progression Graph
+                    h(TeamScoreGraph, {
+                        leaderboard: leaderboard,
+                        scores: scores,
+                        eliminationOrder: eliminationOrder,
+                        winner: winner,
+                        playerTeams: playerTeams,
+                        players: players
+                    }),
+
                     // Leaderboard
                     h('div', { className: 'bg-white/95 backdrop-blur-md rounded-2xl p-6 mb-8 shadow-xl' },
                         h('h2', { 
@@ -995,14 +1206,29 @@
                                             
                                             const category = scoringCategories.find(c => c.id === categoryId);
                                             const scoreId = Date.now().toString();
+                                            const catName = (category ? category.name : '').toLowerCase();
+
+                                            // Auto-implied elimination & winner
+                                            const isElimination = categoryId === 'voted-out' || categoryId === 'first-voted-out' || categoryId === 'medevac' || categoryId === 'expelled' || catName.includes('voted out') || catName.includes('medical');
+                                            const isWinner = categoryId === 'sole-survivor' || catName.includes('sole survivor');
                                             
                                             if (window.firebaseInitialized) {
-                                                const promises = selectedAddScoreLeagues.map(leagueId => {
-                                                    return database.ref(`leagues/${leagueId}/seasons/${activeSeasonId}/scores/${playerId}/${episode}/${scoreId}`).set({
-                                                        category: category ? category.name : 'Custom',
-                                                        points: points,
-                                                        note: note || ''
-                                                    });
+                                                const promises = [];
+                                                selectedAddScoreLeagues.forEach(leagueId => {
+                                                    const baseRef = `leagues/${leagueId}/seasons/${activeSeasonId}`;
+                                                    promises.push(
+                                                        database.ref(`${baseRef}/scores/${playerId}/${episode}/${scoreId}`).set({
+                                                            category: category ? category.name : 'Custom',
+                                                            points: points,
+                                                            note: note || ''
+                                                        })
+                                                    );
+                                                    if (isElimination) {
+                                                        promises.push(database.ref(`${baseRef}/eliminationOrder/${playerId}`).set(parseInt(episode)));
+                                                    }
+                                                    if (isWinner) {
+                                                        promises.push(database.ref(`${baseRef}/winner`).set(parseInt(playerId)));
+                                                    }
                                                 });
                                                 
                                                 Promise.all(promises).then(() => {
@@ -1011,10 +1237,15 @@
                                                     document.getElementById('category-select').value = '';
                                                     document.getElementById('points-input').value = '';
                                                     document.getElementById('note-input').value = '';
+                                                    setSelectedCategoryId('');
+                                                    setCategorySearchTerm('');
                                                     setShowAddScore(false);
                                                     
                                                     const leagueNames = selectedAddScoreLeagues.map(id => (LEAGUES_DATA[id] || {}).name || id).join(', ');
-                                                    alert(`Points added successfully to: ${leagueNames}! 🎉`);
+                                                    let msg = `Points added successfully to: ${leagueNames}! 🎉`;
+                                                    if (isElimination) msg += ' (Player marked as eliminated)';
+                                                    if (isWinner) msg += ' (Player marked as Sole Survivor!)';
+                                                    alert(msg);
                                                 });
                                             } else {
                                                 selectedAddScoreLeagues.forEach(leagueId => {
@@ -1028,209 +1259,38 @@
                                                         note: note || ''
                                                     };
                                                     localStorage.setItem(key, JSON.stringify(existing));
+
+                                                    if (isElimination) {
+                                                        const elimKey = `survivor-elimination-${leagueId}-${activeSeasonId}`;
+                                                        const elims = JSON.parse(localStorage.getItem(elimKey) || '{}');
+                                                        elims[playerId] = parseInt(episode);
+                                                        localStorage.setItem(elimKey, JSON.stringify(elims));
+                                                    }
+                                                    if (isWinner) {
+                                                        const winKey = `survivor-winner-${leagueId}-${activeSeasonId}`;
+                                                        localStorage.setItem(winKey, JSON.stringify(playerId));
+                                                    }
                                                 });
+                                                
+                                                document.getElementById('player-select').value = '';
+                                                document.getElementById('episode-select').value = '';
+                                                document.getElementById('category-select').value = '';
+                                                document.getElementById('points-input').value = '';
+                                                document.getElementById('note-input').value = '';
+                                                setSelectedCategoryId('');
+                                                setCategorySearchTerm('');
                                                 setShowAddScore(false);
-                                                alert('Points added locally to selected leagues!');
+                                                
+                                                const leagueNames = selectedAddScoreLeagues.map(id => (LEAGUES_DATA[id] || {}).name || id).join(', ');
+                                                let msg = `Points added successfully to: ${leagueNames}! 🎉`;
+                                                if (isElimination) msg += ' (Player marked as eliminated)';
+                                                if (isWinner) msg += ' (Player marked as Sole Survivor!)';
+                                                alert(msg);
                                             }
                                         },
                                         className: 'w-full px-6 py-3 bg-gradient-to-r from-orange-500 to-amber-600 text-white rounded-xl font-bold hover:shadow-lg transition text-lg'
                                     }, 'Add Points')
                                 )
-                            )
-                        )
-                    ),
-                    
-                    // Mark Elimination Modal
-                    showMarkElimination && h('div', { 
-                        className: 'modal-backdrop',
-                        onClick: () => setShowMarkElimination(false)
-                    },
-                        h('div', { 
-                            className: 'modal-content',
-                            onClick: (e) => e.stopPropagation(),
-                            style: { maxWidth: '600px' }
-                        },
-                            h('div', { className: 'p-6' },
-                                h('div', { className: 'flex justify-between items-center mb-6' },
-                                    h('h2', { 
-                                        className: 'text-3xl font-black',
-                                        style: { fontFamily: '"Bebas Neue", cursive' }
-                                    }, '❌ MARK ELIMINATION'),
-                                    h('button', {
-                                        onClick: () => setShowMarkElimination(false),
-                                        className: 'text-gray-500 hover:text-gray-700'
-                                    }, h(Icons.X, { size: 28 }))
-                                ),
-                                
-                                // Show currently eliminated players with undo option
-                                Object.keys(eliminationOrder).length > 0 && h('div', { className: 'mb-6 p-4 bg-red-50 border-2 border-red-200 rounded-xl' },
-                                    h('h3', { className: 'font-bold mb-3 text-red-800' }, '👥 Currently Eliminated'),
-                                    h('div', { className: 'space-y-2' },
-                                        ...Object.entries(eliminationOrder).map(([playerId, episode]) => {
-                                            const player = players.find(p => p.id === parseInt(playerId));
-                                            return h('div', {
-                                                key: playerId,
-                                                className: 'flex justify-between items-center bg-white p-3 rounded-lg'
-                                            },
-                                                h('span', { className: 'font-semibold text-gray-900' }, 
-                                                    `${player?.name || 'Unknown'} - Episode ${episode}`
-                                                ),
-                                                h('button', {
-                                                    onClick: () => {
-                                                        if (confirm(`Undo elimination for ${player?.name}?`)) {
-                                                            database.ref(`leagues/${activeLeagueId}/seasons/${activeSeasonId}/eliminationOrder/${playerId}`).remove();
-                                                        }
-                                                    },
-                                                    className: 'px-4 py-2 bg-blue-500 text-white rounded-lg font-bold hover:bg-blue-600 transition'
-                                                }, 'Undo')
-                                            );
-                                        })
-                                    )
-                                ),
-                                
-                                h('div', { className: 'space-y-4' },
-                                    // Player Selection
-                                    h('div', {},
-                                        h('label', { className: 'block text-sm font-bold text-gray-700 mb-2' }, 'Select Player'),
-                                        h('select', {
-                                            id: 'elim-player-select',
-                                            className: 'w-full px-4 py-3 border-2 border-gray-300 rounded-xl focus:border-red-500 focus:outline-none'
-                                        },
-                                            h('option', { value: '' }, 'Choose player...'),
-                                            ...players
-                                                .filter(p => !eliminationOrder[p.id] && (!winner || parseInt(winner) !== p.id))
-                                                .map(player => 
-                                                    h('option', { key: player.id, value: player.id }, player.name)
-                                                )
-                                        )
-                                    ),
-                                    
-                                    // Episode Selection
-                                    h('div', {},
-                                        h('label', { className: 'block text-sm font-bold text-gray-700 mb-2' }, 'Eliminated in Episode'),
-                                        h('select', {
-                                            id: 'elim-episode-select',
-                                            className: 'w-full px-4 py-3 border-2 border-gray-300 rounded-xl focus:border-red-500 focus:outline-none'
-                                        },
-                                            h('option', { value: '' }, 'Choose episode...'),
-                                            ...[...Array(13)].map((_, i) => {
-                                                const ep = i + 1;
-                                                return h('option', { key: ep, value: ep }, 
-                                                    `Episode ${ep}`
-                                                );
-                                            })
-                                        )
-                                    ),
-                                    
-                                    // Submit Button
-                                    h('button', {
-                                        onClick: () => {
-                                            const playerId = document.getElementById('elim-player-select').value;
-                                            const episode = document.getElementById('elim-episode-select').value;
-                                            
-                                            if (!playerId || !episode) {
-                                                alert('Please select both player and episode');
-                                                return;
-                                            }
-                                            
-                                            if (window.firebaseInitialized) {
-                                                database.ref(`leagues/${activeLeagueId}/seasons/${activeSeasonId}/eliminationOrder/${playerId}`).set(parseInt(episode)).then(() => {
-                                                    setShowMarkElimination(false);
-                                                    alert(`Player eliminated in Episode ${episode}!`);
-                                                });
-                                            }
-                                        },
-                                        className: 'w-full px-6 py-3 bg-gradient-to-r from-red-500 to-rose-600 text-white rounded-xl font-bold hover:shadow-lg transition text-lg'
-                                    }, 'Mark as Eliminated')
-                                )
-                            )
-                        )
-                    ),
-                    
-                    // Mark Winner Modal
-                    showMarkWinner && h('div', { 
-                        className: 'modal-backdrop',
-                        onClick: () => setShowMarkWinner(false)
-                    },
-                        h('div', { 
-                            className: 'modal-content',
-                            onClick: (e) => e.stopPropagation(),
-                            style: { maxWidth: '600px' }
-                        },
-                            h('div', { className: 'p-6' },
-                                h('div', { className: 'flex justify-between items-center mb-6' },
-                                    h('h2', { 
-                                        className: 'text-3xl font-black',
-                                        style: { fontFamily: '"Bebas Neue", cursive' }
-                                    }, '👑 MARK WINNER'),
-                                    h('button', {
-                                        onClick: () => setShowMarkWinner(false),
-                                        className: 'text-gray-500 hover:text-gray-700'
-                                    }, h(Icons.X, { size: 28 }))
-                                ),
-                                
-                                winner ? 
-                                    h('div', { className: 'space-y-4' },
-                                        h('div', { className: 'bg-yellow-50 border-2 border-yellow-400 p-4 rounded-lg' },
-                                            h('p', { className: 'font-bold text-lg mb-2' }, '👑 Current Winner:'),
-                                            h('p', { className: 'text-2xl font-black' }, 
-                                                players.find(p => p.id === parseInt(winner))?.name || 'Unknown'
-                                            )
-                                        ),
-                                        h('button', {
-                                            onClick: () => {
-                                                if (confirm('Are you sure you want to clear the current winner?')) {
-                                                    if (window.firebaseInitialized) {
-                                                        database.ref(`leagues/${activeLeagueId}/seasons/${activeSeasonId}/winner`).set(null).then(() => {
-                                                            setShowMarkWinner(false);
-                                                            alert('Winner cleared!');
-                                                        });
-                                                    }
-                                                }
-                                            },
-                                            className: 'w-full px-6 py-3 bg-red-500 text-white rounded-xl font-bold hover:shadow-lg transition'
-                                        }, 'Clear Winner')
-                                    ) :
-                                    h('div', { className: 'space-y-4' },
-                                        h('div', {},
-                                            h('label', { className: 'block text-sm font-bold text-gray-700 mb-2' }, 'Select Sole Survivor'),
-                                            h('select', {
-                                                id: 'winner-select',
-                                                className: 'w-full px-4 py-3 border-2 border-gray-300 rounded-xl focus:border-yellow-500 focus:outline-none'
-                                            },
-                                                h('option', { value: '' }, 'Choose winner...'),
-                                                ...players
-                                                    .filter(p => !eliminationOrder[p.id])
-                                                    .map(player => 
-                                                        h('option', { key: player.id, value: player.id }, player.name)
-                                                    )
-                                            )
-                                        ),
-                                        
-                                        h('div', { className: 'bg-purple-50 p-4 rounded-lg text-sm' },
-                                            h('p', { className: 'font-bold mb-2' }, '🏆 Winner Bonus'),
-                                            h('p', {}, 'The winning player\'s team will receive a +20 point bonus!')
-                                        ),
-                                        
-                                        h('button', {
-                                            onClick: () => {
-                                                const playerId = document.getElementById('winner-select').value;
-                                                
-                                                if (!playerId) {
-                                                    alert('Please select a player');
-                                                    return;
-                                                }
-                                                
-                                                if (window.firebaseInitialized) {
-                                                    database.ref(`leagues/${activeLeagueId}/seasons/${activeSeasonId}/winner`).set(parseInt(playerId)).then(() => {
-                                                        setShowMarkWinner(false);
-                                                        alert('Winner marked! 🎉');
-                                                    });
-                                                }
-                                            },
-                                            className: 'w-full px-6 py-3 bg-gradient-to-r from-yellow-500 to-amber-500 text-white rounded-xl font-bold hover:shadow-lg transition text-lg'
-                                        }, 'Mark as Sole Survivor')
-                                    )
                             )
                         )
                     ),
