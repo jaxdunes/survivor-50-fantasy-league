@@ -13,7 +13,33 @@ const FIREBASE_CONFIG = {
 };
 
 const DEFAULT_SEASON_ID = "season-51";
-const DEFAULT_LEAGUE_ID = "main-league-2026";
+const DEFAULT_LEAGUE_ID = "jackson-ryan-league";
+
+const AVAILABLE_LEAGUES = {
+    'jackson-ryan-league': {
+        id: 'jackson-ryan-league',
+        name: 'Jackson / Ryan League',
+        teams: [
+            { id: 'austin', name: 'Austin', color: 'from-blue-500 to-indigo-600', bgColor: 'bg-blue-50', textColor: 'text-blue-700' },
+            { id: 'sandra', name: 'Sandra', color: 'from-green-500 to-emerald-600', bgColor: 'bg-green-50', textColor: 'text-green-700' },
+            { id: 'ashlynn', name: 'Ashlynn', color: 'from-red-500 to-rose-600', bgColor: 'bg-red-50', textColor: 'text-red-700' },
+            { id: 'jackson-ray', name: 'Jackson/Ray', color: 'from-purple-500 to-violet-600', bgColor: 'bg-purple-50', textColor: 'text-purple-700' },
+            { id: 'maura', name: 'Maura', color: 'from-pink-500 to-fuchsia-600', bgColor: 'bg-pink-50', textColor: 'text-pink-700' },
+            { id: 'ryan-jordan', name: 'Ryan/Jordan', color: 'from-amber-500 to-orange-600', bgColor: 'bg-amber-50', textColor: 'text-amber-700' }
+        ]
+    },
+    'jordan-denver-league': {
+        id: 'jordan-denver-league',
+        name: 'Jordan / Denver League',
+        teams: [
+            { id: 'ryan', name: 'Ryan', color: 'from-amber-500 to-orange-600', bgColor: 'bg-amber-50', textColor: 'text-amber-700' },
+            { id: 'jordan', name: 'Jordan', color: 'from-purple-500 to-violet-600', bgColor: 'bg-purple-50', textColor: 'text-purple-700' },
+            { id: 'scott', name: 'Scott', color: 'from-blue-500 to-indigo-600', bgColor: 'bg-blue-50', textColor: 'text-blue-700' },
+            { id: 'hayley', name: 'Hayley', color: 'from-emerald-500 to-teal-600', bgColor: 'bg-emerald-50', textColor: 'text-emerald-700' },
+            { id: 'ashlynn', name: 'Ashlynn', color: 'from-red-500 to-rose-600', bgColor: 'bg-red-50', textColor: 'text-red-700' }
+        ]
+    }
+};
 
 var firebaseInitialized = false;
 window.firebaseInitialized = false;
@@ -49,20 +75,25 @@ function initFirebase() {
  */
 function getActiveLeagueId() {
     const urlParams = new URLSearchParams(window.location.search);
-    const leagueParam = urlParams.get('league');
+    let leagueParam = urlParams.get('league');
     
-    if (leagueParam) {
-        localStorage.setItem('survivor_active_league_id', leagueParam);
-        return leagueParam;
+    if (!leagueParam || !AVAILABLE_LEAGUES[leagueParam]) {
+        leagueParam = localStorage.getItem('survivor_active_league_id');
     }
     
-    return localStorage.getItem('survivor_active_league_id') || DEFAULT_LEAGUE_ID;
+    if (!AVAILABLE_LEAGUES[leagueParam]) {
+        leagueParam = DEFAULT_LEAGUE_ID;
+    }
+    
+    localStorage.setItem('survivor_active_league_id', leagueParam);
+    return leagueParam;
 }
 
 /**
  * Set active league ID and update URL / localStorage
  */
 function setActiveLeagueId(leagueId) {
+    if (!AVAILABLE_LEAGUES[leagueId]) return;
     localStorage.setItem('survivor_active_league_id', leagueId);
     const url = new URL(window.location.href);
     url.searchParams.set('league', leagueId);
@@ -70,7 +101,7 @@ function setActiveLeagueId(leagueId) {
 }
 
 /**
- * Get active season ID (defaults to season-50)
+ * Get active season ID (defaults to season-51)
  */
 function getActiveSeasonId() {
     const urlParams = new URLSearchParams(window.location.search);

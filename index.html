@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Survivor 50 Fantasy League</title>
+    <title>Survivor 51 Fantasy League</title>
     <script src="https://cdn.jsdelivr.net/npm/react@18.2.0/umd/react.production.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/react-dom@18.2.0/umd/react-dom.production.min.js"></script>
     <script src="https://cdn.tailwindcss.com"></script>
@@ -18,7 +18,7 @@
     <link rel="apple-touch-icon" href="icons/icon-192x192.png">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="default">
-    <meta name="apple-mobile-web-app-title" content="Survivor 50">
+    <meta name="apple-mobile-web-app-title" content="Survivor 51">
     
     <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Playfair+Display:wght@700&display=swap" rel="stylesheet">
     <style>
@@ -54,7 +54,7 @@
 <body>
     <div id="root">
         <div style="display: flex; justify-content: center; align-items: center; min-height: 100vh; font-size: 24px; color: #f97316; font-weight: bold;">
-            🔥 Loading Survivor 50...
+            🔥 Loading Survivor 51...
         </div>
     </div>
     
@@ -106,18 +106,13 @@
             X: createIcon('<path d="M18 6 6 18"></path><path d="m6 6 12 12"></path>'),
             Check: createIcon('<polyline points="20 6 9 17 4 12"></polyline>'),
             Wifi: createIcon('<path d="M5 13a10 10 0 0 1 14 0"></path><path d="M8.5 16.5a5 5 0 0 1 7 0"></path><path d="M2 8.82a15 15 0 0 1 20 0"></path><circle cx="12" cy="20" r="1"></circle>'),
-            WifiOff: createIcon('<line x1="2" y1="2" x2="22" y2="22"></line><path d="M8.5 16.5a5 5 0 0 1 7 0"></path><path d="M2 8.82a15 15 0 0 1 4.17-2.65"></path><path d="M10.66 5c4.01-.36 8.14.9 11.34 3.76"></path><path d="M16.85 11.25a10 10 0 0 1 2.22 1.68"></path><path d="M5 13a10 10 0 0 1 5.24-2.76"></path><circle cx="12" cy="20" r="1"></circle>')
+            WifiOff: createIcon('<line x1="2" y1="2" x2="22" y2="22"></line><path d="M8.5 16.5a5 5 0 0 1 7 0"></path><path d="M2 8.82a15 15 0 0 1 4.17-2.65"></path><path d="M10.66 5c4.01-.36 8.14.9 11.34 3.76"></path><path d="M16.85 11.25a10 10 0 0 1 2.22 1.68"></path><path d="M5 13a10 10 0 0 1 5.24-2.76"></path><circle cx="12" cy="20" r="1"></circle>'),
+            Menu: createIcon('<line x1="4" x2="20" y1="12" y2="12"></line><line x1="4" x2="20" y1="6" y2="6"></line><line x1="4" x2="20" y1="18" y2="18"></line>')
         };
         
         function SurvivorFantasyLeague() {
-            const teams = [
-                { id: 'austin', name: 'Austin', color: 'from-blue-500 to-indigo-600', bgColor: 'bg-blue-50', textColor: 'text-blue-700' },
-                { id: 'sandra', name: 'Sandra', color: 'from-green-500 to-emerald-600', bgColor: 'bg-green-50', textColor: 'text-green-700' },
-                { id: 'ashlynn', name: 'Ashlynn', color: 'from-red-500 to-rose-600', bgColor: 'bg-red-50', textColor: 'text-red-700' },
-                { id: 'jackson-ray', name: 'Jackson/Ray', color: 'from-purple-500 to-violet-600', bgColor: 'bg-purple-50', textColor: 'text-purple-700' },
-                { id: 'maura', name: 'Maura', color: 'from-pink-500 to-fuchsia-600', bgColor: 'bg-pink-50', textColor: 'text-pink-700' },
-                { id: 'ryan-jordan', name: 'Ryan/Jordan', color: 'from-amber-500 to-orange-600', bgColor: 'bg-amber-50', textColor: 'text-amber-700' }
-            ];
+            const currentLeagueConfig = AVAILABLE_LEAGUES[activeLeagueId] || AVAILABLE_LEAGUES['jackson-ryan-league'];
+            const teams = currentLeagueConfig.teams;
             
             const [playerTeams, setPlayerTeams] = useState({});
             const [seasonData, setSeasonData] = useState(null);
@@ -130,6 +125,7 @@
             const [playerDetailId, setPlayerDetailId] = useState(null);
             const [showTeamModal, setShowTeamModal] = useState(false);
             const [playerToAssign, setPlayerToAssign] = useState(null);
+            const [showSideMenu, setShowSideMenu] = useState(false);
             const [connected, setConnected] = useState(window.firebaseInitialized);
             
             // Load season preset data
@@ -374,7 +370,14 @@
                     
                     // Header
                     h('div', { className: 'text-center mb-8' },
-                        h('div', { className: 'flex justify-center items-center gap-4 mb-4' },
+                        h('div', { className: 'flex justify-center items-center gap-3 mb-4 flex-wrap' },
+                            h('button', {
+                                onClick: () => setShowSideMenu(true),
+                                className: 'bg-orange-500 text-white px-4 py-2 rounded-lg hover:bg-orange-600 transition flex items-center gap-2 font-bold shadow-md'
+                            },
+                                h(Icons.Menu, { size: 20 }),
+                                h('span', {}, 'Leagues Menu')
+                            ),
                             h('a', {
                                 href: 'scoring.html?league=' + activeLeagueId,
                                 className: 'bg-white/90 backdrop-blur-md px-4 py-2 rounded-lg hover:bg-white transition flex items-center gap-2 font-bold'
@@ -396,13 +399,17 @@
                             className: 'w-32 h-32 rounded-full mx-auto mb-4 border-4 border-white shadow-xl object-cover'
                         }),
                         h('h1', { 
-                            className: 'text-6xl md:text-8xl font-black mb-4 text-gray-900 drop-shadow-lg',
+                            className: 'text-6xl md:text-8xl font-black mb-2 text-gray-900 drop-shadow-lg',
                             style: { fontFamily: '"Bebas Neue", cursive' }
-                        }, 'SURVIVOR 50'),
+                        }, 'SURVIVOR 51'),
                         h('p', { 
-                            className: 'text-2xl md:text-3xl text-gray-800 font-semibold drop-shadow-md',
+                            className: 'text-2xl md:text-3xl text-gray-800 font-semibold drop-shadow-md mb-3',
                             style: { fontFamily: '"Playfair Display", serif' }
-                        }, 'In the Hands of the Fans - Fantasy League')
+                        }, 'Open Era - Fantasy League'),
+                        h('div', { className: 'inline-flex items-center gap-2 bg-orange-500 text-white font-bold px-4 py-1.5 rounded-full text-sm shadow-md' },
+                            h(Icons.Trophy, { size: 16 }),
+                            h('span', {}, currentLeagueConfig.name)
+                        )
                     ),
                     
                     // Stats Bar
@@ -577,10 +584,60 @@
                         )
                     ),
                     
+                    // Side Menu Drawer Overlay
+                    showSideMenu && h('div', {
+                        className: 'fixed inset-0 bg-black/60 backdrop-blur-sm z-50 flex justify-start transition-opacity',
+                        onClick: () => setShowSideMenu(false)
+                    },
+                        h('div', {
+                            className: 'bg-white w-80 max-w-[85vw] h-full shadow-2xl p-6 flex flex-col justify-between overflow-y-auto',
+                            onClick: (e) => e.stopPropagation()
+                        },
+                            h('div', {},
+                                h('div', { className: 'flex justify-between items-center mb-6 pb-4 border-b border-gray-100' },
+                                    h('div', { className: 'flex items-center gap-2' },
+                                        h(Icons.Trophy, { size: 24, className: 'text-orange-500' }),
+                                        h('h2', { className: 'text-xl font-black text-gray-900' }, 'Select League')
+                                    ),
+                                    h('button', {
+                                        onClick: () => setShowSideMenu(false),
+                                        className: 'p-2 rounded-full hover:bg-gray-100 text-gray-500'
+                                    }, h(Icons.X, { size: 20 }))
+                                ),
+                                h('div', { className: 'space-y-3' },
+                                    Object.values(AVAILABLE_LEAGUES).map(league => {
+                                        const isActive = league.id === activeLeagueId;
+                                        return h('button', {
+                                            key: league.id,
+                                            onClick: () => {
+                                                setShowSideMenu(false);
+                                                setActiveLeagueId(league.id);
+                                            },
+                                            className: `w-full text-left p-4 rounded-xl font-bold transition flex items-center justify-between ${
+                                                isActive 
+                                                    ? 'bg-orange-500 text-white shadow-md' 
+                                                    : 'bg-gray-100 text-gray-800 hover:bg-gray-200'
+                                            }`
+                                        },
+                                            h('div', {},
+                                                h('div', { className: 'font-extrabold text-base' }, league.name),
+                                                h('div', { className: `text-xs mt-1 ${isActive ? 'text-orange-100' : 'text-gray-500'}` }, `${league.teams.length} Teams`)
+                                            ),
+                                            isActive && h(Icons.Check, { size: 20 })
+                                        );
+                                    })
+                                )
+                            ),
+                            h('div', { className: 'pt-6 border-t border-gray-100 text-center text-xs text-gray-400 font-semibold' },
+                                'Survivor 51 Fantasy App'
+                            )
+                        )
+                    ),
+
                     // Footer
                     h('div', { className: 'mt-12 text-center text-gray-900' },
-                        h('p', { className: 'text-lg font-semibold mb-2' }, '📺 Season Premiere: February 25, 2026 on CBS'),
-                        h('p', { className: 'text-sm text-gray-700' }, '3-Hour Special Episode • Biggest Cast Ever • In the Hands of the Fans')
+                        h('p', { className: 'text-lg font-semibold mb-2' }, '📺 Survivor 51: Open Era'),
+                        h('p', { className: 'text-sm text-gray-700' }, 'Official 21 Castaways • Multi-League Draft Tracker')
                     )
                 )
             );
