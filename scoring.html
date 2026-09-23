@@ -94,6 +94,7 @@
         }
 
         body.theme-tribal {
+            position: relative !important;
             background: radial-gradient(circle at 50% 10%, #291c14 0%, #160f0a 55%, #0a0604 100%) !important;
             background-attachment: fixed !important;
             color: #f3eae1 !important;
@@ -103,32 +104,37 @@
             background: transparent !important;
         }
 
-        /* Top Dark Black Night Sky with Faint Stars fading gradually into theme */
+        /* Top Dark Black Night Sky with Faint Stars anchored at top of page */
         body.theme-tribal::before {
             content: '';
-            position: fixed;
+            position: absolute;
             top: 0;
             left: 0;
             right: 0;
-            height: 380px;
+            height: 680px;
             background: 
-                /* Faint Stars */
-                radial-gradient(1.5px 1.5px at 10% 12%, rgba(255, 255, 255, 0.75), transparent),
-                radial-gradient(2px 2px at 24% 6%, rgba(254, 243, 199, 0.8), transparent),
-                radial-gradient(1px 1px at 38% 18%, rgba(255, 255, 255, 0.6), transparent),
-                radial-gradient(1.5px 1.5px at 52% 8%, rgba(253, 230, 138, 0.75), transparent),
-                radial-gradient(2px 2px at 68% 14%, rgba(255, 255, 255, 0.8), transparent),
-                radial-gradient(1px 1px at 82% 10%, rgba(254, 243, 199, 0.65), transparent),
-                radial-gradient(1.5px 1.5px at 92% 22%, rgba(255, 255, 255, 0.6), transparent),
-                radial-gradient(1.5px 1.5px at 16% 26%, rgba(255, 255, 255, 0.65), transparent),
-                radial-gradient(1px 1px at 31% 30%, rgba(254, 243, 199, 0.5), transparent),
-                radial-gradient(1.5px 1.5px at 61% 24%, rgba(255, 255, 255, 0.7), transparent),
-                radial-gradient(1px 1px at 76% 32%, rgba(253, 230, 138, 0.6), transparent),
-                /* Dark Black Sky Arc fading down into dark brown theme */
-                radial-gradient(ellipse 140% 100% at 50% -35%, 
+                /* Faint Stars in expanded vertical field */
+                radial-gradient(1.5px 1.5px at 8% 8%, rgba(255, 255, 255, 0.8), transparent),
+                radial-gradient(2px 2px at 22% 5%, rgba(254, 243, 199, 0.85), transparent),
+                radial-gradient(1.5px 1.5px at 35% 16%, rgba(255, 255, 255, 0.7), transparent),
+                radial-gradient(2px 2px at 48% 10%, rgba(253, 230, 138, 0.8), transparent),
+                radial-gradient(1px 1px at 62% 20%, rgba(255, 255, 255, 0.65), transparent),
+                radial-gradient(2.5px 2.5px at 78% 12%, rgba(254, 243, 199, 0.9), transparent),
+                radial-gradient(1.5px 1.5px at 90% 22%, rgba(255, 255, 255, 0.75), transparent),
+                radial-gradient(1.5px 1.5px at 14% 30%, rgba(255, 255, 255, 0.7), transparent),
+                radial-gradient(2px 2px at 28% 38%, rgba(254, 243, 199, 0.75), transparent),
+                radial-gradient(1px 1px at 42% 32%, rgba(255, 255, 255, 0.6), transparent),
+                radial-gradient(1.5px 1.5px at 58% 36%, rgba(253, 230, 138, 0.65), transparent),
+                radial-gradient(2px 2px at 74% 40%, rgba(255, 255, 255, 0.75), transparent),
+                radial-gradient(1px 1px at 86% 34%, rgba(254, 243, 199, 0.6), transparent),
+                radial-gradient(1.5px 1.5px at 20% 48%, rgba(255, 255, 255, 0.65), transparent),
+                radial-gradient(1px 1px at 64% 46%, rgba(253, 230, 138, 0.55), transparent),
+                /* Dark Black Sky Arc extending further before fading down into theme */
+                radial-gradient(ellipse 140% 100% at 50% -30%, 
                     #000000 0%, 
-                    #030202 35%, 
-                    rgba(12, 8, 5, 0.85) 65%, 
+                    #000000 48%, 
+                    #050403 70%, 
+                    rgba(15, 10, 7, 0.8) 86%, 
                     transparent 100%);
             pointer-events: none;
             z-index: 1;
