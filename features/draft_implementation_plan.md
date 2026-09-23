@@ -52,7 +52,7 @@ Implement the full draft system specified in [`features/draft_prd.md`](file:///U
    - Titled **"🗳️ THE VOTING BOOTH"**, appearing above player cards when draft is `Open`.
    - Displays current Round & Pick (e.g., `Round 1 • Pick 3 (Overall #3)`).
    - Shows live digital timer `⏱️ MM:SS` counting up from `lastPickTimestamp`. Timer resets to `0:00` automatically on every pick.
-   - Renders sequence of teams with glowing amber border and a **burning torch icon (🔥)** on the **On-The-Clock Manager (`TORCH LIT`)**.
+   - Renders sequence of teams with glowing amber border and a **burning torch icon (🔥)** beside the **On-The-Clock Manager**.
 3. **Turn-Based Player Assignment**:
    - When draft is `Open`, player cards show an active **"Draft Player"** or **"Assign"** button only for the team currently on the clock (or for any team if manually selected).
    - Assigning a player updates `playerTeams`, advances `currentPick`, recalculates `onTheClockTeamId` based on `style` (Linear vs Snake), and sets `lastPickTimestamp = Date.now()`.

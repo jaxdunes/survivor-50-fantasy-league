@@ -1045,34 +1045,33 @@
                         ),
 
                         // On-the-Clock Manager Banner with Torch Flame Icon
-                        h('div', { className: 'mb-5 text-center bg-slate-950/60 p-4 rounded-xl border border-amber-500/30' },
+                        h('div', { className: 'mb-4 text-center bg-slate-950/60 p-4 rounded-xl border border-amber-500/30' },
                             h('div', { className: 'flex items-center justify-center gap-2 mb-1' },
-                                h('span', { className: 'text-2xl animate-bounce' }, '🔥'),
-                                h('span', { className: 'text-xs text-amber-400 font-black uppercase tracking-widest' }, 'Torch Lit • On the Clock:'),
-                                h('span', { className: 'text-2xl animate-bounce' }, '🔥')
+                                h('span', { className: 'text-xl animate-bounce' }, '🔥'),
+                                h('span', { className: 'text-xs text-amber-400 font-black uppercase tracking-widest' }, 'On the Clock:'),
+                                h('span', { className: 'text-xl animate-bounce' }, '🔥')
                             ),
                             h('div', { className: 'text-3xl font-black text-amber-300 drop-shadow-md tracking-wide', style: { fontFamily: '"Bebas Neue", cursive' } },
                                 (teams.find(t => t.id === draftState.onTheClockTeamId) || {}).name || draftState.onTheClockTeamId || 'Waiting...'
                             )
                         ),
 
-                        // Horizontal Sequence of Teams with Torch Icon for Drafting Manager
-                        h('div', { className: 'flex items-center gap-3 overflow-x-auto pb-2 scrollbar-none justify-start md:justify-center' },
+                        // Horizontal Sequence of Teams with Torch Icon for Drafting Manager (Padded to prevent top clipping)
+                        h('div', { className: 'flex items-center gap-3 overflow-x-auto pt-4 pb-4 px-2 scrollbar-none justify-start md:justify-center my-1' },
                             ...(draftState.orderSequence && draftState.orderSequence.length > 0 ? draftState.orderSequence : teams.map(t => t.id)).map((tId, idx) => {
                                 const teamObj = teams.find(t => t.id === tId) || { name: tId, color: 'from-amber-500 to-orange-600' };
                                 const isOnClock = tId === draftState.onTheClockTeamId;
                                 return h('div', {
                                     key: tId + '-' + idx,
-                                    className: `flex items-center gap-2 px-4 py-2.5 rounded-xl text-xs font-bold transition transform ${
+                                    className: `flex items-center gap-2 px-4 py-2.5 rounded-xl text-xs font-bold transition ${
                                         isOnClock 
-                                            ? 'bg-gradient-to-r from-orange-500 via-amber-500 to-orange-600 text-white ring-4 ring-orange-400/80 scale-105 shadow-2xl animate-pulse border border-amber-300' 
+                                            ? 'bg-gradient-to-r from-orange-500 via-amber-500 to-orange-600 text-white ring-4 ring-orange-400/80 shadow-2xl animate-pulse border border-amber-300 font-black' 
                                             : 'bg-slate-800/80 text-slate-300 opacity-70 border border-slate-700'
                                     }`
                                 },
-                                    isOnClock && h('span', { className: 'text-base animate-bounce' }, '🔥'),
+                                    isOnClock && h('span', { className: 'text-base' }, '🔥'),
                                     h('span', { className: 'text-[10px] opacity-75 font-mono' }, `#${idx + 1}`),
-                                    h('span', { className: 'font-black' }, teamObj.name),
-                                    isOnClock && h('span', { className: 'text-[10px] bg-amber-950 text-amber-300 px-1.5 py-0.5 rounded font-black border border-amber-400/40 uppercase tracking-wider' }, 'TORCH LIT')
+                                    h('span', { className: 'font-black' }, teamObj.name)
                                 );
                             })
                         )

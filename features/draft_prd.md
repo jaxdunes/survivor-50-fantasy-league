@@ -64,7 +64,7 @@ stateDiagram-v2
   - Current Round & Pick Number (e.g., `Round 2 • Pick 3 (Overall #10)`).
   - **Pick Timer (`⏱️ 0:00`)**: Digital timer tracking elapsed time since the last pick was made. Restarts at `0:00` immediately whenever a pick occurs.
   - Horizontal scrolling list of managers in draft sequence order.
-  - **Torch Icon (🔥)**: Displayed prominently beside the manager currently on the clock, accompanied by a glowing amber border and pulse animation (`TORCH LIT`).
+  - **Torch Icon (🔥)**: Visually displayed beside the manager currently on the clock, accompanied by a glowing amber border and pulse animation (without redundant text labels).
 
 ### 3.3 Draft Settings Drawer / Modal
 Accessible via the **⚙️ Settings Cog** next to the View Mode toggles.
