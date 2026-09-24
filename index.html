@@ -714,6 +714,86 @@
                 )
             );
         }
+
+        function EpisodesScoredTracker({ scores, eliminationOrder, onEpisodeClick, theme }) {
+            const episodes = Array.from({ length: 14 }, (_, i) => i + 1);
+
+            const episodeStates = episodes.map(ep => {
+                // State 1: Completed / Voted Out
+                const hasVotedOut = Object.entries(eliminationOrder || {}).some(([playerId, elimEp]) => {
+                    return parseInt(elimEp) === ep;
+                });
+
+                if (hasVotedOut) {
+                    return { ep, status: 'completed', label: 'Completed', icon: '✓' };
+                }
+
+                // State 2: Being Scored / In Progress
+                let hasPoints = false;
+                let pointsCount = 0;
+                Object.values(scores || {}).forEach(playerScores => {
+                    if (playerScores && playerScores[ep]) {
+                        const numScores = Object.keys(playerScores[ep]).length;
+                        if (numScores > 0) {
+                            hasPoints = true;
+                            pointsCount += numScores;
+                        }
+                    }
+                });
+
+                if (hasPoints) {
+                    return { ep, status: 'in-progress', label: 'Being Scored', icon: '⚪', count: pointsCount };
+                }
+
+                // State 3: Unscored / Not Started
+                return { ep, status: 'unscored', label: 'Unscored', icon: '✗' };
+            });
+
+            const isTribal = theme === 'tribal';
+
+            return h('div', { className: 'bg-white/90 backdrop-blur-md rounded-xl px-4 py-3 mb-6 shadow-md border border-gray-100/80 flex flex-col md:flex-row items-start md:items-center justify-between gap-3' },
+                h('div', { className: 'flex items-center gap-2.5 flex-shrink-0' },
+                    h('span', { className: 'text-base' }, '📺'),
+                    h('span', { className: 'text-xs font-black uppercase tracking-wider text-gray-800 font-mono' }, 'Episodes Scored:'),
+                    h('div', { className: 'hidden sm:flex items-center gap-2 text-[10px] font-bold text-gray-500 border-l border-gray-200 pl-2.5' },
+                        h('span', { className: 'flex items-center gap-1' }, h('span', { className: 'w-1.5 h-1.5 rounded-full bg-emerald-500' }), 'Scored (✓)'),
+                        h('span', { className: 'flex items-center gap-1' }, h('span', { className: 'w-1.5 h-1.5 rounded-full bg-slate-400' }), 'In Progress (⚪)'),
+                        h('span', { className: 'flex items-center gap-1' }, h('span', { className: 'w-1.5 h-1.5 rounded-full bg-amber-700/40 border border-amber-900/40' }), 'Unscored (✗)')
+                    )
+                ),
+
+                h('div', { className: 'flex flex-wrap items-center gap-1.5 w-full md:w-auto overflow-x-auto py-0.5' },
+                    ...episodeStates.map(item => {
+                        let badgeStyle = '';
+
+                        if (item.status === 'completed') {
+                            badgeStyle = isTribal 
+                                ? 'bg-emerald-950/80 border-emerald-500/70 text-emerald-300 hover:bg-emerald-900 shadow-xs' 
+                                : 'bg-green-100 border-green-500 text-green-900 hover:bg-green-200 shadow-xs';
+                        } else if (item.status === 'in-progress') {
+                            badgeStyle = isTribal 
+                                ? 'bg-slate-800/90 border-slate-400/70 text-slate-200 hover:bg-slate-700 shadow-xs' 
+                                : 'bg-gray-200 border-gray-400 text-gray-800 hover:bg-gray-300 shadow-xs';
+                        } else {
+                            badgeStyle = isTribal 
+                                ? 'bg-amber-950/20 border-amber-900/40 text-amber-300/40 hover:bg-amber-900/30 hover:text-amber-200/80' 
+                                : 'bg-gray-50 border-gray-300 text-gray-400 hover:bg-gray-100 hover:text-gray-600 shadow-xs';
+                        }
+
+                        return h('button', {
+                            key: item.ep,
+                            type: 'button',
+                            onClick: () => onEpisodeClick(item.ep),
+                            title: `Episode ${item.ep}: ${item.label} (Click to add points)`,
+                            className: `px-2 py-1 rounded-lg border text-[11px] font-bold font-mono flex items-center gap-1 transition-all duration-150 cursor-pointer ${badgeStyle}`
+                        },
+                            h('span', {}, `E${item.ep}`),
+                            h('span', { className: 'text-[10px] font-black' }, item.icon)
+                        );
+                    })
+                )
+            );
+        }
         
         function ScoringPage() {
             const currentLeagueConfig = LEAGUES_DATA[activeLeagueId] || LEAGUES_DATA['jackson-ryan-league'];
@@ -802,6 +882,7 @@
             const [eliminationOrder, setEliminationOrder] = useState({});
             const [winner, setWinner] = useState(null); // Single winner ID
             const [currentEpisode, setCurrentEpisode] = useState(1);
+            const [lastSelectedEpisode, setLastSelectedEpisode] = useState(() => localStorage.getItem('survivor_last_selected_episode') || '1');
             const [showRules, setShowRules] = useState(false);
             const [showAddScore, setShowAddScore] = useState(false);
             const [showMarkElimination, setShowMarkElimination] = useState(false);
@@ -1149,6 +1230,19 @@
                         )
                     ),
                     
+                    // Episodes Scored Tracker
+                    h(EpisodesScoredTracker, {
+                        scores: scores,
+                        eliminationOrder: eliminationOrder,
+                        theme: theme,
+                        onEpisodeClick: (epNum) => {
+                            const epStr = String(epNum);
+                            setLastSelectedEpisode(epStr);
+                            localStorage.setItem('survivor_last_selected_episode', epStr);
+                            setShowAddScore(true);
+                        }
+                    }),
+
                     // Weekly Team Point Progression Graph
                     h(TeamScoreGraph, {
                         leaderboard: leaderboard,
@@ -1381,6 +1475,26 @@
                                         selectedAddScoreLeagues.length === 0 && h('div', { className: 'text-xs text-red-600 font-bold mt-2' }, '⚠️ Please select at least one league to apply points.')
                                     ),
                                     
+                                    // Episode Selection (Top of Form)
+                                    h('div', {},
+                                        h('label', { className: 'block text-sm font-bold text-gray-700 mb-2' }, 'Episode Number'),
+                                        h('select', {
+                                            id: 'episode-select',
+                                            value: lastSelectedEpisode,
+                                            onChange: (e) => {
+                                                const val = e.target.value;
+                                                setLastSelectedEpisode(val);
+                                                localStorage.setItem('survivor_last_selected_episode', val);
+                                            },
+                                            className: 'w-full px-4 py-3 border-2 border-gray-300 rounded-xl focus:border-orange-500 focus:outline-none font-semibold'
+                                        },
+                                            h('option', { value: '' }, 'Choose episode...'),
+                                            ...[...Array(14)].map((_, i) => 
+                                                h('option', { key: i + 1, value: String(i + 1) }, `Episode ${i + 1}`)
+                                            )
+                                        )
+                                    ),
+
                                     // Player Selection
                                     h('div', {},
                                         h('label', { className: 'block text-sm font-bold text-gray-700 mb-2' }, 'Select Player'),
@@ -1391,20 +1505,6 @@
                                             h('option', { value: '' }, 'Choose a player...'),
                                             ...players.map(player => 
                                                 h('option', { key: player.id, value: player.id }, player.name)
-                                            )
-                                        )
-                                    ),
-                                    
-                                    // Episode Selection
-                                    h('div', {},
-                                        h('label', { className: 'block text-sm font-bold text-gray-700 mb-2' }, 'Episode Number'),
-                                        h('select', {
-                                            id: 'episode-select',
-                                            className: 'w-full px-4 py-3 border-2 border-gray-300 rounded-xl focus:border-orange-500 focus:outline-none'
-                                        },
-                                            h('option', { value: '' }, 'Choose episode...'),
-                                            ...[...Array(14)].map((_, i) => 
-                                                h('option', { key: i + 1, value: i + 1 }, `Episode ${i + 1}`)
                                             )
                                         )
                                     ),
@@ -1576,7 +1676,9 @@
                                                 
                                                 Promise.all(promises).then(() => {
                                                     document.getElementById('player-select').value = '';
-                                                    document.getElementById('episode-select').value = '';
+                                                    if (document.getElementById('episode-select')) {
+                                                        document.getElementById('episode-select').value = episode;
+                                                    }
                                                     document.getElementById('category-select').value = '';
                                                     document.getElementById('points-input').value = '';
                                                     document.getElementById('note-input').value = '';
@@ -1616,7 +1718,9 @@
                                                 });
                                                 
                                                 document.getElementById('player-select').value = '';
-                                                document.getElementById('episode-select').value = '';
+                                                if (document.getElementById('episode-select')) {
+                                                    document.getElementById('episode-select').value = episode;
+                                                }
                                                 document.getElementById('category-select').value = '';
                                                 document.getElementById('points-input').value = '';
                                                 document.getElementById('note-input').value = '';
