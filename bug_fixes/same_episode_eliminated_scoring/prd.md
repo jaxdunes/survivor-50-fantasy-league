@@ -36,33 +36,36 @@ Player selection eligibility on the "Add Points" screen MUST be evaluated relati
   - If a player was eliminated in **Episode E** (`eliminationOrder[playerId] === E`), they **MUST REMAIN ACTIVE AND SELECTABLE** when **Episode E** is selected in the "Choose Episode" dropdown.
   - This allows admins to add multiple scoring events for that contestant during the episode in which they were voted out.
 
-- **Rule B (Subsequent-Episode Lockout)**:
-  - A player is marked as `isEliminated` (disabled/filtered out) on the "Add Points" screen ONLY if they were eliminated in a **prior episode** relative to the selected episode (`eliminationOrder[playerId] < selectedEpisode`).
+- **Rule B (Subsequent-Episode Complete Omission)**:
+  - If an episode is selected that occurs after a player's elimination (`eliminationOrder[playerId] < selectedEpisode`), that player **MUST NOT BE SHOWN AT ALL** on the "Add Points" screen. Only eligible players for the selected episode are displayed.
 
-#### Eligibility Matrix Example:
+#### Eligibility & Visibility Matrix Example:
 | Selected Episode | Player A (Eliminated Ep 1) | Player B (Eliminated Ep 2) | Player C (Active) |
 | :--- | :--- | :--- | :--- |
-| **Episode 1** | **Active & Selectable** | Active & Selectable | Active & Selectable |
-| **Episode 2** | *Disabled (Eliminated Ep 1)* | **Active & Selectable** | Active & Selectable |
-| **Episode 3** | *Disabled (Eliminated Ep 1)* | *Disabled (Eliminated Ep 2)* | Active & Selectable |
+| **Episode 1** | **Active & Visible (`💀 EP 1 OUT`)** | Active & Visible | Active & Visible |
+| **Episode 2** | *Hidden (Omitted from view)* | **Active & Visible (`💀 EP 2 OUT`)** | Active & Visible |
+| **Episode 3** | *Hidden (Omitted from view)* | *Hidden (Omitted from view)* | Active & Visible |
 
 ---
 
 ## 3. Component & UI Specifications (`index.html`)
 
 ### 3.1 "Add Points" Player Selection Grid
-- **Dynamic Eligibility Logic**:
+- **Dynamic Eligibility & Filtering Logic**:
   ```javascript
   const selectedEpNum = parseInt(lastSelectedEpisode) || 1;
-  const playerElimEp = eliminationOrder[player.id] ? parseInt(eliminationOrder[player.id]) : null;
-  const isEliminatedForSelectedEp = playerElimEp !== null && playerElimEp < selectedEpNum;
+  const eligibleTribePlayers = tPlayers.filter(player => {
+      const playerElimEp = eliminationOrder[player.id] ? parseInt(eliminationOrder[player.id]) : null;
+      return playerElimEp === null || playerElimEp >= selectedEpNum;
+  });
   ```
-- **Button State**:
-  - `disabled`: `isEliminatedForSelectedEp` (only disabled if eliminated in an earlier episode).
-  - `visual indicator`: If `playerElimEp === selectedEpNum`, display a subtle badge (e.g. `💀 Voted Out Ep E`) to indicate the player was eliminated in the currently selected episode, but keep their button fully clickable for additional point entries.
+- **Rendering & Badging**:
+  - Only players in `eligibleTribePlayers` are rendered in the grid.
+  - If `playerElimEp === selectedEpNum`, render a `💀 EP E OUT` badge on their button, keeping the button active & clickable for any additional Episode E point entries.
+  - Players eliminated before `selectedEpNum` are omitted completely.
 
 ### 3.2 Tribe Bulk Selection (`toggleTribeSelected`)
-- Bulk selecting a tribe for Episode E targets players where `!eliminationOrder[p.id] || parseInt(eliminationOrder[p.id]) >= selectedEpNum`.
+- Bulk selecting a tribe for Episode E targets `eligibleTribePlayers` (`!eliminationOrder[p.id] || parseInt(eliminationOrder[p.id]) >= selectedEpNum`).
 
 ---
 
@@ -73,8 +76,8 @@ Player selection eligibility on the "Add Points" screen MUST be evaluated relati
    - Assign "Voted Out" event to a player in Episode 1. Verify `eliminationOrder[player.id] = 1` is written.
 2. **Same-Episode Eligibility Test**:
    - Select Episode 1 in the "Add Points" modal.
-   - Verify the contestant voted out in Episode 1 remains **active and selectable**.
+   - Verify the contestant voted out in Episode 1 remains **active, visible, and selectable**.
    - Assign a second scoring event (e.g. "First Voted Out" or confessionals) to that player. Verify the event saves successfully.
-3. **Subsequent-Episode Lockout Test**:
+3. **Subsequent-Episode Omission Test**:
    - Select Episode 2 in the "Add Points" modal.
-   - Verify the contestant voted out in Episode 1 is now **disabled/grayed out**.
+   - Verify the contestant voted out in Episode 1 is **completely hidden/omitted** from the grid and does not appear on screen.

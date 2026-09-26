@@ -23,17 +23,18 @@ const isElimination = (
 
 ---
 
-### 2. Episode-Aware Player Selection Eligibility Grid (`index.html`)
+### 2. Episode-Aware Player Selection & Complete Omission (`index.html`)
 - Derived `selectedEpNum` from `lastSelectedEpisode`.
-- Updated player button status and bulk tribe selection logic so player eligibility is relative to the selected episode:
-  - **Same-Episode Rule**: If `playerElimEp === selectedEpNum`, the player displays a red `💀 EP E OUT` badge, BUT remains **fully active and selectable** when Episode E is selected in the dropdown.
-  - **Subsequent-Episode Rule**: A player is disabled/grayed out ONLY if `playerElimEp < selectedEpNum` (eliminated in a prior episode).
+- Updated player button rendering and bulk tribe selection logic so player visibility is relative to the selected episode:
+  - **Same-Episode Rule**: If `playerElimEp === selectedEpNum`, the player displays a red `💀 EP E OUT` badge, BUT remains **fully active and visible** when Episode E is selected in the dropdown.
+  - **Subsequent-Episode Rule**: A player is **completely omitted / hidden** from the grid if `playerElimEp < selectedEpNum` (eliminated in a prior episode), ensuring only eligible players for the selected episode are displayed to the user.
 
 ```javascript
 const selectedEpNum = parseInt(lastSelectedEpisode) || 1;
-const playerElimEp = eliminationOrder[player.id] ? parseInt(eliminationOrder[player.id]) : null;
-const isEliminatedForSelectedEp = playerElimEp !== null && playerElimEp < selectedEpNum;
-const isEliminatedThisEp = playerElimEp !== null && playerElimEp === selectedEpNum;
+const eligibleTribePlayers = tPlayers.filter(p => {
+    const pElimEp = eliminationOrder[p.id] ? parseInt(eliminationOrder[p.id]) : null;
+    return pElimEp === null || pElimEp >= selectedEpNum;
+});
 ```
 
 ---

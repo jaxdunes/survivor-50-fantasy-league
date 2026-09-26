@@ -1690,8 +1690,11 @@
                                         h('div', { className: 'space-y-4' },
                                             Object.entries(playersByTribe).map(([tName, tPlayers]) => {
                                                 const selectedEpNum = parseInt(lastSelectedEpisode) || 1;
-                                                const activeTribePlayers = tPlayers.filter(p => !eliminationOrder[p.id] || parseInt(eliminationOrder[p.id]) >= selectedEpNum);
-                                                const activeIds = activeTribePlayers.map(p => p.id);
+                                                const eligibleTribePlayers = tPlayers.filter(p => {
+                                                    const pElimEp = eliminationOrder[p.id] ? parseInt(eliminationOrder[p.id]) : null;
+                                                    return pElimEp === null || pElimEp >= selectedEpNum;
+                                                });
+                                                const activeIds = eligibleTribePlayers.map(p => p.id);
                                                 const isEntireTribeSelected = activeIds.length > 0 && activeIds.every(id => selectedPlayerIds.includes(id));
                                                 
                                                 return h('div', { key: tName, className: 'bg-white p-3 rounded-xl border border-gray-200 shadow-sm' },
@@ -1699,11 +1702,11 @@
                                                         h('div', { className: 'flex items-center gap-2' },
                                                             h('span', { className: 'text-base' }, getTribeIcon(tName)),
                                                             h('span', { className: 'font-extrabold text-sm text-gray-800' }, tName),
-                                                            h('span', { className: 'text-xs text-gray-500 font-semibold' }, `(${activeTribePlayers.length} active Ep ${selectedEpNum})`)
+                                                            h('span', { className: 'text-xs text-gray-500 font-semibold' }, `(${eligibleTribePlayers.length} eligible Ep ${selectedEpNum})`)
                                                         ),
-                                                        activeTribePlayers.length > 0 && h('button', {
+                                                        eligibleTribePlayers.length > 0 && h('button', {
                                                             type: 'button',
-                                                            onClick: () => toggleTribeSelected(tName, tPlayers),
+                                                            onClick: () => toggleTribeSelected(tName, eligibleTribePlayers),
                                                             className: `text-xs font-bold px-3 py-1 rounded-lg border transition ${
                                                                 isEntireTribeSelected
                                                                     ? 'bg-amber-500 text-white border-amber-600 shadow-sm'
@@ -1712,34 +1715,32 @@
                                                         }, isEntireTribeSelected ? '✓ Tribe Selected' : `Select ${tName} Tribe`)
                                                     ),
                                                     h('div', { className: 'flex flex-wrap gap-2 pt-1' },
-                                                        tPlayers.map(player => {
-                                                            const isSelected = selectedPlayerIds.includes(player.id);
-                                                            const playerElimEp = eliminationOrder[player.id] ? parseInt(eliminationOrder[player.id]) : null;
-                                                            const isEliminatedForSelectedEp = playerElimEp !== null && playerElimEp < selectedEpNum;
-                                                            const isEliminatedThisEp = playerElimEp !== null && playerElimEp === selectedEpNum;
-                                                            const pTribe = player.tribe || player.startingTribe;
+                                                        eligibleTribePlayers.length === 0
+                                                            ? h('div', { className: 'text-xs text-gray-400 italic py-1' }, `No active/eligible players in ${tName} for Ep ${selectedEpNum}`)
+                                                            : eligibleTribePlayers.map(player => {
+                                                                const isSelected = selectedPlayerIds.includes(player.id);
+                                                                const playerElimEp = eliminationOrder[player.id] ? parseInt(eliminationOrder[player.id]) : null;
+                                                                const isEliminatedThisEp = playerElimEp !== null && playerElimEp === selectedEpNum;
+                                                                const pTribe = player.tribe || player.startingTribe;
 
-                                                            return h('button', {
-                                                                key: player.id,
-                                                                type: 'button',
-                                                                onClick: () => !isEliminatedForSelectedEp && togglePlayerSelected(player.id),
-                                                                disabled: isEliminatedForSelectedEp,
-                                                                className: `px-3 py-1.5 rounded-lg text-xs font-bold flex items-center gap-1.5 border transition cursor-pointer ${
-                                                                    isEliminatedForSelectedEp
-                                                                        ? 'bg-gray-100 text-gray-400 border-gray-200 line-through cursor-not-allowed opacity-50'
-                                                                        : isSelected
+                                                                return h('button', {
+                                                                    key: player.id,
+                                                                    type: 'button',
+                                                                    onClick: () => togglePlayerSelected(player.id),
+                                                                    className: `px-3 py-1.5 rounded-lg text-xs font-bold flex items-center gap-1.5 border transition cursor-pointer ${
+                                                                        isSelected
                                                                             ? 'bg-gradient-to-r from-orange-500 to-amber-600 text-white border-orange-600 shadow-md ring-2 ring-orange-300'
                                                                             : isEliminatedThisEp
                                                                                 ? 'bg-red-50 text-red-900 border-red-300 hover:bg-red-100 ring-1 ring-red-300'
                                                                                 : 'bg-gray-50 text-gray-700 border-gray-300 hover:bg-gray-100 hover:border-orange-300'
-                                                                }`
-                                                            },
-                                                                isSelected && h(Icons.Check, { size: 12 }),
-                                                                player.name,
-                                                                isEliminatedThisEp && h('span', { className: 'text-[10px] bg-red-600 text-white font-black px-1 rounded shadow-xs' }, `💀 EP ${playerElimEp} OUT`),
-                                                                pTribe && pTribe !== 'Unassigned' && h('span', { className: `text-[10px] font-bold px-1.5 py-0.5 rounded ${getTribeBadgeColor(pTribe)}` }, getTribeIcon(pTribe) + pTribe)
-                                                            );
-                                                        })
+                                                                    }`
+                                                                },
+                                                                    isSelected && h(Icons.Check, { size: 12 }),
+                                                                    player.name,
+                                                                    isEliminatedThisEp && h('span', { className: 'text-[10px] bg-red-600 text-white font-black px-1 rounded shadow-xs' }, `💀 EP ${playerElimEp} OUT`),
+                                                                    pTribe && pTribe !== 'Unassigned' && h('span', { className: `text-[10px] font-bold px-1.5 py-0.5 rounded ${getTribeBadgeColor(pTribe)}` }, getTribeIcon(pTribe) + pTribe)
+                                                                );
+                                                            })
                                                     )
                                                 );
                                             })

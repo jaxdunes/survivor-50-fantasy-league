@@ -21,20 +21,17 @@ Update `index.html` to ensure eliminated contestants remain selectable when scor
 
 #### [MODIFY] [`index.html`](file:///Users/ryantaylor/Desktop/survivor-50-fantasy-league/index.html)
 - Derive `selectedEpNum = parseInt(lastSelectedEpisode) || 1`.
-- Update player card button filtering in `playersByTribe` mapping (around line 1689 & line 1713):
-  - Change active tribe player filter:
+- Update player selection grid in `playersByTribe` mapping:
+  - Filter `tPlayers` into `eligibleTribePlayers`:
     ```javascript
-    const activeTribePlayers = tPlayers.filter(p => !eliminationOrder[p.id] || parseInt(eliminationOrder[p.id]) >= selectedEpNum);
+    const eligibleTribePlayers = tPlayers.filter(p => {
+        const pElimEp = eliminationOrder[p.id] ? parseInt(eliminationOrder[p.id]) : null;
+        return pElimEp === null || pElimEp >= selectedEpNum;
+    });
     ```
-  - Change player disabled check:
-    ```javascript
-    const playerElimEp = eliminationOrder[player.id] ? parseInt(eliminationOrder[player.id]) : null;
-    const isEliminatedForSelectedEp = playerElimEp !== null && playerElimEp < selectedEpNum;
-    const isEliminatedThisEp = playerElimEp !== null && playerElimEp === selectedEpNum;
-    ```
-  - Set button `disabled: isEliminatedForSelectedEp`.
-  - Update `toggleTribeSelected` to target players where `!eliminationOrder[p.id] || parseInt(eliminationOrder[p.id]) >= selectedEpNum`.
-  - Add visual indicator badge `💀 Voted Out Ep E` for players eliminated in the selected episode while keeping them active and selectable.
+  - Contestants eliminated BEFORE `selectedEpNum` (`pElimEp < selectedEpNum`) are **completely omitted** from the Add Points screen.
+  - Contestants eliminated IN `selectedEpNum` (`pElimEp === selectedEpNum`) render with a `💀 EP E OUT` badge, but remain active & selectable for multiple point entries in Episode E.
+  - Update `toggleTribeSelected` to target `eligibleTribePlayers`.
 
 ---
 
@@ -44,10 +41,10 @@ Update `index.html` to ensure eliminated contestants remain selectable when scor
 1. **Category Trigger Verification**:
    - Assign "First Voted Out" penalty (-10 pts) to a player. Verify `eliminationOrder` remains unchanged.
    - Assign "Voted Out" event to a player in Episode 1. Verify `eliminationOrder[player.id] = 1`.
-2. **Episode 1 Scoring Multi-Event Verification**:
+2. **Same-Episode Eligibility Verification**:
    - Select Episode 1 in the "Add Points" modal.
-   - Verify the contestant voted out in Episode 1 remains **active and selectable**.
+   - Verify the contestant voted out in Episode 1 remains **active, visible, and selectable**.
    - Assign a second scoring event (e.g., "First Voted Out" or confessionals) to that player. Verify the event saves cleanly.
-3. **Episode 2 Subsequent-Episode Lockout Verification**:
+3. **Subsequent-Episode Complete Omission Verification**:
    - Select Episode 2 in the "Add Points" modal.
-   - Verify the contestant voted out in Episode 1 is now **disabled / filtered out**.
+   - Verify the contestant voted out in Episode 1 is **completely hidden/omitted** from the grid and does not appear on screen.
