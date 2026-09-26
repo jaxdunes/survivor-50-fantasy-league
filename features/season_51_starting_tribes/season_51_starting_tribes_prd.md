@@ -96,15 +96,26 @@ Survivor 51 features **two starting tribes** of 10 contestants, plus 1 contestan
 - **Batch Points Submission**:
   - Submitting the scoring event records points, category, and optional notes for all selected players across chosen fantasy leagues simultaneously.
 
+### 3.4 Dynamic Tribe History & Episode Event Timeline on Player Cards
+- **Contestant Schema (`tribeHistory`)**:
+  - Every contestant object in `seasons/season-50.json` and `seasons/season-51.json` includes a `tribeHistory` array tracking episode-by-episode tribe transitions (`starting`, `swap`, `merge`).
+- **Tribe Progression Arrow Badges**:
+  - Player cards and expanded team roster items render a visual sequence of tribe badges connected by directional arrows (e.g. `☀️ Toka ➔ 🟣 Savu ➔ 🏝️ MERGE`).
+- **Chronological Episode History & Timeline**:
+  - Player detail views and cards display a chronological timeline combining **Scoring Events** (e.g., *Won Immunity*, *Found Idol*) and **Tribe Events** (e.g., *Tribe Swap to Savu*, *Reached Merge*), grouped under the exact episode in which they occurred.
+
 ---
 
 ## 4. Verification & Testing Plan
 
 1. **Dataset Verification**:
-   - Inspect `seasons/season-51.json` to confirm all 21 contestants have non-unassigned `tribe` and `startingTribe` values.
+   - Inspect `seasons/season-51.json` to confirm all 21 contestants have non-unassigned `tribe` and `startingTribe` values and initial `tribeHistory` arrays.
 2. **Draftboard Render & Filter Verification**:
    - Open `draft.html` for Season 51.
    - Confirm contestant cards display yellow Toka, purple Savu, and stone Exile Island badges.
    - Select `Toka` in tribe dropdown: confirm only 10 Toka members display.
    - Select `Savu`: confirm 10 Savu members display.
    - Select `Exile Island`: confirm Lewis Kelly displays.
+3. **Tribe Swap & Timeline Verification**:
+   - Confirm tribe progression arrow badges and episode history timelines display correctly on player detail views and expanded team cards.
+
