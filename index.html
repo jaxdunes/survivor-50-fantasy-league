@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Survivor 51 Fantasy League - Leaderboard</title>
+    <title>Fantasy Survivor League</title>
     <script src="https://cdn.jsdelivr.net/npm/react@18.2.0/umd/react.production.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/react-dom@18.2.0/umd/react-dom.production.min.js"></script>
     <script src="https://cdn.tailwindcss.com"></script>
@@ -18,7 +18,7 @@
     <link rel="apple-touch-icon" href="icons/icon-192x192.png">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="default">
-    <meta name="apple-mobile-web-app-title" content="Survivor 51">
+    <meta name="apple-mobile-web-app-title" content="Fantasy Survivor">
     
     <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Playfair+Display:wght@700&display=swap" rel="stylesheet">
     <script>
@@ -810,6 +810,130 @@
                 )
             );
         }
+
+        function InstallAppModal({ isOpen, onClose }) {
+            const [copied, setCopied] = useState(false);
+
+            if (!isOpen) return null;
+
+            const shareUrl = "https://jaxdunes.github.io/survivor-fantasy-league/install.html";
+
+            const handleCopyLink = () => {
+                if (navigator.clipboard && navigator.clipboard.writeText) {
+                    navigator.clipboard.writeText(shareUrl).then(() => {
+                        setCopied(true);
+                        setTimeout(() => setCopied(false), 2500);
+                    }).catch(() => fallbackCopy());
+                } else {
+                    fallbackCopy();
+                }
+            };
+
+            const fallbackCopy = () => {
+                const input = document.createElement('input');
+                input.value = shareUrl;
+                document.body.appendChild(input);
+                input.select();
+                document.execCommand('copy');
+                document.body.removeChild(input);
+                setCopied(true);
+                setTimeout(() => setCopied(false), 2500);
+            };
+
+            const steps = [
+                {
+                    num: 1,
+                    title: "Open in Safari",
+                    subtitle: "Must use Safari browser on iPhone! (Chrome/Firefox on iOS do not support Add to Home Screen)",
+                    icon: "🌐",
+                    highlight: "Must be Safari!"
+                },
+                {
+                    num: 2,
+                    title: "Go to Website URL",
+                    subtitle: "jaxdunes.github.io/survivor-fantasy-league",
+                    icon: "🔗",
+                    highlight: "Already here? Perfect!"
+                },
+                {
+                    num: 3,
+                    title: "Tap Share ⬆️ → 'Add to Home Screen'",
+                    subtitle: "Tap Share button at the bottom of Safari, scroll down and tap 'Add to Home Screen'. Don't change anything, just click 'Add'. App name defaults to Fantasy Survivor!",
+                    icon: "📲",
+                    highlight: "Defaults to 'Fantasy Survivor'"
+                },
+                {
+                    num: 4,
+                    title: "Open App from Home Screen",
+                    subtitle: "Locate the Fantasy Survivor icon on your home screen and tap to launch.",
+                    icon: "🚀",
+                    highlight: "Fantasy Survivor app icon"
+                },
+                {
+                    num: 5,
+                    title: "Go to Notifications → Enable Notifications → Allow",
+                    subtitle: "Inside the app, open Notifications, tap 'Enable Notifications', and select 'Allow' when iOS prompts you.",
+                    icon: "🔔",
+                    highlight: "Get real-time score updates!"
+                }
+            ];
+
+            return h('div', { className: 'fixed inset-0 bg-black/80 backdrop-blur-md z-50 flex items-center justify-center p-4 overflow-y-auto' },
+                h('div', { className: 'bg-slate-900 border border-slate-800 rounded-3xl max-w-lg w-full p-6 text-white shadow-2xl relative my-auto max-h-[90vh] overflow-y-auto' },
+                    h('button', {
+                        onClick: onClose,
+                        className: 'absolute top-5 right-5 p-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-400 hover:text-white transition cursor-pointer'
+                    }, h(Icons.X, { size: 20 })),
+
+                    h('div', { className: 'text-center mb-6 pt-2' },
+                        h('div', { className: 'w-14 h-14 bg-gradient-to-tr from-orange-500 to-amber-500 rounded-2xl flex items-center justify-center text-2xl mx-auto mb-3 shadow-lg shadow-orange-500/20' }, '📱'),
+                        h('h2', { className: 'text-2xl font-black text-white font-mono uppercase tracking-wide' }, 'Install Fantasy Survivor'),
+                        h('p', { className: 'text-xs text-slate-400 font-semibold mt-1' }, 'Follow these 5 quick steps to get the app on your phone')
+                    ),
+
+                    h('div', { className: 'space-y-3 mb-6' },
+                        steps.map(step => (
+                            h('div', { key: step.num, className: 'bg-slate-800/80 border border-slate-700/60 rounded-2xl p-3.5 flex gap-3.5 items-start' },
+                                h('div', { className: 'w-8 h-8 rounded-full bg-gradient-to-r from-orange-500 to-amber-600 text-white font-black text-sm flex items-center justify-center flex-shrink-0 shadow-sm mt-0.5' }, step.num),
+                                h('div', { className: 'flex-1 min-w-0' },
+                                    h('div', { className: 'flex items-center justify-between gap-2 mb-0.5' },
+                                        h('h3', { className: 'font-bold text-sm text-white flex items-center gap-1.5' },
+                                            h('span', {}, step.icon),
+                                            step.title
+                                        ),
+                                        step.highlight && h('span', { className: 'text-[9px] font-black uppercase px-2 py-0.5 rounded-full bg-orange-500/20 text-orange-400 border border-orange-500/30 flex-shrink-0' }, step.highlight)
+                                    ),
+                                    h('p', { className: 'text-xs text-slate-300 leading-relaxed font-normal' }, step.subtitle)
+                                )
+                            )
+                        ))
+                    ),
+
+                    h('div', { className: 'bg-gradient-to-r from-orange-950/40 to-amber-950/40 border border-orange-500/30 rounded-2xl p-4 mb-6 text-center' },
+                        h('div', { className: 'text-xs font-bold text-slate-300 mb-2 flex items-center justify-center gap-1.5' },
+                            h('span', {}, '📤'),
+                            'Send instructions to a friend or league member:'
+                        ),
+                        h('button', {
+                            onClick: handleCopyLink,
+                            className: `w-full py-2.5 px-4 rounded-xl font-bold text-xs transition flex items-center justify-center gap-2 cursor-pointer ${
+                                copied
+                                    ? 'bg-emerald-600 text-white shadow-lg'
+                                    : 'bg-gradient-to-r from-orange-500 to-amber-600 hover:from-orange-600 hover:to-amber-700 text-white shadow-md'
+                            }`
+                        },
+                            h(copied ? Icons.Check : Icons.Book, { size: 16 }),
+                            copied ? 'Link Copied to Clipboard! 🎉' : 'Copy Shareable Link'
+                        )
+                    ),
+
+                    h('button', {
+                        onClick: onClose,
+                        className: 'w-full py-3 bg-slate-800 hover:bg-slate-700 text-slate-300 hover:text-white rounded-xl font-bold text-xs transition cursor-pointer'
+                    }, 'Done')
+                )
+            );
+        }
         
         function ScoringPage() {
             const currentLeagueConfig = LEAGUES_DATA[activeLeagueId] || LEAGUES_DATA['jackson-ryan-league'];
@@ -948,8 +1072,16 @@
             const [showMarkElimination, setShowMarkElimination] = useState(false);
             const [showMarkWinner, setShowMarkWinner] = useState(false);
             const [showSideMenu, setShowSideMenu] = useState(false);
+            const [showInstallModal, setShowInstallModal] = useState(false);
             const [expandedTeams, setExpandedTeams] = useState({});
             const [theme, setTheme] = useState(() => localStorage.getItem('survivor_theme') || 'tribal');
+
+            useEffect(() => {
+                const params = new URLSearchParams(window.location.search);
+                if (params.get('install') === 'true' || window.location.hash === '#install') {
+                    setShowInstallModal(true);
+                }
+            }, []);
 
             useEffect(() => {
                 document.body.classList.toggle('theme-tribal', theme === 'tribal');
@@ -2170,9 +2302,17 @@
                                 )
                             ),
 
-                            // Sidebar Footer with Theme Toggle
-                            h('div', { className: 'p-4 border-t border-slate-800 bg-slate-950/80' },
-                                h('div', { className: 'flex items-center justify-between mb-3 bg-slate-900/90 p-2.5 rounded-xl border border-slate-800 shadow-inner' },
+                            // Sidebar Footer with Theme Toggle & Mobile App Button
+                            h('div', { className: 'p-4 border-t border-slate-800 bg-slate-950/80 space-y-3' },
+                                h('button', {
+                                    type: 'button',
+                                    onClick: () => setShowInstallModal(true),
+                                    className: 'w-full py-2.5 px-3 bg-gradient-to-r from-orange-500/20 to-amber-500/20 hover:from-orange-500/30 hover:to-amber-500/30 border border-orange-500/40 rounded-xl text-xs font-bold text-orange-300 hover:text-white transition flex items-center justify-center gap-2 cursor-pointer shadow-sm group'
+                                },
+                                    h('span', { className: 'text-base group-hover:scale-110 transition-transform' }, '📱'),
+                                    h('span', {}, 'Want This As A Mobile App?')
+                                ),
+                                h('div', { className: 'flex items-center justify-between mb-1 bg-slate-900/90 p-2.5 rounded-xl border border-slate-800 shadow-inner' },
                                     h('div', { className: 'flex items-center gap-2.5' },
                                         h('span', { className: 'text-lg' }, '🔥'),
                                         h('div', {},
@@ -2203,7 +2343,7 @@
                                         h('span', { className: 'w-2 h-2 rounded-full bg-emerald-500 animate-pulse' }),
                                         h('span', {}, `${(LEAGUES_DATA[activeLeagueId] || {}).name} • ${activeSeasonId.toUpperCase()}`)
                                     ),
-                                    'Survivor 51 Fantasy App'
+                                    'Fantasy Survivor App'
                                 )
                             )
                         )
@@ -2212,7 +2352,13 @@
                     // Footer
                     h('div', { className: 'mt-12 text-center text-gray-900' },
                         h('p', { className: 'text-sm text-gray-700' }, 'Survivor 51: Open Era • Scoring Tracker & Leaderboard')
-                    )
+                    ),
+
+                    // Install App Modal
+                    h(InstallAppModal, {
+                        isOpen: showInstallModal,
+                        onClose: () => setShowInstallModal(false)
+                    })
                 )
             );
         }

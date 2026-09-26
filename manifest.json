@@ -1,9 +1,9 @@
 {
-  "name": "Survivor 51 Fantasy League",
-  "short_name": "Survivor 51",
+  "name": "Fantasy Survivor",
+  "short_name": "Fantasy Survivor",
   "description": "Fantasy league for Survivor Season 50",
-  "start_url": "/survivor-50-fantasy-league/",
-  "scope": "/survivor-50-fantasy-league/",
+  "start_url": "/survivor-fantasy-league/",
+  "scope": "/survivor-fantasy-league/",
   "display": "standalone",
   "background_color": "#f5f5f5",
   "theme_color": "#f97316",

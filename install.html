@@ -3,142 +3,157 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Install Survivor 50 App</title>
+    <title>Install Fantasy Survivor App</title>
+    <meta name="apple-mobile-web-app-title" content="Fantasy Survivor">
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&display=swap" rel="stylesheet">
     <style>
         body { 
             margin: 0; 
             padding: 0; 
-            font-family: system-ui, -apple-system, sans-serif;
-            background: linear-gradient(135deg, #f5f5f5 0%, #9e9e9e 50%, #424242 100%);
+            font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            background: linear-gradient(135deg, #0f172a 0%, #1e293b 50%, #0f172a 100%);
             min-height: 100vh;
+            color: #f8fafc;
         }
     </style>
 </head>
 <body>
-    <div class="max-w-2xl mx-auto p-6 min-h-screen flex items-center">
-        <div class="w-full">
+    <div class="max-w-2xl mx-auto p-4 sm:p-6 min-h-screen flex items-center justify-center">
+        <div class="w-full my-auto py-6">
             <!-- Header -->
-            <div class="bg-white/95 backdrop-blur-md rounded-2xl p-8 mb-6 shadow-xl text-center">
-                <div class="text-6xl mb-4">🏝️</div>
-                <h1 class="text-5xl font-black mb-2" style="font-family: 'Bebas Neue', cursive; color: #f97316;">
-                    INSTALL SURVIVOR 50 APP
+            <div class="bg-slate-900/90 border border-slate-800 backdrop-blur-md rounded-3xl p-6 sm:p-8 mb-6 shadow-2xl text-center">
+                <div class="w-16 h-16 bg-gradient-to-tr from-orange-500 to-amber-500 rounded-2xl flex items-center justify-center text-3xl mx-auto mb-4 shadow-lg shadow-orange-500/20">📱</div>
+                <h1 class="text-4xl sm:text-5xl font-black mb-2 tracking-wide font-mono uppercase text-transparent bg-clip-text bg-gradient-to-r from-orange-400 to-amber-400">
+                    INSTALL FANTASY SURVIVOR
                 </h1>
-                <p class="text-gray-600 text-lg">Get the league on your home screen!</p>
+                <p class="text-slate-400 text-sm sm:text-base font-semibold">Get the mobile app on your iPhone in 5 quick steps!</p>
             </div>
             
-            <!-- iOS Instructions -->
-            <div class="bg-white/95 backdrop-blur-md rounded-2xl p-8 shadow-xl">
-                <div class="flex items-center gap-3 mb-6">
-                    <div class="text-4xl">📱</div>
-                    <div>
-                        <h2 class="text-2xl font-bold text-gray-800">iPhone Installation</h2>
-                        <p class="text-sm text-gray-600">Works on iOS 16.4+ (iPhone XS and newer)</p>
+            <!-- Instructions Card -->
+            <div class="bg-slate-900/90 border border-slate-800 backdrop-blur-md rounded-3xl p-6 sm:p-8 shadow-2xl">
+                <div class="flex items-center justify-between mb-6 pb-4 border-b border-slate-800">
+                    <div class="flex items-center gap-3">
+                        <div class="text-3xl">📱</div>
+                        <div>
+                            <h2 class="text-xl font-bold text-white">iPhone Setup Guide</h2>
+                            <p class="text-xs text-slate-400">Safari PWA Installation</p>
+                        </div>
                     </div>
+                    <span class="px-3 py-1 bg-orange-500/20 border border-orange-500/30 text-orange-400 rounded-full text-xs font-black uppercase">iOS Guide</span>
                 </div>
                 
-                <div class="space-y-6">
+                <div class="space-y-4">
                     <!-- Step 1 -->
-                    <div class="flex gap-4">
-                        <div class="flex-shrink-0 w-10 h-10 bg-orange-500 text-white rounded-full flex items-center justify-center font-bold text-lg">
+                    <div class="bg-slate-800/80 border border-slate-700/60 rounded-2xl p-4 flex gap-4 items-start">
+                        <div class="flex-shrink-0 w-9 h-9 bg-gradient-to-r from-orange-500 to-amber-600 text-white rounded-full flex items-center justify-center font-black text-base shadow-sm">
                             1
                         </div>
                         <div class="flex-1">
-                            <h3 class="font-bold text-lg mb-2">Open in Safari</h3>
-                            <p class="text-gray-700">Must use Safari browser (not Chrome). Already here? Great!</p>
+                            <div class="flex items-center justify-between gap-2 mb-1">
+                                <h3 class="font-bold text-base text-white">Open in Safari</h3>
+                                <span class="text-[10px] font-black uppercase px-2 py-0.5 rounded-full bg-red-500/20 text-red-400 border border-red-500/30">Must be Safari!</span>
+                            </div>
+                            <p class="text-slate-300 text-xs sm:text-sm">Must use Safari browser on iPhone (Chrome/Firefox on iOS do not support Add to Home Screen).</p>
                         </div>
                     </div>
                     
                     <!-- Step 2 -->
-                    <div class="flex gap-4">
-                        <div class="flex-shrink-0 w-10 h-10 bg-orange-500 text-white rounded-full flex items-center justify-center font-bold text-lg">
+                    <div class="bg-slate-800/80 border border-slate-700/60 rounded-2xl p-4 flex gap-4 items-start">
+                        <div class="flex-shrink-0 w-9 h-9 bg-gradient-to-r from-orange-500 to-amber-600 text-white rounded-full flex items-center justify-center font-black text-base shadow-sm">
                             2
                         </div>
                         <div class="flex-1">
-                            <h3 class="font-bold text-lg mb-2">Tap the Share Button</h3>
-                            <p class="text-gray-700 mb-3">Tap the <span class="inline-block bg-blue-100 px-2 py-1 rounded font-bold">⬆️</span> button at the bottom of Safari</p>
-                            <div class="bg-blue-50 border-2 border-blue-200 rounded-lg p-3 text-sm">
-                                💡 <strong>Tip:</strong> It's the square with an arrow pointing up
-                            </div>
+                            <h3 class="font-bold text-base text-white mb-1">Go to Website URL</h3>
+                            <p class="text-slate-300 text-xs sm:text-sm font-mono bg-slate-950/60 p-2 rounded-xl border border-slate-800 text-orange-300 select-all mb-2">jaxdunes.github.io/survivor-fantasy-league</p>
+                            <p class="text-slate-400 text-xs">Already here? Excellent! Proceed to step 3.</p>
                         </div>
                     </div>
                     
                     <!-- Step 3 -->
-                    <div class="flex gap-4">
-                        <div class="flex-shrink-0 w-10 h-10 bg-orange-500 text-white rounded-full flex items-center justify-center font-bold text-lg">
+                    <div class="bg-slate-800/80 border border-slate-700/60 rounded-2xl p-4 flex gap-4 items-start">
+                        <div class="flex-shrink-0 w-9 h-9 bg-gradient-to-r from-orange-500 to-amber-600 text-white rounded-full flex items-center justify-center font-black text-base shadow-sm">
                             3
                         </div>
                         <div class="flex-1">
-                            <h3 class="font-bold text-lg mb-2">Add to Home Screen</h3>
-                            <p class="text-gray-700 mb-3">Scroll down in the menu and tap <strong>"Add to Home Screen"</strong></p>
+                            <h3 class="font-bold text-base text-white mb-1">Tap Share ⬆️ → "Add to Home Screen"</h3>
+                            <p class="text-slate-300 text-xs sm:text-sm mb-2">Tap the Share button (<span class="bg-slate-700 px-2 py-0.5 rounded text-white">⬆️</span>) at the bottom of Safari, scroll down, and tap <strong>"Add to Home Screen"</strong>.</p>
+                            <div class="bg-emerald-950/40 border border-emerald-500/30 rounded-xl p-2.5 text-xs text-emerald-300">
+                                💡 <strong>Tip:</strong> App name defaults to <strong>"Fantasy Survivor"</strong> — don't change anything, just click <strong>"Add"</strong>!
+                            </div>
                         </div>
                     </div>
                     
                     <!-- Step 4 -->
-                    <div class="flex gap-4">
-                        <div class="flex-shrink-0 w-10 h-10 bg-orange-500 text-white rounded-full flex items-center justify-center font-bold text-lg">
+                    <div class="bg-slate-800/80 border border-slate-700/60 rounded-2xl p-4 flex gap-4 items-start">
+                        <div class="flex-shrink-0 w-9 h-9 bg-gradient-to-r from-orange-500 to-amber-600 text-white rounded-full flex items-center justify-center font-black text-base shadow-sm">
                             4
                         </div>
                         <div class="flex-1">
-                            <h3 class="font-bold text-lg mb-2">Tap "Add"</h3>
-                            <p class="text-gray-700 mb-3">Confirm by tapping <strong>"Add"</strong> in the top right</p>
-                            <div class="bg-green-50 border-2 border-green-200 rounded-lg p-4 text-center">
-                                <div class="text-4xl mb-2">🔥</div>
-                                <p class="font-bold text-green-800">Survivor logo appears on your home screen!</p>
-                            </div>
+                            <h3 class="font-bold text-base text-white mb-1">Open App from Home Screen</h3>
+                            <p class="text-slate-300 text-xs sm:text-sm">Locate the new <strong>Fantasy Survivor</strong> app icon on your iPhone home screen and tap to open it.</p>
+                        </div>
+                    </div>
+
+                    <!-- Step 5 -->
+                    <div class="bg-slate-800/80 border border-slate-700/60 rounded-2xl p-4 flex gap-4 items-start">
+                        <div class="flex-shrink-0 w-9 h-9 bg-gradient-to-r from-orange-500 to-amber-600 text-white rounded-full flex items-center justify-center font-black text-base shadow-sm">
+                            5
+                        </div>
+                        <div class="flex-1">
+                            <h3 class="font-bold text-base text-white mb-1">Notifications → Enable Notifications → Allow</h3>
+                            <p class="text-slate-300 text-xs sm:text-sm mb-2">Inside the app, navigate to Notifications, tap <strong>"Enable Notifications"</strong>, and select <strong>"Allow"</strong> when prompted by iOS.</p>
                         </div>
                     </div>
                 </div>
                 
-                <!-- Enable Notifications -->
-                <div class="mt-8 pt-8 border-t-2 border-gray-200">
-                    <h3 class="text-xl font-bold mb-4 flex items-center gap-2">
-                        🔔 Enable Notifications
-                    </h3>
-                    <ol class="space-y-3 text-gray-700 ml-5 list-decimal">
-                        <li>Open the <strong>Survivor 50</strong> app from your home screen</li>
-                        <li>Go to <strong>Chat</strong> → <strong>Login</strong></li>
-                        <li>Tap the <strong>🔔 Notifications</strong> button</li>
-                        <li>Tap <strong>"Enable Notifications"</strong></li>
-                        <li>Customize which alerts you want</li>
-                        <li>Tap <strong>"Save Preferences"</strong></li>
-                    </ol>
-                </div>
-                
-                <!-- Requirements -->
-                <div class="mt-6 bg-yellow-50 border-2 border-yellow-200 rounded-lg p-4">
-                    <p class="text-sm text-gray-700">
-                        <strong>⚠️ Requirements:</strong> iOS 16.4 or newer for notifications. 
-                        Check: Settings → General → About → Software Version
-                    </p>
+                <!-- Shareable Link Card -->
+                <div class="mt-6 pt-6 border-t border-slate-800 text-center">
+                    <button id="copyShareBtn" class="w-full py-3 px-6 bg-gradient-to-r from-orange-500 to-amber-600 hover:from-orange-600 hover:to-amber-700 text-white rounded-2xl font-bold text-sm shadow-lg transition flex items-center justify-center gap-2 cursor-pointer">
+                        <span>📋</span>
+                        <span id="copyBtnText">Copy Shareable Link for Friends</span>
+                    </button>
                 </div>
             </div>
             
-            <!-- Back Button -->
+            <!-- Back to League Button -->
             <div class="text-center mt-6">
-                <a href="index.html" class="inline-block px-8 py-3 bg-gradient-to-r from-orange-500 to-amber-600 text-white rounded-xl font-bold hover:shadow-lg transition text-lg">
-                    ← Back to League
+                <a href="index.html" class="inline-block px-8 py-3 bg-slate-800 hover:bg-slate-700 text-slate-300 hover:text-white rounded-2xl font-bold text-sm border border-slate-700 transition">
+                    ← Back to League Leaderboard
                 </a>
             </div>
         </div>
     </div>
     
-    <!-- Auto-detect and show message if already installed -->
     <script>
+    const shareUrl = "https://jaxdunes.github.io/survivor-fantasy-league/install.html";
+    const copyBtn = document.getElementById('copyShareBtn');
+    const copyBtnText = document.getElementById('copyBtnText');
+
+    copyBtn.addEventListener('click', () => {
+        navigator.clipboard.writeText(shareUrl).then(() => {
+            copyBtnText.textContent = "Link Copied to Clipboard! 🎉";
+            copyBtn.className = "w-full py-3 px-6 bg-emerald-600 text-white rounded-2xl font-bold text-sm shadow-lg transition flex items-center justify-center gap-2 cursor-pointer";
+            setTimeout(() => {
+                copyBtnText.textContent = "Copy Shareable Link for Friends";
+                copyBtn.className = "w-full py-3 px-6 bg-gradient-to-r from-orange-500 to-amber-600 hover:from-orange-600 hover:to-amber-700 text-white rounded-2xl font-bold text-sm shadow-lg transition flex items-center justify-center gap-2 cursor-pointer";
+            }, 3000);
+        });
+    });
+
     if (window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone === true) {
         document.body.innerHTML = `
             <div class="max-w-2xl mx-auto p-6 min-h-screen flex items-center justify-center">
-                <div class="bg-white/95 backdrop-blur-md rounded-2xl p-8 shadow-xl text-center">
+                <div class="bg-slate-900 border border-slate-800 rounded-3xl p-8 shadow-2xl text-center">
                     <div class="text-6xl mb-4">✅</div>
-                    <h1 class="text-4xl font-black mb-4" style="font-family: 'Bebas Neue', cursive; color: #22c55e;">
+                    <h1 class="text-3xl font-black mb-3 text-emerald-400 uppercase tracking-wider font-mono">
                         ALREADY INSTALLED!
                     </h1>
-                    <p class="text-gray-700 text-lg mb-6">
-                        You're using the installed app right now!
+                    <p class="text-slate-300 text-base mb-6">
+                        You're currently using the installed Fantasy Survivor app!
                     </p>
-                    <a href="index.html" class="inline-block px-8 py-3 bg-gradient-to-r from-orange-500 to-amber-600 text-white rounded-xl font-bold hover:shadow-lg transition text-lg">
-                        Go to League
+                    <a href="index.html" class="inline-block px-8 py-3 bg-gradient-to-r from-orange-500 to-amber-600 text-white rounded-2xl font-bold text-sm shadow-lg transition">
+                        Go to League Leaderboard
                     </a>
                 </div>
             </div>
