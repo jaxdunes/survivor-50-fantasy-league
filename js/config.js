@@ -92,7 +92,39 @@ window.AVAILABLE_LEAGUES = AVAILABLE_LEAGUES;
 window.LEAGUES = AVAILABLE_LEAGUES;
 var LEAGUES = AVAILABLE_LEAGUES;
 var firebaseInitialized = false;
-window.firebaseInitialized = false;
+const IS_DEV_ENV = typeof window !== 'undefined' && (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1');
+
+function wrapDatabaseInstance(db) {
+    if (!db || db._isDevWrapped) return db;
+    if (IS_DEV_ENV && typeof db.ref === 'function') {
+        const origRef = db.ref.bind(db);
+        db.ref = function(path) {
+            if (path === undefined || path === null || path === '') {
+                return origRef('dev_testing');
+            }
+            const strPath = String(path);
+            const cleanPath = strPath.startsWith('/') ? strPath.slice(1) : strPath;
+            if (cleanPath.startsWith('dev_testing')) {
+                return origRef(cleanPath);
+            }
+            return origRef(`dev_testing/${cleanPath}`);
+        };
+        db._isDevWrapped = true;
+        console.log('🧪 LOCAL DEV ENVIRONMENT: Firebase database.ref wrapped under "dev_testing/" namespace.');
+    }
+    return db;
+}
+
+if (IS_DEV_ENV && typeof window !== 'undefined') {
+    window.addEventListener('DOMContentLoaded', () => {
+        if (document.getElementById('dev-env-indicator')) return;
+        const banner = document.createElement('div');
+        banner.id = 'dev-env-indicator';
+        banner.style.cssText = 'position:fixed;bottom:12px;right:12px;z-index:999999;background:#0f172a;color:#38bdf8;padding:8px 14px;border-radius:9999px;font-family:monospace;font-size:11px;font-weight:bold;border:1.5px solid #0284c7;box-shadow:0 10px 25px -5px rgba(0,0,0,0.5);display:flex;align-items:center;gap:6px;pointer-events:none;';
+        banner.innerHTML = '<span>🧪 DEV MODE</span><span style="color:#64748b;">|</span><span style="color:#f8fafc;">Firebase Path: <code style="color:#4ade80;font-weight:bold;">dev_testing/</code></span>';
+        document.body.appendChild(banner);
+    });
+}
 
 /**
  * Initializes Firebase database connection if available
@@ -111,7 +143,8 @@ function initFirebase() {
         firebaseInitialized = true;
         window.firebaseInitialized = true;
         console.log('🔥 Firebase initialized successfully!');
-        return firebase.database();
+        const db = firebase.database();
+        return wrapDatabaseInstance(db);
     } catch (error) {
         console.error('Firebase initialization error:', error);
         firebaseInitialized = false;
