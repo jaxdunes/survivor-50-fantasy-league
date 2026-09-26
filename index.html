@@ -1169,7 +1169,10 @@
             };
 
             const toggleTribeSelected = (tribeName, tribePlayers) => {
-                const activeTribePlayerIds = tribePlayers.filter(p => !eliminationOrder[p.id]).map(p => p.id);
+                const selectedEpNum = parseInt(lastSelectedEpisode) || 1;
+                const activeTribePlayerIds = tribePlayers
+                    .filter(p => !eliminationOrder[p.id] || parseInt(eliminationOrder[p.id]) >= selectedEpNum)
+                    .map(p => p.id);
                 if (activeTribePlayerIds.length === 0) return;
 
                 const allSelected = activeTribePlayerIds.every(id => selectedPlayerIds.includes(id));
@@ -1686,7 +1689,8 @@
                                         ),
                                         h('div', { className: 'space-y-4' },
                                             Object.entries(playersByTribe).map(([tName, tPlayers]) => {
-                                                const activeTribePlayers = tPlayers.filter(p => !eliminationOrder[p.id]);
+                                                const selectedEpNum = parseInt(lastSelectedEpisode) || 1;
+                                                const activeTribePlayers = tPlayers.filter(p => !eliminationOrder[p.id] || parseInt(eliminationOrder[p.id]) >= selectedEpNum);
                                                 const activeIds = activeTribePlayers.map(p => p.id);
                                                 const isEntireTribeSelected = activeIds.length > 0 && activeIds.every(id => selectedPlayerIds.includes(id));
                                                 
@@ -1695,7 +1699,7 @@
                                                         h('div', { className: 'flex items-center gap-2' },
                                                             h('span', { className: 'text-base' }, getTribeIcon(tName)),
                                                             h('span', { className: 'font-extrabold text-sm text-gray-800' }, tName),
-                                                            h('span', { className: 'text-xs text-gray-500 font-semibold' }, `(${activeTribePlayers.length} active)`)
+                                                            h('span', { className: 'text-xs text-gray-500 font-semibold' }, `(${activeTribePlayers.length} active Ep ${selectedEpNum})`)
                                                         ),
                                                         activeTribePlayers.length > 0 && h('button', {
                                                             type: 'button',
@@ -1710,23 +1714,29 @@
                                                     h('div', { className: 'flex flex-wrap gap-2 pt-1' },
                                                         tPlayers.map(player => {
                                                             const isSelected = selectedPlayerIds.includes(player.id);
-                                                            const isEliminated = eliminationOrder[player.id];
+                                                            const playerElimEp = eliminationOrder[player.id] ? parseInt(eliminationOrder[player.id]) : null;
+                                                            const isEliminatedForSelectedEp = playerElimEp !== null && playerElimEp < selectedEpNum;
+                                                            const isEliminatedThisEp = playerElimEp !== null && playerElimEp === selectedEpNum;
                                                             const pTribe = player.tribe || player.startingTribe;
+
                                                             return h('button', {
                                                                 key: player.id,
                                                                 type: 'button',
-                                                                onClick: () => !isEliminated && togglePlayerSelected(player.id),
-                                                                disabled: isEliminated,
+                                                                onClick: () => !isEliminatedForSelectedEp && togglePlayerSelected(player.id),
+                                                                disabled: isEliminatedForSelectedEp,
                                                                 className: `px-3 py-1.5 rounded-lg text-xs font-bold flex items-center gap-1.5 border transition cursor-pointer ${
-                                                                    isEliminated
+                                                                    isEliminatedForSelectedEp
                                                                         ? 'bg-gray-100 text-gray-400 border-gray-200 line-through cursor-not-allowed opacity-50'
                                                                         : isSelected
                                                                             ? 'bg-gradient-to-r from-orange-500 to-amber-600 text-white border-orange-600 shadow-md ring-2 ring-orange-300'
-                                                                            : 'bg-gray-50 text-gray-700 border-gray-300 hover:bg-gray-100 hover:border-orange-300'
+                                                                            : isEliminatedThisEp
+                                                                                ? 'bg-red-50 text-red-900 border-red-300 hover:bg-red-100 ring-1 ring-red-300'
+                                                                                : 'bg-gray-50 text-gray-700 border-gray-300 hover:bg-gray-100 hover:border-orange-300'
                                                                 }`
                                                             },
                                                                 isSelected && h(Icons.Check, { size: 12 }),
                                                                 player.name,
+                                                                isEliminatedThisEp && h('span', { className: 'text-[10px] bg-red-600 text-white font-black px-1 rounded shadow-xs' }, `💀 EP ${playerElimEp} OUT`),
                                                                 pTribe && pTribe !== 'Unassigned' && h('span', { className: `text-[10px] font-bold px-1.5 py-0.5 rounded ${getTribeBadgeColor(pTribe)}` }, getTribeIcon(pTribe) + pTribe)
                                                             );
                                                         })
@@ -1854,7 +1864,7 @@
                                             const catName = (category ? category.name : '').toLowerCase();
 
                                             // Auto-implied elimination & winner
-                                            const isElimination = categoryId === 'voted-out' || categoryId === 'first-voted-out' || categoryId === 'medevac' || categoryId === 'expelled' || catName.includes('voted out') || catName.includes('medical');
+                                            const isElimination = (categoryId === 'voted-out' || categoryId === 'medevac' || categoryId === 'expelled' || (catName.includes('voted out') && !catName.includes('first voted out'))) && categoryId !== 'first-voted-out';
                                             const isWinner = categoryId === 'sole-survivor' || catName.includes('sole survivor');
                                             
                                             if (window.firebaseInitialized) {
