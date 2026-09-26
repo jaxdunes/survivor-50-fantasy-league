@@ -21,6 +21,18 @@
     <meta name="apple-mobile-web-app-title" content="Survivor 51">
     
     <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Playfair+Display:wght@700&display=swap" rel="stylesheet">
+    <script>
+    window.onerror = function(msg, url, lineNo, columnNo, error) {
+        var errorDetails = (error && error.stack) ? error.stack : (msg + ' at ' + url + ':' + lineNo + ':' + columnNo);
+        console.error('GLOBAL RUNTIME ERROR:', errorDetails);
+        var div = document.createElement('div');
+        div.id = 'global-error-banner';
+        div.style.cssText = 'position:fixed;top:10px;left:10px;right:10px;z-index:999999;background:#991b1b;color:#fef2f2;padding:20px;border-radius:12px;font-family:monospace;font-size:13px;box-shadow:0 20px 25px -5px rgba(0,0,0,0.5);border:2px solid #ef4444;';
+        div.innerHTML = '<strong style="font-size:16px;">🚨 FATAL RUNTIME ERROR:</strong><br><pre style="white-space:pre-wrap;margin-top:10px;max-height:300px;overflow-y:auto;background:rgba(0,0,0,0.4);padding:10px;border-radius:8px;">' + errorDetails + '</pre>';
+        if (document.body) document.body.appendChild(div);
+        return false;
+    };
+    </script>
     <style>
         body { margin: 0; padding: 0; font-family: system-ui, -apple-system, sans-serif; }
         #root { min-height: 100vh; }
@@ -763,7 +775,7 @@
                 ),
 
                 h('div', { className: 'flex flex-wrap items-center gap-1.5 w-full md:w-auto overflow-x-auto py-0.5' },
-                    ...episodeStates.map(item => {
+                    episodeStates.map(item => {
                         let badgeStyle = '';
 
                         if (item.status === 'completed') {
@@ -1174,20 +1186,50 @@
             const toggleTeamExpanded = (teamId) => {
                 setExpandedTeams(prev => ({ ...prev, [teamId]: !prev[teamId] }));
             };
+
+            const getPlayerTribeProgression = (player) => {
+                if (!player) return [];
+                if (typeof window.getPlayerTribeProgression === 'function') {
+                    return window.getPlayerTribeProgression(player);
+                }
+                if (player.tribeHistory && Array.isArray(player.tribeHistory) && player.tribeHistory.length > 0) {
+                    return player.tribeHistory;
+                }
+                const start = player.startingTribe || player.tribe || 'Unassigned';
+                const curr = player.tribe || player.startingTribe || 'Unassigned';
+                if (start !== curr && curr !== 'Unassigned') {
+                    return [
+                        { episode: 1, tribe: start, type: 'starting', label: `Starting Tribe: ${start}` },
+                        { episode: 2, tribe: curr, type: 'swap', label: `Swapped to ${curr}` }
+                    ];
+                }
+                return [{ episode: 1, tribe: start, type: 'starting', label: `Starting Tribe: ${start}` }];
+            };
             
             const getPlayerScore = (playerId) => {
-                const playerScores = scores[playerId] || {};
+                const pId = parseInt(playerId);
+                const playerScores = scores && (scores[playerId] || scores[pId]) ? (scores[playerId] || scores[pId]) : {};
                 let total = 0;
-                Object.values(playerScores).forEach(episodeScores => {
-                    Object.values(episodeScores).forEach(score => {
-                        total += score.points || 0;
+                
+                if (typeof playerScores === 'object' && playerScores !== null) {
+                    Object.values(playerScores).forEach(episodeScores => {
+                        if (typeof episodeScores === 'object' && episodeScores !== null) {
+                            Object.values(episodeScores).forEach(score => {
+                                if (score && typeof score === 'object') {
+                                    total += (parseInt(score.points) || 0);
+                                } else if (typeof score === 'number') {
+                                    total += score;
+                                }
+                            });
+                        }
                     });
-                });
+                }
                 
                 // Add elimination bonus
-                if (eliminationOrder[playerId]) {
-                    const episode = eliminationOrder[playerId];
-                    total += episode; // Points = episode number (rewards longevity)
+                const elimEp = eliminationOrder && (eliminationOrder[playerId] || eliminationOrder[pId]);
+                if (elimEp) {
+                    const episode = parseInt(elimEp) || 0;
+                    total += episode;
                 }
                 
                 return total;
@@ -1196,45 +1238,55 @@
             const isFinishedSeason = (seasonData && seasonData.status === 'finished') || (seasonConfig && seasonConfig.status === 'previous') || activeSeasonId === 'season-50';
 
             const getPlayerBreakdown = (playerId) => {
-                const playerScores = scores[playerId] || {};
+                const pId = parseInt(playerId);
+                const playerScores = scores && (scores[playerId] || scores[pId]) ? (scores[playerId] || scores[pId]) : {};
                 const breakdown = [];
                 
-                Object.keys(playerScores).forEach(ep => {
-                    const episodeScores = playerScores[ep] || {};
-                    Object.keys(episodeScores).forEach(scoreId => {
-                        const score = episodeScores[scoreId];
-                        breakdown.push({
-                            episode: parseInt(ep),
-                            scoreId: scoreId,
-                            playerId: playerId,
-                            category: score.category,
-                            points: score.points,
-                            note: score.note,
-                            canDelete: !isFinishedSeason
-                        });
-                    });
-                });
-
-                // Add tribe swap & merge events
-                const playerObj = playerById[playerId];
-                if (playerObj) {
-                    const progression = getPlayerTribeProgression(playerObj);
-                    progression.forEach(th => {
-                        if (th.type === 'swap' || th.type === 'merge') {
-                            breakdown.push({
-                                episode: th.episode || 1,
-                                category: th.type === 'merge' ? `🏝️ Reached Merge (${th.tribe} Tribe)` : `🔄 Tribe Swap (${th.tribe} Tribe)`,
-                                points: 0,
-                                note: th.label || `Transferred to ${th.tribe}`
+                if (typeof playerScores === 'object' && playerScores !== null) {
+                    Object.keys(playerScores).forEach(ep => {
+                        const episodeScores = playerScores[ep] || {};
+                        if (typeof episodeScores === 'object' && episodeScores !== null) {
+                            Object.keys(episodeScores).forEach(scoreId => {
+                                const score = episodeScores[scoreId];
+                                if (score && typeof score === 'object') {
+                                    breakdown.push({
+                                        episode: parseInt(ep) || 1,
+                                        scoreId: scoreId,
+                                        playerId: playerId,
+                                        category: score.category || 'Points',
+                                        points: parseInt(score.points) || 0,
+                                        note: score.note || '',
+                                        canDelete: !isFinishedSeason
+                                    });
+                                }
                             });
                         }
                     });
                 }
+
+                // Add tribe swap & merge events
+                if (players && Array.isArray(players)) {
+                    const playerObj = players.find(p => p && (p.id === playerId || p.id === pId));
+                    if (playerObj) {
+                        const progression = getPlayerTribeProgression(playerObj);
+                        progression.forEach(th => {
+                            if (th && (th.type === 'swap' || th.type === 'merge')) {
+                                breakdown.push({
+                                    episode: th.episode || 1,
+                                    category: th.type === 'merge' ? `🏝️ Reached Merge (${th.tribe} Tribe)` : `🔄 Tribe Swap (${th.tribe} Tribe)`,
+                                    points: 0,
+                                    note: th.label || `Transferred to ${th.tribe}`
+                                });
+                            }
+                        });
+                    }
+                }
                 
                 // Add elimination bonus if exists
-                if (eliminationOrder[playerId]) {
-                    const episode = eliminationOrder[playerId];
-                    const placement = 25 - episode; // Calculate placement
+                const elimEp = eliminationOrder && (eliminationOrder[playerId] || eliminationOrder[pId]);
+                if (elimEp) {
+                    const episode = parseInt(elimEp) || 1;
+                    const placement = Math.max(1, 25 - episode);
                     breakdown.push({
                         episode: episode,
                         category: 'Elimination Bonus',
@@ -1244,7 +1296,7 @@
                 }
                 
                 // Add winner bonus if this player won
-                if (winner && parseInt(winner) === playerId) {
+                if (winner && (parseInt(winner) === playerId || parseInt(winner) === pId)) {
                     breakdown.push({
                         episode: 14,
                         category: 'Winner Bonus',
@@ -1253,7 +1305,7 @@
                     });
                 }
                 
-                return breakdown.sort((a, b) => a.episode - b.episode);
+                return breakdown.sort((a, b) => (a.episode || 0) - (b.episode || 0));
             };
             
             // Delete a score entry
@@ -1375,7 +1427,7 @@
                             'Leaderboard'
                         ),
                         h('div', { className: 'space-y-4' },
-                            ...leaderboard.map((team, index) => 
+                            leaderboard.map((team, index) => 
                                 h('div', {
                                     key: team.id,
                                     className: `border-2 rounded-xl p-4 ${team.bgColor} border-gray-200`
@@ -1407,67 +1459,70 @@
                                     ),
                                     
                                     // Expanded player breakdown
-                                    expandedTeams[team.id] && h('div', { className: 'mt-4 pt-4 border-t-2 border-gray-200 space-y-3' },
+                                    expandedTeams[team.id] ? h('div', { className: 'mt-4 pt-4 border-t-2 border-gray-200 space-y-3' },
                                         team.roster.length === 0 ? 
                                             h('div', { className: 'text-center text-gray-500 italic py-4' }, 'No players drafted') :
                                             team.roster.map(player => {
                                                 const playerScore = getPlayerScore(player.id);
                                                 const breakdown = getPlayerBreakdown(player.id);
-                                                const isEliminated = eliminationOrder[player.id];
+                                                const isEliminated = eliminationOrder && eliminationOrder[player.id];
                                                 const isWinner = winner && parseInt(winner) === player.id;
-                                                const isBackfilled = draftState.backfilledPlayers && draftState.backfilledPlayers[player.id];
+                                                const isBackfilled = draftState && draftState.backfilledPlayers && draftState.backfilledPlayers[player.id];
                                                 
+                                                const playerHeaderChildren = [h('span', { key: 'name' }, player.name)];
+                                                const progression = getPlayerTribeProgression(player);
+                                                if (Array.isArray(progression)) {
+                                                    progression.forEach((item, idx) => {
+                                                        const tName = item.tribe || 'Unassigned';
+                                                        playerHeaderChildren.push(
+                                                            h('span', { key: `tribe-${idx}`, className: `text-[10px] font-bold px-2 py-0.5 rounded-full ${getTribeBadgeColor(tName)} shadow-sm flex items-center gap-1` },
+                                                                idx > 0 ? '➔ ' : '',
+                                                                getTribeIcon(tName),
+                                                                tName,
+                                                                item.type === 'merge' ? h('span', { key: 'm', className: 'text-[9px] bg-emerald-700 text-emerald-100 font-black px-1 rounded ml-0.5' }, 'MERGE') : null
+                                                            )
+                                                        );
+                                                    });
+                                                }
+                                                if (isWinner) {
+                                                    playerHeaderChildren.push(h('span', { key: 'winner', className: 'text-xs text-yellow-600 font-bold' }, '👑 SOLE SURVIVOR'));
+                                                }
+                                                if (isEliminated && !isWinner) {
+                                                    playerHeaderChildren.push(h('span', { key: 'elim', className: 'text-xs text-red-600 font-semibold' }, `(Eliminated E${isEliminated})`));
+                                                }
+                                                if (isBackfilled) {
+                                                    playerHeaderChildren.push(h('span', { key: 'backfill', className: 'text-[10px] bg-amber-400 text-amber-950 font-black px-1.5 py-0.5 rounded shadow-sm' }, '↩️ BACKFILLED'));
+                                                }
+
                                                 return h('div', {
                                                     key: player.id,
                                                     className: `bg-white p-3 rounded-lg ${isWinner ? 'border-2 border-yellow-400' : isEliminated ? 'opacity-60' : ''}`
                                                 },
                                                     h('div', { className: 'flex justify-between items-start mb-2' },
-                                                        h('div', { className: 'font-bold text-gray-900 flex items-center gap-1.5 flex-wrap' }, 
-                                                            player.name,
-                                                            ...getPlayerTribeProgression(player).map((item, idx) => {
-                                                                const tName = item.tribe;
-                                                                return h('React.Fragment', { key: idx },
-                                                                    idx > 0 && h('span', { className: 'text-[10px] text-gray-400 font-black' }, '➔'),
-                                                                    h('span', { className: `text-[10px] font-bold px-2 py-0.5 rounded-full ${getTribeBadgeColor(tName)} shadow-sm flex items-center gap-1` },
-                                                                        getTribeIcon(tName),
-                                                                        tName,
-                                                                        item.type === 'merge' && h('span', { className: 'text-[9px] bg-emerald-700 text-emerald-100 font-black px-1 rounded ml-0.5' }, 'MERGE')
-                                                                    )
-                                                                );
-                                                            }),
-                                                            isWinner && h('span', { className: 'text-xs text-yellow-600 font-bold' }, 
-                                                                '👑 SOLE SURVIVOR'
-                                                            ),
-                                                            isEliminated && !isWinner && h('span', { className: 'text-xs text-red-600 font-semibold' }, 
-                                                                `(Eliminated E${isEliminated})`
-                                                            ),
-                                                            isBackfilled && h('span', { className: 'text-[10px] bg-amber-400 text-amber-950 font-black px-1.5 py-0.5 rounded shadow-sm' }, 
-                                                                '↩️ BACKFILLED'
-                                                            )
-                                                        ),
+                                                        h('div', { className: 'font-bold text-gray-900 flex items-center gap-1.5 flex-wrap' }, playerHeaderChildren),
                                                         h('div', { className: 'text-xl font-bold text-gray-900' }, playerScore)
                                                     ),
-                                                    breakdown.length > 0 && h('div', { className: 'text-xs space-y-1' },
-                                                        ...breakdown.map((item, idx) => 
-                                                            h('div', { key: idx, className: 'flex justify-between items-center text-gray-600 group' },
+                                                    breakdown && breakdown.length > 0 ? h('div', { className: 'text-xs space-y-1' },
+                                                        breakdown.map((item, idx) => 
+                                                            h('div', { key: item.scoreId || `breakdown-${idx}`, className: 'flex justify-between items-center text-gray-600 group' },
                                                                 h('span', {}, `E${item.episode}: ${item.category}${item.note ? ` - ${item.note}` : ''}`),
-                                                                 h('div', { className: 'flex items-center gap-2' },
+                                                                h('div', { className: 'flex items-center gap-2' },
                                                                     h('span', { className: `font-bold ${item.points < 0 ? 'text-red-600' : 'text-gray-700'}` }, `${item.points > 0 ? '+' : ''}${item.points}`),
-                                                                    item.canDelete && h('button', {
+                                                                    item.canDelete ? h('button', {
                                                                         onClick: (e) => {
                                                                             e.stopPropagation();
                                                                             deleteScore(item.playerId, item.episode, item.scoreId);
                                                                         },
                                                                         className: 'opacity-0 group-hover:opacity-100 transition-opacity ml-2 text-red-500 hover:text-red-700 font-bold',
                                                                         title: 'Delete this score'
-                                                                    }, '×')
+                                                                    }, '×') : null
                                                                 )
                                                             )
                                                         )
-                                                    )
+                                                    ) : null
                                                 );
                                             })
-                                    )
+                                    ) : null
                                 )
                             )
                         )
@@ -1609,7 +1664,7 @@
                                             },
                                             className: 'w-full px-4 py-3 border-2 border-gray-300 rounded-xl focus:border-orange-500 focus:outline-none font-semibold'
                                         },
-                                            h('option', { value: '' }, 'Choose episode...'),
+                                            h('option', { key: 'default', value: '' }, 'Choose episode...'),
                                             ...[...Array(14)].map((_, i) => 
                                                 h('option', { key: i + 1, value: String(i + 1) }, `Episode ${i + 1}`)
                                             )
@@ -1630,7 +1685,7 @@
                                             )
                                         ),
                                         h('div', { className: 'space-y-4' },
-                                            ...Object.entries(playersByTribe).map(([tName, tPlayers]) => {
+                                            Object.entries(playersByTribe).map(([tName, tPlayers]) => {
                                                 const activeTribePlayers = tPlayers.filter(p => !eliminationOrder[p.id]);
                                                 const activeIds = activeTribePlayers.map(p => p.id);
                                                 const isEntireTribeSelected = activeIds.length > 0 && activeIds.every(id => selectedPlayerIds.includes(id));
@@ -1716,7 +1771,7 @@
                                                 }
                                             }
                                         },
-                                            h('option', { value: '' }, categorySearchTerm ? `Matching categories (${filteredScoringCategories.length})...` : 'Choose category...'),
+                                            h('option', { key: 'default', value: '' }, categorySearchTerm ? `Matching categories (${filteredScoringCategories.length})...` : 'Choose category...'),
                                             ...filteredScoringCategories.map(cat => 
                                                 h('option', { 
                                                     key: cat.id, 
@@ -2060,8 +2115,34 @@
             );
         }
         
+        class ErrorBoundary extends React.Component {
+            constructor(props) {
+                super(props);
+                this.state = { hasError: false, error: null };
+            }
+            static getDerivedStateFromError(error) {
+                return { hasError: true, error };
+            }
+            componentDidCatch(error, errorInfo) {
+                console.error("ErrorBoundary caught an error:", error, errorInfo);
+            }
+            render() {
+                if (this.state.hasError) {
+                    return h('div', { className: 'p-6 bg-red-900 text-white rounded-2xl m-4 max-w-4xl mx-auto shadow-2xl border border-red-500 my-12' },
+                        h('h2', { className: 'text-2xl font-bold mb-2 flex items-center gap-2' }, '⚠️ Scoring Page Render Error'),
+                        h('p', { className: 'text-sm font-mono bg-black/50 p-4 rounded-xl text-red-200 overflow-x-auto mb-4' }, String(this.state.error && this.state.error.stack ? this.state.error.stack : this.state.error)),
+                        h('button', {
+                            className: 'px-5 py-2.5 bg-white text-red-950 font-black rounded-xl hover:bg-red-100 transition shadow-md cursor-pointer',
+                            onClick: () => this.setState({ hasError: false, error: null })
+                        }, '🔄 Try Again / Reset')
+                    );
+                }
+                return this.props.children;
+            }
+        }
+        
         const root = ReactDOM.createRoot(document.getElementById('root'));
-        root.render(h(ScoringPage));
+        root.render(h(ErrorBoundary, null, h(ScoringPage)));
     }
     </script>
     

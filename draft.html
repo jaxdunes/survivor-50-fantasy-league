@@ -934,7 +934,7 @@
                                     activeSeasonId === 'season-50' && player.era && h('div', { className: 'text-xs font-semibold bg-white/20 backdrop-blur-sm px-2.5 py-0.5 rounded-full' }, player.era),
                                     progression.map((item, idx) => {
                                         const tName = item.tribe;
-                                        return h('React.Fragment', { key: idx },
+                                        return h('span', { key: idx, className: 'inline-flex items-center gap-1' },
                                             idx > 0 && h('span', { className: 'text-xs text-white/80 font-black' }, '➔'),
                                             h('div', { className: `text-xs font-bold px-2.5 py-0.5 rounded-full ${getTribeBadgeColor(tName)} backdrop-blur-sm shadow-sm flex items-center gap-1` },
                                                 getTribeIcon(tName),

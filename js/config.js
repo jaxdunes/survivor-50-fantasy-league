@@ -280,3 +280,9 @@ function setActiveLeagueAndSeason(leagueId, seasonId) {
     window.location.href = url.toString();
 }
 
+window.getPlayerTribeProgression = getPlayerTribeProgression;
+window.getPlayerEventsTimeline = getPlayerEventsTimeline;
+window.setActiveLeagueAndSeason = setActiveLeagueAndSeason;
+
+
+
