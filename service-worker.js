@@ -122,18 +122,37 @@ async function updateBadgeCount() {
 self.addEventListener('notificationclick', (event) => {
     event.notification.close();
     
+    const notificationData = event.notification.data || {};
+    let targetUrl = './index.html';
+    
+    if (notificationData.type === 'episode-scored') {
+        const leagueParam = notificationData.leagueId ? `league=${encodeURIComponent(notificationData.leagueId)}` : '';
+        const seasonParam = notificationData.seasonId ? `season=${encodeURIComponent(notificationData.seasonId)}` : '';
+        const queryParams = [leagueParam, seasonParam].filter(Boolean).join('&');
+        targetUrl = `./index.html${queryParams ? '?' + queryParams : ''}`;
+    } else if (notificationData.type === 'chat') {
+        targetUrl = './chat.html';
+    }
+    
     event.waitUntil(
         clients.matchAll({ type: 'window', includeUncontrolled: true })
             .then((clientList) => {
-                // If a window is already open, focus it
+                const searchFilename = targetUrl.replace('./', '');
                 for (let client of clientList) {
-                    if ('focus' in client) {
+                    if ('focus' in client && client.url.includes(searchFilename)) {
                         return client.focus();
                     }
                 }
-                // Otherwise, open a new window
+                for (let client of clientList) {
+                    if ('focus' in client) {
+                        if ('navigate' in client) {
+                            client.navigate(targetUrl);
+                        }
+                        return client.focus();
+                    }
+                }
                 if (clients.openWindow) {
-                    return clients.openWindow('./chat.html');
+                    return clients.openWindow(targetUrl);
                 }
             })
     );

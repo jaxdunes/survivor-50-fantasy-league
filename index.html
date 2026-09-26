@@ -730,16 +730,17 @@
             );
         }
 
-        function EpisodesScoredTracker({ scores, eliminationOrder, onEpisodeClick, theme }) {
+        function EpisodesScoredTracker({ scores, eliminationOrder, scoredEpisodes = {}, onEpisodeClick, theme }) {
             const episodes = Array.from({ length: 14 }, (_, i) => i + 1);
 
             const episodeStates = episodes.map(ep => {
-                // State 1: Completed / Voted Out
+                // State 1: Completed / Voted Out or Explicitly Scored
                 const hasVotedOut = Object.entries(eliminationOrder || {}).some(([playerId, elimEp]) => {
                     return parseInt(elimEp) === ep;
                 });
+                const isExplicitlyScored = Boolean(scoredEpisodes && (scoredEpisodes[ep] || scoredEpisodes[`episode-${ep}`]));
 
-                if (hasVotedOut) {
+                if (hasVotedOut || isExplicitlyScored) {
                     return { ep, status: 'completed', label: 'Completed', icon: '✓' };
                 }
 
@@ -938,6 +939,7 @@
             const [seasonData, setSeasonData] = useState(null);
             const [scores, setScores] = useState({});
             const [eliminationOrder, setEliminationOrder] = useState({});
+            const [scoredEpisodes, setScoredEpisodes] = useState({});
             const [winner, setWinner] = useState(null); // Single winner ID
             const [currentEpisode, setCurrentEpisode] = useState(1);
             const [lastSelectedEpisode, setLastSelectedEpisode] = useState(() => localStorage.getItem('survivor_last_selected_episode') || '1');
@@ -1083,6 +1085,11 @@
                     }
                 });
                 
+                const scoredEpisodesRef = database.ref(`${seasonBasePath}/scoredEpisodes`);
+                scoredEpisodesRef.on('value', (snapshot) => {
+                    setScoredEpisodes(snapshot.val() || {});
+                });
+
                 database.ref('currentEpisode').on('value', (snapshot) => {
                     setCurrentEpisode(snapshot.val() || 1);
                 });
@@ -1092,6 +1099,7 @@
                     scoresRef.off();
                     elimRef.off();
                     winnerRef.off();
+                    scoredEpisodesRef.off();
                     database.ref('currentEpisode').off();
                 };
             }, [activeLeagueId, activeSeasonId]);
@@ -1449,6 +1457,7 @@
                     h(EpisodesScoredTracker, {
                         scores: scores,
                         eliminationOrder: eliminationOrder,
+                        scoredEpisodes: scoredEpisodes,
                         theme: theme,
                         onEpisodeClick: (epNum) => {
                             const epStr = String(epNum);
@@ -1889,6 +1898,18 @@
                                             placeholder: 'e.g., "Won against Jackson", "Found on beach"'
                                         })
                                     ),
+
+                                    // Mark Episode as Scored Checkbox
+                                    h('div', { className: 'flex items-center gap-2 pt-2' },
+                                        h('input', {
+                                            id: 'notify-scored-checkbox',
+                                            type: 'checkbox',
+                                            className: 'w-4 h-4 text-orange-600 rounded focus:ring-orange-500 cursor-pointer'
+                                        }),
+                                        h('label', { htmlFor: 'notify-scored-checkbox', className: 'text-xs font-bold text-gray-700 cursor-pointer' },
+                                            'Mark Episode as Scored & Send Push Notification to League 🏆'
+                                        )
+                                    ),
                                     
                                     // Submit Button
                                     h('button', {
@@ -1904,6 +1925,7 @@
                                             const categoryId = document.getElementById('category-select').value;
                                             const points = parseInt(document.getElementById('points-input').value);
                                             const note = document.getElementById('note-input').value;
+                                            const notifyScored = document.getElementById('notify-scored-checkbox') ? document.getElementById('notify-scored-checkbox').checked : false;
                                             
                                             if (targetPlayerIds.length === 0 || !episode || !categoryId || isNaN(points)) {
                                                 alert(targetPlayerIds.length === 0 ? 'Please select at least one player.' : 'Please fill in all required fields');
@@ -1920,6 +1942,18 @@
                                             
                                             if (window.firebaseInitialized) {
                                                 const promises = [];
+                                                if (notifyScored) {
+                                                    selectedAddScoreLeagues.forEach(leagueId => {
+                                                        const scoredRef = `leagues/${leagueId}/seasons/${activeSeasonId}/scoredEpisodes/${episode}`;
+                                                        promises.push(
+                                                            database.ref(scoredRef).set({
+                                                                scoredAt: Date.now(),
+                                                                scoredBy: firebase.auth().currentUser ? (firebase.auth().currentUser.displayName || firebase.auth().currentUser.email || 'Admin') : 'Admin',
+                                                                status: 'completed'
+                                                            })
+                                                        );
+                                                    });
+                                                }
                                                 targetPlayerIds.forEach(playerId => {
                                                     selectedAddScoreLeagues.forEach(leagueId => {
                                                         const baseRef = `leagues/${leagueId}/seasons/${activeSeasonId}`;
@@ -1979,6 +2013,9 @@
                                                     document.getElementById('category-select').value = '';
                                                     document.getElementById('points-input').value = '';
                                                     document.getElementById('note-input').value = '';
+                                                    if (document.getElementById('notify-scored-checkbox')) {
+                                                        document.getElementById('notify-scored-checkbox').checked = false;
+                                                    }
                                                     setSelectedCategoryId('');
                                                     setCategorySearchTerm('');
                                                     setSelectedPlayerIds([]);

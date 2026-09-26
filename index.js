@@ -245,3 +245,88 @@ exports.sendEpisodeWatchedNotification = functions.database.ref('/users/{userId}
             return null;
         }
     });
+
+// Send notification when an episode is marked as scored
+exports.sendEpisodeScoredNotification = functions.database.ref('/leagues/{leagueId}/seasons/{seasonId}/scoredEpisodes/{episodeNum}')
+    .onCreate(async (snapshot, context) => {
+        const leagueId = context.params.leagueId;
+        const seasonId = context.params.seasonId;
+        const episodeNum = context.params.episodeNum;
+        
+        console.log(`Episode ${episodeNum} marked as scored in league ${leagueId} (${seasonId})`);
+        
+        // Fetch league members if present, fallback to all users
+        const leagueSnap = await admin.database().ref(`leagues/${leagueId}`).once('value');
+        const league = leagueSnap.val() || {};
+        const leagueMembers = league.members || null;
+        
+        const usersSnapshot = await admin.database().ref('users').once('value');
+        const users = usersSnapshot.val();
+        if (!users) {
+            console.log('No users found');
+            return null;
+        }
+        
+        const tokens = [];
+        for (const userId in users) {
+            // If league members exist, filter by league membership
+            if (leagueMembers && !leagueMembers[userId]) continue;
+            
+            const user = users[userId];
+            if (!user.fcmToken) continue;
+            
+            const prefs = user.notificationPrefs || {};
+            if (prefs.episodeScored === false) {
+                console.log(`User ${user.username || userId} disabled episodeScored notifications`);
+                continue;
+            }
+            
+            tokens.push(user.fcmToken);
+        }
+        
+        if (tokens.length === 0) {
+            console.log('No users to notify for episode scored');
+            return null;
+        }
+        
+        console.log(`Sending episode scored notification to ${tokens.length} users`);
+        
+        const payload = {
+            notification: {
+                title: `🏆 Survivor Fantasy League`,
+                body: `Scores for Episode ${episodeNum} are live! Check the standings.`
+            },
+            data: {
+                type: 'episode-scored',
+                leagueId: leagueId,
+                seasonId: seasonId,
+                episode: episodeNum
+            }
+        };
+        
+        try {
+            const response = await admin.messaging().sendToDevice(tokens, payload);
+            console.log('Successfully sent episode scored notification. Success count:', response.successCount);
+            
+            if (response.failureCount > 0) {
+                const updates = {};
+                response.results.forEach((result, index) => {
+                    if (result.error) {
+                        for (const userId in users) {
+                            if (users[userId].fcmToken === tokens[index]) {
+                                updates[`users/${userId}/fcmToken`] = null;
+                            }
+                        }
+                    }
+                });
+                if (Object.keys(updates).length > 0) {
+                    await admin.database().ref().update(updates);
+                }
+            }
+            return response;
+        } catch (error) {
+            console.error('Error sending episode scored notification:', error);
+            return null;
+        }
+    });
+
