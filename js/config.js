@@ -163,6 +163,10 @@ function getActiveSeasonId(leagueId) {
     let seasonParam = urlParams.get('season');
     
     if (!seasonParam || !allowedSeasonIds.includes(seasonParam)) {
+        seasonParam = localStorage.getItem('survivor_active_season_id_' + activeLeague);
+    }
+    
+    if (!seasonParam || !allowedSeasonIds.includes(seasonParam)) {
         seasonParam = DEFAULT_SEASON_ID;
     }
     
@@ -174,16 +178,11 @@ function getActiveSeasonId(leagueId) {
  */
 function setActiveLeagueAndSeason(leagueId, seasonId) {
     if (!AVAILABLE_LEAGUES[leagueId]) return;
+    const sId = seasonId || DEFAULT_SEASON_ID;
     localStorage.setItem('survivor_active_league_id', leagueId);
-    if (seasonId) {
-        localStorage.setItem('survivor_active_season_id_' + leagueId, seasonId);
-    }
+    localStorage.setItem('survivor_active_season_id_' + leagueId, sId);
     const url = new URL(window.location.href);
     url.searchParams.set('league', leagueId);
-    if (seasonId && seasonId !== DEFAULT_SEASON_ID) {
-        url.searchParams.set('season', seasonId);
-    } else {
-        url.searchParams.delete('season');
-    }
+    url.searchParams.set('season', sId);
     window.location.href = url.toString();
 }

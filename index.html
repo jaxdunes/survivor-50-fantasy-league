@@ -800,17 +800,60 @@
             const seasonConfig = (currentLeagueConfig.seasons || []).find(s => s.id === activeSeasonId) || {};
             const teams = seasonConfig.teams || currentLeagueConfig.teams;
             
-            const defaultPlayers = [
-                { id: 1, name: "Aaliyah Puglia" },
-                { id: 2, name: "Alexis Levine" },
-                { id: 3, name: "An “Thien An” Nguyen" },
-                { id: 4, name: "Ana Sani" },
-                { id: 5, name: "Angelica “Jelly” Loblack" },
-                { id: 6, name: "Brady Booker" },
-                { id: 7, name: "Carter Krull" },
-                { id: 8, name: "Cristian Chavez" },
-                { id: 9, name: "Danny “Kilby” Kilby" },
-                { id: 10, name: "Devin Way" }
+            const defaultSeason50Players = [
+                // CILA TRIBE
+                { id: 1, name: "Jenna Lewis-Dougherty", tribe: "Cila", seasons: ["S1: Borneo", "S8: All-Stars"], placement: "3rd in All-Stars", era: "Old School", strengths: ["Social Game", "Longevity"], threat: "Medium", note: "Original Borneo castaway returning after 20+ years!", image: "https://www.fantasysurvivorgame.com/images/50/draftpics/jennaDFT.jpg" },
+                { id: 2, name: "Cirie Fields", tribe: "Cila", seasons: ["S12", "S16", "S20", "S34"], placement: "4th multiple times", era: "Legend", strengths: ["Strategy", "Social"], threat: "EXTREMELY HIGH", note: "5-time player! Best to never win", image: "https://www.fantasysurvivorgame.com/images/50/draftpics/cirieDFT.jpg" },
+                { id: 3, name: "Ozzy Lusth", tribe: "Cila", seasons: ["S13", "S16", "S23", "S34"], placement: "2nd in Cook Islands", era: "Legend", strengths: ["Physical", "Provider"], threat: "EXTREMELY HIGH", note: "5-time player! Challenge beast", image: "https://www.fantasysurvivorgame.com/images/50/draftpics/ozzyDFT.jpg" },
+                { id: 4, name: "Christian Hubicki", tribe: "Cila", seasons: ["S37"], placement: "7th", era: "New School", strengths: ["Puzzles", "Likeable"], threat: "High", note: "Robotics professor with algorithm brain", image: "https://www.fantasysurvivorgame.com/images/50/draftpics/christianDFT.jpg" },
+                { id: 5, name: "Rick Devens", tribe: "Cila", seasons: ["S38"], placement: "4th", era: "New School", strengths: ["Idols", "Resilience"], threat: "High", note: "News anchor comeback king", image: "https://www.fantasysurvivorgame.com/images/50/draftpics/rickDFT.jpg" },
+                { id: 6, name: "Emily Flippen", tribe: "Cila", seasons: ["S45"], placement: "8th", era: "New Era", strengths: ["Strategic", "Social"], threat: "Medium", note: "Corporate strategist from S45", image: "https://www.fantasysurvivorgame.com/images/50/draftpics/emilyDFT.jpg" },
+                { id: 7, name: "Joe Hunter", tribe: "Cila", seasons: ["S46"], placement: "5th", era: "New Era", strengths: ["Physical", "Idols"], threat: "Very High", note: "Challenge competitor from S46", image: "https://www.fantasysurvivorgame.com/images/50/draftpics/joeDFT.jpg" },
+                { id: 8, name: "Savannah Louie", tribe: "Cila", seasons: ["S49 - WINNER"], placement: "WINNER", era: "New Era", strengths: ["Strategic", "Social"], threat: "EXTREMELY HIGH", note: "Just won S49! Only 2 weeks between seasons", image: "https://www.fantasysurvivorgame.com/images/50/draftpics/savannahDFT.jpg" },
+                
+                // KALO TRIBE  
+                { id: 9, name: "Coach Wade", tribe: "Kalo", seasons: ["S18", "S20", "S23"], placement: "2nd in South Pacific", era: "Old School", strengths: ["Leadership", "Character"], threat: "High", note: "The Dragon Slayer returns!", image: "https://www.fantasysurvivorgame.com/images/50/draftpics/coachDFT.jpg" },
+                { id: 10, name: "Chrissy Hofbeck", tribe: "Kalo", seasons: ["S35"], placement: "2nd", era: "New School", strengths: ["Strategic", "Challenges"], threat: "High", note: "Actuary who nearly won S35", image: "https://www.fantasysurvivorgame.com/images/50/draftpics/chrissyDFT.jpg" },
+                { id: 11, name: "Mike White", tribe: "Kalo", seasons: ["S37"], placement: "2nd", era: "New School", strengths: ["Social", "Strategic"], threat: "Very High", note: "Hollywood screenwriter & School of Rock writer", image: "https://www.fantasysurvivorgame.com/images/50/draftpics/mikeDFT.jpg" },
+                { id: 12, name: "Jonathan Young", tribe: "Kalo", seasons: ["S42"], placement: "4th", era: "New Era", strengths: ["Physical Beast", "Provider"], threat: "VERY HIGH", note: "Alabama strength coach. Absolute unit!", image: "https://www.fantasysurvivorgame.com/images/50/draftpics/jonathanDFT.jpg" },
+                { id: 13, name: "Charlie Davis", tribe: "Kalo", seasons: ["S46"], placement: "2nd", era: "New Era", strengths: ["Strategic", "Social"], threat: "Very High", note: "Law student who nearly won S46", image: "https://www.fantasysurvivorgame.com/images/50/draftpics/charlieDFT.jpg" },
+                { id: 14, name: "Tiffany Ervin", tribe: "Kalo", seasons: ["S46"], placement: "8th", era: "New Era", strengths: ["Strategic", "Underdog"], threat: "Medium", note: "Teacher from S46", image: "https://www.fantasysurvivorgame.com/images/50/draftpics/tiffanyDFT.jpg" },
+                { id: 15, name: "Kamilla Karthigesu", tribe: "Kalo", seasons: ["S46"], placement: "6th", era: "New Era", strengths: ["Physical", "Strategic"], threat: "High", note: "Has history with Joe from S46", image: "https://www.fantasysurvivorgame.com/images/50/draftpics/kamillaDFT.jpg" },
+                { id: 16, name: "Dee Valladares", tribe: "Kalo", seasons: ["S45 - WINNER"], placement: "WINNER", era: "New Era", strengths: ["Strategic", "Social"], threat: "EXTREMELY HIGH", note: "Winner of S45!", image: "https://www.fantasysurvivorgame.com/images/50/draftpics/deeDFT.jpg" },
+                
+                // VATU TRIBE
+                { id: 17, name: "Colby Donaldson", tribe: "Vatu", seasons: ["S2", "S8", "S20"], placement: "2nd in Australia", era: "Old School", strengths: ["Physical", "Leadership"], threat: "High", note: "Original challenge beast from S2", image: "https://www.fantasysurvivorgame.com/images/50/draftpics/colbyDFT.jpg" },
+                { id: 18, name: "Stephenie LaGrossa", tribe: "Vatu", seasons: ["S10", "S11", "S20"], placement: "2nd in Guatemala", era: "Old School", strengths: ["Physical", "Resilience"], threat: "High", note: "Last woman standing in Palau!", image: "https://www.fantasysurvivorgame.com/images/50/draftpics/stephenieDFT.jpg" },
+                { id: 19, name: "Aubry Bracco", tribe: "Vatu", seasons: ["S32", "S34", "S38"], placement: "2nd in Kaoh Rong", era: "New School", strengths: ["Strategic", "Adaptable"], threat: "Very High", note: "Fan favorite strategic player", image: "https://www.fantasysurvivorgame.com/images/50/draftpics/aubryDFT.jpg" },
+                { id: 20, name: "Angelina Keeley", tribe: "Vatu", seasons: ["S37"], placement: "3rd", era: "New School", strengths: ["Negotiation", "Strategy"], threat: "Medium-High", note: "Can I have your jacket? Rice negotiator!", image: "https://www.fantasysurvivorgame.com/images/50/draftpics/angelinaDFT.jpg" },
+                { id: 21, name: "Genevieve Mushaluk", tribe: "Vatu", seasons: ["S47"], placement: "3rd", era: "New Era", strengths: ["Strategy", "Cutthroat"], threat: "Very High", note: "Canadian lawyer. Cutthroat player", image: "https://www.fantasysurvivorgame.com/images/50/draftpics/genevieveDFT.jpg" },
+                { id: 22, name: "Q Burdette", tribe: "Vatu", seasons: ["S46"], placement: "7th", era: "New Era", strengths: ["Strategic", "Charismatic"], threat: "Medium-High", note: "Real estate agent from S46", image: "https://www.fantasysurvivorgame.com/images/50/draftpics/%22q%22DFT.jpg" },
+                { id: 23, name: "Rizo Velovic", tribe: "Vatu", seasons: ["S49"], placement: "TBD", era: "New Era", strengths: ["Unknown", "Fresh"], threat: "Medium", note: "Just finished S49 with Savannah!", image: "https://www.fantasysurvivorgame.com/images/50/draftpics/rizoDFT.jpg" },
+                { id: 24, name: "Kyle Fraser", tribe: "Vatu", seasons: ["S48 - WINNER"], placement: "WINNER", era: "New Era", strengths: ["Strategic", "Social"], threat: "EXTREMELY HIGH", note: "Winner of S48!", image: "https://www.fantasysurvivorgame.com/images/50/draftpics/kyleDFT.jpg" }
+            ];
+
+            const defaultSeason51Players = [
+                { id: 1, name: "Aaliyah Puglia", tribe: "Toka", startingTribe: "Toka", age: 24, occupation: "Chef", hometown: "Providence, RI" },
+                { id: 2, name: "Alexis Levine", tribe: "Savu", startingTribe: "Savu", age: 34, occupation: "Criminal Defense Attorney", hometown: "Atlanta, GA" },
+                { id: 3, name: "An “Thien An” Nguyen", tribe: "Toka", startingTribe: "Toka", age: 24, occupation: "Medical Student", hometown: "Fort Worth, TX" },
+                { id: 4, name: "Ana Sani", tribe: "Savu", startingTribe: "Savu", age: 34, occupation: "Voice Actress", hometown: "Toronto, ON" },
+                { id: 5, name: "Angelica “Jelly” Loblack", tribe: "Toka", startingTribe: "Toka", age: 29, occupation: "Sociology Professor", hometown: "Bloomington, IN" },
+                { id: 6, name: "Brady Booker", tribe: "Toka", startingTribe: "Toka", age: 27, occupation: "Professional Wrestler", hometown: "Knoxville, TN" },
+                { id: 7, name: "Carter Krull", tribe: "Savu", startingTribe: "Savu", age: 24, occupation: "Livestock Farmer", hometown: "Sioux Falls, SD" },
+                { id: 8, name: "Cristian Chavez", tribe: "Savu", startingTribe: "Savu", age: 26, occupation: "Head of HR", hometown: "Salt Lake City, UT" },
+                { id: 9, name: "Danny “Kilby” Kilby", tribe: "Toka", startingTribe: "Toka", age: 30, occupation: "Game Designer", hometown: "London, ON" },
+                { id: 10, name: "Devin Way", tribe: "Toka", startingTribe: "Toka", age: 33, occupation: "Actor", hometown: "Los Angeles, CA" },
+                { id: 11, name: "Eric Macksoud", tribe: "Savu", startingTribe: "Savu", age: 34, occupation: "Mental Health Counselor", hometown: "Windsor Locks, CT" },
+                { id: 12, name: "Jenna Doore", tribe: "Toka", startingTribe: "Toka", age: 30, occupation: "Wedding Photographer", hometown: "Toledo, OH" },
+                { id: 13, name: "Kristin Flickinger", tribe: "Savu", startingTribe: "Savu", age: 49, occupation: "Crisis Management", hometown: "Santa Barbara, CA" },
+                { id: 14, name: "Lewis Kelly", tribe: "Exile Island", startingTribe: "Exile Island", age: 28, occupation: "Farmer", hometown: "Puerto Rico / Ireland" },
+                { id: 15, name: "Linnea Capobianco", tribe: "Savu", startingTribe: "Savu", age: 25, occupation: "Entrepreneur", hometown: "Jersey City, NJ" },
+                { id: 16, name: "Maggie Nestor", tribe: "Toka", startingTribe: "Toka", age: 40, occupation: "Farmer", hometown: "Charles Town, WV" },
+                { id: 17, name: "Mike Pinsky", tribe: "Toka", startingTribe: "Toka", age: 32, occupation: "Baseball Executive", hometown: "New York City, NY" },
+                { id: 18, name: "Ori Jean-Charles", tribe: "Savu", startingTribe: "Savu", age: 27, occupation: "Personal Trainer", hometown: "Spring Valley, NY" },
+                { id: 19, name: "Patt Cannaday", tribe: "Toka", startingTribe: "Toka", age: 33, occupation: "Federal Prosecutor", hometown: "Washington, DC" },
+                { id: 20, name: "Rob Antonson", tribe: "Savu", startingTribe: "Savu", age: 40, occupation: "Airline Gate Agent", hometown: "Cumberland, RI" },
+                { id: 21, name: "Sharonda Cox", tribe: "Savu", startingTribe: "Savu", age: 34, occupation: "OBGYN Resident", hometown: "Richmond, KY" }
             ];
             
             const scoringCategories = [
@@ -898,12 +941,14 @@
             const [categorySearchTerm, setCategorySearchTerm] = useState('');
             const [selectedCategoryId, setSelectedCategoryId] = useState('');
             const [rulesSearchTerm, setRulesSearchTerm] = useState('');
+            const [selectedPlayerIds, setSelectedPlayerIds] = useState([]);
             
             useEffect(() => {
                 if (showAddScore) {
                     setSelectedAddScoreLeagues(Object.keys(LEAGUES_DATA));
                     setCategorySearchTerm('');
                     setSelectedCategoryId('');
+                    setSelectedPlayerIds([]);
                 }
             }, [showAddScore]);
 
@@ -932,13 +977,13 @@
             
             // Load season preset data
             useEffect(() => {
-                fetch('seasons/' + activeSeasonId + '.json')
+                fetch('seasons/' + activeSeasonId + '.json?t=' + Date.now())
                     .then(res => res.json())
                     .then(data => setSeasonData(data))
                     .catch(err => console.warn('Could not load season json in scoring', err));
             }, [activeSeasonId]);
 
-            const players = (seasonData && seasonData.contestants) ? seasonData.contestants : defaultPlayers;
+            const players = (seasonData && seasonData.contestants) ? seasonData.contestants : (activeSeasonId === 'season-50' ? defaultSeason50Players : defaultSeason51Players);
 
             const [draftState, setDraftState] = useState({});
 
@@ -1073,8 +1118,59 @@
                     score: getTeamScore(team.id),
                     roster: players.filter(p => playerTeams[p.id] === team.id)
                 })).sort((a, b) => b.score - a.score);
-            }, [playerTeams, scores, eliminationOrder, winner]);
+            }, [playerTeams, scores, eliminationOrder, winner, players]);
             
+            const getTribeBadgeColor = (tribe) => {
+                if (tribe === 'Cila') return 'bg-orange-950/80 text-orange-200 border border-orange-500/60 shadow-sm';
+                if (tribe === 'Kalo') return 'bg-teal-950/80 text-teal-200 border border-teal-500/60 shadow-sm';
+                if (tribe === 'Vatu') return 'bg-purple-950/80 text-purple-200 border border-purple-500/60 shadow-sm';
+                if (tribe === 'Toka') return 'bg-amber-950/80 text-amber-200 border border-amber-500/60 shadow-sm';
+                if (tribe === 'Savu') return 'bg-purple-950/80 text-purple-200 border border-purple-500/60 shadow-sm';
+                if (tribe === 'Exile Island') return 'bg-slate-900/80 text-slate-200 border border-slate-500/60 shadow-sm';
+                return 'bg-slate-800 text-slate-200 border border-slate-600';
+            };
+            
+            const getTribeIcon = (t) => {
+                if (t === 'Cila') return '🔥 ';
+                if (t === 'Kalo') return '🌊 ';
+                if (t === 'Vatu') return '⚡ ';
+                if (t === 'Toka') return '☀️ ';
+                if (t === 'Savu') return '🟣 ';
+                if (t === 'Exile Island') return '🏝️ ';
+                return '🏕️ ';
+            };
+
+            const playersByTribe = useMemo(() => {
+                const map = {};
+                players.forEach(p => {
+                    const tName = (p.tribe && p.tribe !== 'Unassigned') ? p.tribe : (p.startingTribe && p.startingTribe !== 'Unassigned') ? p.startingTribe : 'Unassigned';
+                    if (!map[tName]) map[tName] = [];
+                    map[tName].push(p);
+                });
+                return map;
+            }, [players]);
+
+            const togglePlayerSelected = (playerId) => {
+                setSelectedPlayerIds(prev => 
+                    prev.includes(playerId) ? prev.filter(id => id !== playerId) : [...prev, playerId]
+                );
+            };
+
+            const toggleTribeSelected = (tribeName, tribePlayers) => {
+                const activeTribePlayerIds = tribePlayers.filter(p => !eliminationOrder[p.id]).map(p => p.id);
+                if (activeTribePlayerIds.length === 0) return;
+
+                const allSelected = activeTribePlayerIds.every(id => selectedPlayerIds.includes(id));
+                if (allSelected) {
+                    setSelectedPlayerIds(prev => prev.filter(id => !activeTribePlayerIds.includes(id)));
+                } else {
+                    setSelectedPlayerIds(prev => {
+                        const newSet = new Set([...prev, ...activeTribePlayerIds]);
+                        return Array.from(newSet);
+                    });
+                }
+            };
+
             const toggleTeamExpanded = (teamId) => {
                 setExpandedTeams(prev => ({ ...prev, [teamId]: !prev[teamId] }));
             };
@@ -1310,18 +1406,20 @@
                                                     className: `bg-white p-3 rounded-lg ${isWinner ? 'border-2 border-yellow-400' : isEliminated ? 'opacity-60' : ''}`
                                                 },
                                                     h('div', { className: 'flex justify-between items-start mb-2' },
-                                                        h('div', {},
-                                                            h('div', { className: 'font-bold text-gray-900 flex items-center gap-1.5 flex-wrap' }, 
-                                                                player.name,
-                                                                isWinner && h('span', { className: 'text-xs text-yellow-600 font-bold' }, 
-                                                                    '👑 SOLE SURVIVOR'
-                                                                ),
-                                                                isEliminated && !isWinner && h('span', { className: 'text-xs text-red-600 font-semibold' }, 
-                                                                    `(Eliminated E${isEliminated})`
-                                                                ),
-                                                                isBackfilled && h('span', { className: 'text-[10px] bg-amber-400 text-amber-950 font-black px-1.5 py-0.5 rounded shadow-sm' }, 
-                                                                    '↩️ BACKFILLED'
-                                                                )
+                                                        h('div', { className: 'font-bold text-gray-900 flex items-center gap-1.5 flex-wrap' }, 
+                                                            player.name,
+                                                            (player.tribe || player.startingTribe) && (player.tribe || player.startingTribe) !== 'Unassigned' && h('span', { className: `text-[10px] font-bold px-2 py-0.5 rounded-full ${getTribeBadgeColor(player.tribe || player.startingTribe)} shadow-sm` },
+                                                                getTribeIcon(player.tribe || player.startingTribe),
+                                                                player.tribe || player.startingTribe
+                                                            ),
+                                                            isWinner && h('span', { className: 'text-xs text-yellow-600 font-bold' }, 
+                                                                '👑 SOLE SURVIVOR'
+                                                            ),
+                                                            isEliminated && !isWinner && h('span', { className: 'text-xs text-red-600 font-semibold' }, 
+                                                                `(Eliminated E${isEliminated})`
+                                                            ),
+                                                            isBackfilled && h('span', { className: 'text-[10px] bg-amber-400 text-amber-950 font-black px-1.5 py-0.5 rounded shadow-sm' }, 
+                                                                '↩️ BACKFILLED'
                                                             )
                                                         ),
                                                         h('div', { className: 'text-xl font-bold text-gray-900' }, playerScore)
@@ -1495,17 +1593,68 @@
                                         )
                                     ),
 
-                                    // Player Selection
-                                    h('div', {},
-                                        h('label', { className: 'block text-sm font-bold text-gray-700 mb-2' }, 'Select Player'),
-                                        h('select', {
-                                            id: 'player-select',
-                                            className: 'w-full px-4 py-3 border-2 border-gray-300 rounded-xl focus:border-orange-500 focus:outline-none'
-                                        },
-                                            h('option', { value: '' }, 'Choose a player...'),
-                                            ...players.map(player => 
-                                                h('option', { key: player.id, value: player.id }, player.name)
+                                    // Player Selection Box Grid (Tribe Grouped)
+                                    h('div', { className: 'bg-slate-50 border border-slate-200 rounded-xl p-4' },
+                                        h('div', { className: 'flex justify-between items-center mb-3' },
+                                            h('label', { className: 'block text-sm font-bold text-gray-800' }, 'Player Selection'),
+                                            h('div', { className: 'flex items-center gap-2' },
+                                                h('span', { className: 'text-xs text-orange-700 font-extrabold bg-orange-100 px-2.5 py-1 rounded-lg border border-orange-200' }, `${selectedPlayerIds.length} player(s) selected`),
+                                                selectedPlayerIds.length > 0 && h('button', {
+                                                    type: 'button',
+                                                    onClick: () => setSelectedPlayerIds([]),
+                                                    className: 'text-xs bg-red-500 text-white font-bold px-2.5 py-1 rounded-lg hover:bg-red-600 transition shadow-sm'
+                                                }, 'Clear')
                                             )
+                                        ),
+                                        h('div', { className: 'space-y-4' },
+                                            ...Object.entries(playersByTribe).map(([tName, tPlayers]) => {
+                                                const activeTribePlayers = tPlayers.filter(p => !eliminationOrder[p.id]);
+                                                const activeIds = activeTribePlayers.map(p => p.id);
+                                                const isEntireTribeSelected = activeIds.length > 0 && activeIds.every(id => selectedPlayerIds.includes(id));
+                                                
+                                                return h('div', { key: tName, className: 'bg-white p-3 rounded-xl border border-gray-200 shadow-sm' },
+                                                    h('div', { className: 'flex items-center justify-between mb-2 pb-2 border-b border-gray-100' },
+                                                        h('div', { className: 'flex items-center gap-2' },
+                                                            h('span', { className: 'text-base' }, getTribeIcon(tName)),
+                                                            h('span', { className: 'font-extrabold text-sm text-gray-800' }, tName),
+                                                            h('span', { className: 'text-xs text-gray-500 font-semibold' }, `(${activeTribePlayers.length} active)`)
+                                                        ),
+                                                        activeTribePlayers.length > 0 && h('button', {
+                                                            type: 'button',
+                                                            onClick: () => toggleTribeSelected(tName, tPlayers),
+                                                            className: `text-xs font-bold px-3 py-1 rounded-lg border transition ${
+                                                                isEntireTribeSelected
+                                                                    ? 'bg-amber-500 text-white border-amber-600 shadow-sm'
+                                                                    : 'bg-orange-50 text-orange-700 border-orange-200 hover:bg-orange-100'
+                                                            }`
+                                                        }, isEntireTribeSelected ? '✓ Tribe Selected' : `Select ${tName} Tribe`)
+                                                    ),
+                                                    h('div', { className: 'flex flex-wrap gap-2 pt-1' },
+                                                        tPlayers.map(player => {
+                                                            const isSelected = selectedPlayerIds.includes(player.id);
+                                                            const isEliminated = eliminationOrder[player.id];
+                                                            const pTribe = player.tribe || player.startingTribe;
+                                                            return h('button', {
+                                                                key: player.id,
+                                                                type: 'button',
+                                                                onClick: () => !isEliminated && togglePlayerSelected(player.id),
+                                                                disabled: isEliminated,
+                                                                className: `px-3 py-1.5 rounded-lg text-xs font-bold flex items-center gap-1.5 border transition cursor-pointer ${
+                                                                    isEliminated
+                                                                        ? 'bg-gray-100 text-gray-400 border-gray-200 line-through cursor-not-allowed opacity-50'
+                                                                        : isSelected
+                                                                            ? 'bg-gradient-to-r from-orange-500 to-amber-600 text-white border-orange-600 shadow-md ring-2 ring-orange-300'
+                                                                            : 'bg-gray-50 text-gray-700 border-gray-300 hover:bg-gray-100 hover:border-orange-300'
+                                                                }`
+                                                            },
+                                                                isSelected && h(Icons.Check, { size: 12 }),
+                                                                player.name,
+                                                                pTribe && pTribe !== 'Unassigned' && h('span', { className: `text-[10px] font-bold px-1.5 py-0.5 rounded ${getTribeBadgeColor(pTribe)}` }, getTribeIcon(pTribe) + pTribe)
+                                                            );
+                                                        })
+                                                    )
+                                                );
+                                            })
                                         )
                                     ),
                                     
@@ -1610,14 +1759,15 @@
                                                 return;
                                             }
                                             
-                                            const playerId = document.getElementById('player-select').value;
+                                            const targetPlayerIds = selectedPlayerIds;
+                                            
                                             const episode = document.getElementById('episode-select').value;
                                             const categoryId = document.getElementById('category-select').value;
                                             const points = parseInt(document.getElementById('points-input').value);
                                             const note = document.getElementById('note-input').value;
                                             
-                                            if (!playerId || !episode || !categoryId || isNaN(points)) {
-                                                alert('Please fill in all required fields');
+                                            if (targetPlayerIds.length === 0 || !episode || !categoryId || isNaN(points)) {
+                                                alert(targetPlayerIds.length === 0 ? 'Please select at least one player.' : 'Please fill in all required fields');
                                                 return;
                                             }
                                             
@@ -1631,51 +1781,55 @@
                                             
                                             if (window.firebaseInitialized) {
                                                 const promises = [];
-                                                selectedAddScoreLeagues.forEach(leagueId => {
-                                                    const baseRef = `leagues/${leagueId}/seasons/${activeSeasonId}`;
-                                                    promises.push(
-                                                        database.ref(`${baseRef}/scores/${playerId}/${episode}/${scoreId}`).set({
-                                                            category: category ? category.name : 'Custom',
-                                                            points: points,
-                                                            note: note || ''
-                                                        })
-                                                    );
-                                                    if (isElimination) {
-                                                        promises.push(database.ref(`${baseRef}/eliminationOrder/${playerId}`).set(parseInt(episode)));
-                                                        
-                                                        // Post-draft Auto-Backfill Engine
+                                                targetPlayerIds.forEach(playerId => {
+                                                    selectedAddScoreLeagues.forEach(leagueId => {
+                                                        const baseRef = `leagues/${leagueId}/seasons/${activeSeasonId}`;
                                                         promises.push(
-                                                            database.ref(`${baseRef}/draftState`).once('value').then(dsSnap => {
-                                                                const ds = dsSnap.val() || {};
-                                                                if (ds.status === 'finalized' && ds.backfillEnabled !== false) {
-                                                                    return database.ref(`${baseRef}/teams`).once('value').then(tSnap => {
-                                                                        const currentTeams = tSnap.val() || {};
-                                                                        const eliminatedTeamId = currentTeams[playerId];
-                                                                        if (eliminatedTeamId) {
-                                                                            const unassigned = players.filter(p => !currentTeams[p.id]).sort((a,b) => parseInt(a.id) - parseInt(b.id));
-                                                                            if (unassigned.length > 0) {
-                                                                                const backfillP = unassigned[0];
-                                                                                currentTeams[backfillP.id] = eliminatedTeamId;
-                                                                                ds.backfilledPlayers = ds.backfilledPlayers || {};
-                                                                                ds.backfilledPlayers[backfillP.id] = true;
-                                                                                return Promise.all([
-                                                                                    database.ref(`${baseRef}/teams`).set(currentTeams),
-                                                                                    database.ref(`${baseRef}/draftState`).set(ds)
-                                                                                ]);
-                                                                            }
-                                                                        }
-                                                                    });
-                                                                }
+                                                            database.ref(`${baseRef}/scores/${playerId}/${episode}/${scoreId}`).set({
+                                                                category: category ? category.name : 'Custom',
+                                                                points: points,
+                                                                note: note || ''
                                                             })
                                                         );
-                                                    }
-                                                    if (isWinner) {
-                                                        promises.push(database.ref(`${baseRef}/winner`).set(parseInt(playerId)));
-                                                    }
+                                                        if (isElimination) {
+                                                            promises.push(database.ref(`${baseRef}/eliminationOrder/${playerId}`).set(parseInt(episode)));
+                                                            
+                                                            // Post-draft Auto-Backfill Engine
+                                                            promises.push(
+                                                                database.ref(`${baseRef}/draftState`).once('value').then(dsSnap => {
+                                                                    const ds = dsSnap.val() || {};
+                                                                    if (ds.status === 'finalized' && ds.backfillEnabled !== false) {
+                                                                        return database.ref(`${baseRef}/teams`).once('value').then(tSnap => {
+                                                                            const currentTeams = tSnap.val() || {};
+                                                                            const eliminatedTeamId = currentTeams[playerId];
+                                                                            if (eliminatedTeamId) {
+                                                                                const unassigned = players.filter(p => !currentTeams[p.id]).sort((a,b) => parseInt(a.id) - parseInt(b.id));
+                                                                                if (unassigned.length > 0) {
+                                                                                    const backfillP = unassigned[0];
+                                                                                    currentTeams[backfillP.id] = eliminatedTeamId;
+                                                                                    ds.backfilledPlayers = ds.backfilledPlayers || {};
+                                                                                    ds.backfilledPlayers[backfillP.id] = true;
+                                                                                    return Promise.all([
+                                                                                        database.ref(`${baseRef}/teams`).set(currentTeams),
+                                                                                        database.ref(`${baseRef}/draftState`).set(ds)
+                                                                                    ]);
+                                                                                }
+                                                                            }
+                                                                        });
+                                                                    }
+                                                                })
+                                                            );
+                                                        }
+                                                        if (isWinner) {
+                                                            promises.push(database.ref(`${baseRef}/winner`).set(parseInt(playerId)));
+                                                        }
+                                                    });
                                                 });
                                                 
                                                 Promise.all(promises).then(() => {
-                                                    document.getElementById('player-select').value = '';
+                                                    if (document.getElementById('player-select')) {
+                                                        document.getElementById('player-select').value = '';
+                                                    }
                                                     if (document.getElementById('episode-select')) {
                                                         document.getElementById('episode-select').value = episode;
                                                     }
@@ -1684,40 +1838,45 @@
                                                     document.getElementById('note-input').value = '';
                                                     setSelectedCategoryId('');
                                                     setCategorySearchTerm('');
+                                                    setSelectedPlayerIds([]);
                                                     setShowAddScore(false);
                                                     
                                                     const leagueNames = selectedAddScoreLeagues.map(id => (LEAGUES_DATA[id] || {}).name || id).join(', ');
-                                                    let msg = `Points added successfully to: ${leagueNames}! 🎉`;
-                                                    if (isElimination) msg += ' (Player marked as eliminated & lowest Cast ID backfilled!)';
+                                                    let msg = `Points added successfully for ${targetPlayerIds.length} player(s) in: ${leagueNames}! 🎉`;
+                                                    if (isElimination) msg += ' (Player(s) marked as eliminated & lowest Cast ID backfilled!)';
                                                     if (isWinner) msg += ' (Player marked as Sole Survivor!)';
                                                     alert(msg);
                                                 });
                                             } else {
-                                                selectedAddScoreLeagues.forEach(leagueId => {
-                                                    const key = `survivor-scores-${leagueId}-${activeSeasonId}`;
-                                                    const existing = JSON.parse(localStorage.getItem(key) || '{}');
-                                                    if (!existing[playerId]) existing[playerId] = {};
-                                                    if (!existing[playerId][episode]) existing[playerId][episode] = {};
-                                                    existing[playerId][episode][scoreId] = {
-                                                        category: category ? category.name : 'Custom',
-                                                        points: points,
-                                                        note: note || ''
-                                                    };
-                                                    localStorage.setItem(key, JSON.stringify(existing));
+                                                targetPlayerIds.forEach(playerId => {
+                                                    selectedAddScoreLeagues.forEach(leagueId => {
+                                                        const key = `survivor-scores-${leagueId}-${activeSeasonId}`;
+                                                        const existing = JSON.parse(localStorage.getItem(key) || '{}');
+                                                        if (!existing[playerId]) existing[playerId] = {};
+                                                        if (!existing[playerId][episode]) existing[playerId][episode] = {};
+                                                        existing[playerId][episode][scoreId] = {
+                                                            category: category ? category.name : 'Custom',
+                                                            points: points,
+                                                            note: note || ''
+                                                        };
+                                                        localStorage.setItem(key, JSON.stringify(existing));
 
-                                                    if (isElimination) {
-                                                        const elimKey = `survivor-elimination-${leagueId}-${activeSeasonId}`;
-                                                        const elims = JSON.parse(localStorage.getItem(elimKey) || '{}');
-                                                        elims[playerId] = parseInt(episode);
-                                                        localStorage.setItem(elimKey, JSON.stringify(elims));
-                                                    }
-                                                    if (isWinner) {
-                                                        const winKey = `survivor-winner-${leagueId}-${activeSeasonId}`;
-                                                        localStorage.setItem(winKey, JSON.stringify(playerId));
-                                                    }
+                                                        if (isElimination) {
+                                                            const elimKey = `survivor-elimination-${leagueId}-${activeSeasonId}`;
+                                                            const elims = JSON.parse(localStorage.getItem(elimKey) || '{}');
+                                                            elims[playerId] = parseInt(episode);
+                                                            localStorage.setItem(elimKey, JSON.stringify(elims));
+                                                        }
+                                                        if (isWinner) {
+                                                            const winKey = `survivor-winner-${leagueId}-${activeSeasonId}`;
+                                                            localStorage.setItem(winKey, JSON.stringify(playerId));
+                                                        }
+                                                    });
                                                 });
                                                 
-                                                document.getElementById('player-select').value = '';
+                                                if (document.getElementById('player-select')) {
+                                                    document.getElementById('player-select').value = '';
+                                                }
                                                 if (document.getElementById('episode-select')) {
                                                     document.getElementById('episode-select').value = episode;
                                                 }
@@ -1726,11 +1885,12 @@
                                                 document.getElementById('note-input').value = '';
                                                 setSelectedCategoryId('');
                                                 setCategorySearchTerm('');
+                                                setSelectedPlayerIds([]);
                                                 setShowAddScore(false);
                                                 
                                                 const leagueNames = selectedAddScoreLeagues.map(id => (LEAGUES_DATA[id] || {}).name || id).join(', ');
-                                                let msg = `Points added successfully to: ${leagueNames}! 🎉`;
-                                                if (isElimination) msg += ' (Player marked as eliminated)';
+                                                let msg = `Points added successfully for ${targetPlayerIds.length} player(s) in: ${leagueNames}! 🎉`;
+                                                if (isElimination) msg += ' (Player(s) marked as eliminated)';
                                                 if (isWinner) msg += ' (Player marked as Sole Survivor!)';
                                                 alert(msg);
                                             }

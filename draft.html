@@ -442,7 +442,7 @@
             
             // Load season preset data
             useEffect(() => {
-                fetch('seasons/' + activeSeasonId + '.json')
+                fetch('seasons/' + activeSeasonId + '.json?t=' + Date.now())
                     .then(res => res.json())
                     .then(data => setSeasonData(data))
                     .catch(err => console.warn('Could not load season json, using fallback.', err));
@@ -569,7 +569,7 @@
             };
 
             
-            const defaultPlayers = [
+            const defaultSeason50Players = [
                 // CILA TRIBE
                 { id: 1, name: "Jenna Lewis-Dougherty", tribe: "Cila", seasons: ["S1: Borneo", "S8: All-Stars"], placement: "3rd in All-Stars", era: "Old School", strengths: ["Social Game", "Longevity"], threat: "Medium", note: "Original Borneo castaway returning after 20+ years!", image: "https://www.fantasysurvivorgame.com/images/50/draftpics/jennaDFT.jpg" },
                 { id: 2, name: "Cirie Fields", tribe: "Cila", seasons: ["S12", "S16", "S20", "S34"], placement: "4th multiple times", era: "Legend", strengths: ["Strategy", "Social"], threat: "EXTREMELY HIGH", note: "5-time player! Best to never win", image: "https://www.fantasysurvivorgame.com/images/50/draftpics/cirieDFT.jpg" },
@@ -601,7 +601,31 @@
                 { id: 24, name: "Kyle Fraser", tribe: "Vatu", seasons: ["S48 - WINNER"], placement: "WINNER", era: "New Era", strengths: ["Strategic", "Social"], threat: "EXTREMELY HIGH", note: "Winner of S48!", image: "https://www.fantasysurvivorgame.com/images/50/draftpics/kyleDFT.jpg" }
             ];
 
-            const players = (seasonData && seasonData.contestants) ? seasonData.contestants : defaultPlayers;
+            const defaultSeason51Players = [
+                { id: 1, name: "Aaliyah Puglia", tribe: "Toka", startingTribe: "Toka", age: 24, occupation: "Chef", hometown: "Providence, RI" },
+                { id: 2, name: "Alexis Levine", tribe: "Savu", startingTribe: "Savu", age: 34, occupation: "Criminal Defense Attorney", hometown: "Atlanta, GA" },
+                { id: 3, name: "An “Thien An” Nguyen", tribe: "Toka", startingTribe: "Toka", age: 24, occupation: "Medical Student", hometown: "Fort Worth, TX" },
+                { id: 4, name: "Ana Sani", tribe: "Savu", startingTribe: "Savu", age: 34, occupation: "Voice Actress", hometown: "Toronto, ON" },
+                { id: 5, name: "Angelica “Jelly” Loblack", tribe: "Toka", startingTribe: "Toka", age: 29, occupation: "Sociology Professor", hometown: "Bloomington, IN" },
+                { id: 6, name: "Brady Booker", tribe: "Toka", startingTribe: "Toka", age: 27, occupation: "Professional Wrestler", hometown: "Knoxville, TN" },
+                { id: 7, name: "Carter Krull", tribe: "Savu", startingTribe: "Savu", age: 24, occupation: "Livestock Farmer", hometown: "Sioux Falls, SD" },
+                { id: 8, name: "Cristian Chavez", tribe: "Savu", startingTribe: "Savu", age: 26, occupation: "Head of HR", hometown: "Salt Lake City, UT" },
+                { id: 9, name: "Danny “Kilby” Kilby", tribe: "Toka", startingTribe: "Toka", age: 30, occupation: "Game Designer", hometown: "London, ON" },
+                { id: 10, name: "Devin Way", tribe: "Toka", startingTribe: "Toka", age: 33, occupation: "Actor", hometown: "Los Angeles, CA" },
+                { id: 11, name: "Eric Macksoud", tribe: "Savu", startingTribe: "Savu", age: 34, occupation: "Mental Health Counselor", hometown: "Windsor Locks, CT" },
+                { id: 12, name: "Jenna Doore", tribe: "Toka", startingTribe: "Toka", age: 30, occupation: "Wedding Photographer", hometown: "Toledo, OH" },
+                { id: 13, name: "Kristin Flickinger", tribe: "Savu", startingTribe: "Savu", age: 49, occupation: "Crisis Management", hometown: "Santa Barbara, CA" },
+                { id: 14, name: "Lewis Kelly", tribe: "Exile Island", startingTribe: "Exile Island", age: 28, occupation: "Farmer", hometown: "Puerto Rico / Ireland" },
+                { id: 15, name: "Linnea Capobianco", tribe: "Savu", startingTribe: "Savu", age: 25, occupation: "Entrepreneur", hometown: "Jersey City, NJ" },
+                { id: 16, name: "Maggie Nestor", tribe: "Toka", startingTribe: "Toka", age: 40, occupation: "Farmer", hometown: "Charles Town, WV" },
+                { id: 17, name: "Mike Pinsky", tribe: "Toka", startingTribe: "Toka", age: 32, occupation: "Baseball Executive", hometown: "New York City, NY" },
+                { id: 18, name: "Ori Jean-Charles", tribe: "Savu", startingTribe: "Savu", age: 27, occupation: "Personal Trainer", hometown: "Spring Valley, NY" },
+                { id: 19, name: "Patt Cannaday", tribe: "Toka", startingTribe: "Toka", age: 33, occupation: "Federal Prosecutor", hometown: "Washington, DC" },
+                { id: 20, name: "Rob Antonson", tribe: "Savu", startingTribe: "Savu", age: 40, occupation: "Airline Gate Agent", hometown: "Cumberland, RI" },
+                { id: 21, name: "Sharonda Cox", tribe: "Savu", startingTribe: "Savu", age: 34, occupation: "OBGYN Resident", hometown: "Richmond, KY" }
+            ];
+
+            const players = (seasonData && seasonData.contestants) ? seasonData.contestants : (activeSeasonId === 'season-50' ? defaultSeason50Players : defaultSeason51Players);
             
             const calculatePreviousSeasonOrder = () => {
                 const season50Scores = {
@@ -786,6 +810,26 @@
                 return `${mins}:${secs < 10 ? '0' : ''}${secs}`;
             };
             
+            const getTribeIcon = (t) => {
+                if (t === 'Cila') return '🔥 ';
+                if (t === 'Kalo') return '🌊 ';
+                if (t === 'Vatu') return '⚡ ';
+                if (t === 'Toka') return '☀️ ';
+                if (t === 'Savu') return '🟣 ';
+                if (t === 'Exile Island') return '🏝️ ';
+                return '🏕️ ';
+            };
+
+            const availableTribes = useMemo(() => {
+                const tribes = [];
+                players.forEach(p => {
+                    if (p.tribe && p.tribe !== 'Unassigned' && !tribes.includes(p.tribe)) {
+                        tribes.push(p.tribe);
+                    }
+                });
+                return tribes;
+            }, [players]);
+
             const filteredPlayers = useMemo(() => {
                 return players.filter(player => {
                     const matchesSearch = player.name.toLowerCase().includes(searchTerm.toLowerCase());
@@ -812,24 +856,31 @@
             };
             
             const getTribeBadgeColor = (tribe) => {
-                if (tribe === 'Cila') return 'bg-white/90 text-orange-600 border border-orange-200';
-                if (tribe === 'Kalo') return 'bg-white/90 text-teal-600 border border-teal-200';
-                if (tribe === 'Vatu') return 'bg-white/90 text-purple-600 border border-purple-200';
-                return 'bg-gray-100 text-gray-800';
+                if (tribe === 'Cila') return 'bg-orange-950/80 text-orange-200 border border-orange-500/60 shadow-sm';
+                if (tribe === 'Kalo') return 'bg-teal-950/80 text-teal-200 border border-teal-500/60 shadow-sm';
+                if (tribe === 'Vatu') return 'bg-purple-950/80 text-purple-200 border border-purple-500/60 shadow-sm';
+                if (tribe === 'Toka') return 'bg-amber-950/80 text-amber-200 border border-amber-500/60 shadow-sm';
+                if (tribe === 'Savu') return 'bg-purple-950/80 text-purple-200 border border-purple-500/60 shadow-sm';
+                if (tribe === 'Exile Island') return 'bg-slate-900/80 text-slate-200 border border-slate-500/60 shadow-sm';
+                return 'bg-slate-800 text-slate-200 border border-slate-600';
             };
             
             const getTribeColor = (tribe) => {
                 if (tribe === 'Cila') return 'from-orange-500 to-amber-600';
                 if (tribe === 'Kalo') return 'from-teal-500 to-cyan-600';
                 if (tribe === 'Vatu') return 'from-purple-500 to-pink-600';
+                if (tribe === 'Toka') return 'from-amber-500 to-yellow-600';
+                if (tribe === 'Savu') return 'from-purple-600 to-indigo-700';
+                if (tribe === 'Exile Island') return 'from-slate-700 to-stone-800';
                 return 'from-amber-600 to-orange-700';
             };
             
             const PlayerCard = React.memo(({ player, assignedTeam, isBackfilled, canAssign, draftStateStatus, activeSeasonId, onRemove, onDraft }) => {
+                const tribeName = player.tribe || player.startingTribe;
                 return h('div', { 
                     className: 'bg-white rounded-2xl shadow-lg overflow-hidden hover:shadow-xl transition-all duration-300 border-2 border-gray-100'
                 },
-                    h('div', { className: `p-4 bg-gradient-to-r ${getTribeColor(player.tribe)} text-white relative` },
+                    h('div', { className: `p-4 bg-gradient-to-r ${getTribeColor(tribeName)} text-white relative` },
                         h('img', {
                             src: player.image,
                             alt: player.name,
@@ -849,9 +900,9 @@
                             h('h3', { className: 'text-2xl font-black mb-1', style: { fontFamily: '"Bebas Neue", cursive' }}, player.name),
                             h('div', { className: 'flex gap-2 items-center flex-wrap' },
                                 activeSeasonId === 'season-50' && player.era && h('div', { className: 'text-xs font-semibold bg-white/20 backdrop-blur-sm px-3 py-1 rounded-full' }, player.era),
-                                player.tribe && player.tribe !== 'Unassigned' && h('div', { className: `text-xs font-semibold px-3 py-1 rounded-full ${getTribeBadgeColor(player.tribe)} backdrop-blur-sm shadow-sm` },
-                                    player.tribe === 'Cila' ? '🔥 ' : player.tribe === 'Kalo' ? '🌊 ' : '⚡ ',
-                                    player.tribe
+                                tribeName && tribeName !== 'Unassigned' && h('div', { className: `text-xs font-semibold px-3 py-1 rounded-full ${getTribeBadgeColor(tribeName)} backdrop-blur-sm shadow-sm` },
+                                    getTribeIcon(tribeName),
+                                    tribeName
                                 )
                             )
                         )
@@ -1093,36 +1144,36 @@
                                         placeholder: 'Search players...',
                                         value: searchTerm,
                                         onChange: (e) => setSearchTerm(e.target.value),
-                                        className: 'px-4 py-3 border-2 border-gray-300 rounded-xl focus:border-orange-500 focus:outline-none'
+                                        className: 'px-4 py-3 bg-white text-gray-900 font-bold border-2 border-gray-300 rounded-xl focus:border-orange-500 focus:outline-none shadow-sm'
                                     }),
                                     activeSeasonId === 'season-50' && h('select', {
                                         value: filterEra,
                                         onChange: (e) => setFilterEra(e.target.value),
-                                        className: 'px-4 py-3 border-2 border-gray-300 rounded-xl focus:border-orange-500 focus:outline-none'
+                                        className: 'px-4 py-3 bg-white text-gray-900 font-bold border-2 border-gray-300 rounded-xl focus:border-orange-500 focus:outline-none shadow-sm cursor-pointer'
                                     },
-                                        h('option', { value: 'all' }, 'All Eras'),
-                                        h('option', { value: 'Old School' }, 'Old School'),
-                                        h('option', { value: 'Legend' }, 'Legend'),
-                                        h('option', { value: 'New School' }, 'New School'),
-                                        h('option', { value: 'New Era' }, 'New Era')
+                                        h('option', { value: 'all', className: 'bg-white text-gray-900' }, 'All Eras'),
+                                        h('option', { value: 'Old School', className: 'bg-white text-gray-900' }, 'Old School'),
+                                        h('option', { value: 'Legend', className: 'bg-white text-gray-900' }, 'Legend'),
+                                        h('option', { value: 'New School', className: 'bg-white text-gray-900' }, 'New School'),
+                                        h('option', { value: 'New Era', className: 'bg-white text-gray-900' }, 'New Era')
                                     ),
                                     h('select', {
                                         value: filterTribe,
                                         onChange: (e) => setFilterTribe(e.target.value),
-                                        className: 'px-4 py-3 border-2 border-gray-300 rounded-xl focus:border-orange-500 focus:outline-none'
+                                        className: 'px-4 py-3 bg-white text-gray-900 font-bold border-2 border-gray-300 rounded-xl focus:border-orange-500 focus:outline-none shadow-sm cursor-pointer'
                                     },
-                                        h('option', { value: 'all' }, 'All Tribes'),
-                                        h('option', { value: 'Cila' }, '🔥 Cila'),
-                                        h('option', { value: 'Kalo' }, '🌊 Kalo'),
-                                        h('option', { value: 'Vatu' }, '⚡ Vatu')
+                                        h('option', { value: 'all', className: 'bg-white text-gray-900' }, 'All Tribes'),
+                                        ...availableTribes.map(t =>
+                                            h('option', { key: t, value: t, className: 'bg-white text-gray-900' }, `${getTribeIcon(t)}${t}`)
+                                        )
                                     ),
                                     h('select', {
                                         value: filterTeam,
                                         onChange: (e) => setFilterTeam(e.target.value),
-                                        className: 'px-4 py-3 border-2 border-gray-300 rounded-xl focus:border-orange-500 focus:outline-none'
+                                        className: 'px-4 py-3 bg-white text-gray-900 font-bold border-2 border-gray-300 rounded-xl focus:border-orange-500 focus:outline-none shadow-sm cursor-pointer'
                                     },
-                                        h('option', { value: 'all' }, 'All Players'),
-                                        h('option', { value: 'unassigned' }, `Unassigned (${stats.unassigned})`)
+                                        h('option', { value: 'all', className: 'bg-white text-gray-900' }, 'All Players'),
+                                        h('option', { value: 'unassigned', className: 'bg-white text-gray-900' }, `Unassigned (${stats.unassigned})`)
                                     )
                                 )
                             ),
@@ -1172,9 +1223,15 @@
                                                     h('div', { className: 'flex justify-between items-start' },
                                                         h('div', { className: 'flex-1' },
                                                             h('div', {},
-                                                                h('div', { className: 'font-bold text-gray-900' }, player.name),
+                                                                h('div', { className: 'font-bold text-gray-900 flex items-center gap-2 flex-wrap mb-0.5' },
+                                                                    player.name,
+                                                                    (player.tribe || player.startingTribe) && (player.tribe !== 'Unassigned') && h('span', { className: `text-[10px] font-bold px-2 py-0.5 rounded-full ${getTribeBadgeColor(player.tribe || player.startingTribe)} shadow-sm` },
+                                                                        getTribeIcon(player.tribe || player.startingTribe),
+                                                                        player.tribe || player.startingTribe
+                                                                    )
+                                                                ),
                                                                 h('div', { className: 'text-xs text-gray-600' }, 
-                                                                    player.occupation ? `${player.occupation}${player.hometown ? ' • ' + player.hometown : ''}` : (player.tribe || '')
+                                                                    player.occupation ? `${player.occupation}${player.hometown ? ' • ' + player.hometown : ''}` : ''
                                                                 )
                                                             )
                                                         ),
