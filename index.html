@@ -512,7 +512,7 @@
             Check: createIcon('<polyline points="20 6 9 17 4 12"></polyline>')
         };
 
-        function TeamScoreGraph({ leaderboard, scores, eliminationOrder, winner, playerTeams, players }) {
+        function TeamScoreGraph({ leaderboard, scores, eliminationOrder, winner, playerTeams, players, draftState }) {
             const { useState, useMemo } = React;
             const [hoveredPoint, setHoveredPoint] = useState(null);
 
@@ -553,12 +553,15 @@
                     let cumulative = 0;
                     const history = episodes.map(ep => {
                         roster.forEach(player => {
-                            const playerScores = (scores[player.id] || {})[ep] || {};
-                            Object.values(playerScores).forEach(score => {
-                                cumulative += (score.points || 0);
-                            });
-                            if (eliminationOrder[player.id] === ep) {
-                                cumulative += ep;
+                            const bfEp = getBackfillEpisode(player.id, draftState);
+                            if (bfEp === null || ep > bfEp) {
+                                const playerScores = (scores[player.id] || {})[ep] || {};
+                                Object.values(playerScores).forEach(score => {
+                                    cumulative += (score.points || 0);
+                                });
+                                if (eliminationOrder[player.id] === ep) {
+                                    cumulative += ep;
+                                }
                             }
                         });
                         if (winner && ep >= 14 && roster.some(p => p.id === parseInt(winner))) {
@@ -579,7 +582,7 @@
 
                 const roundedMax = Math.ceil((maxScoreVal + 10) / 20) * 20;
                 return { series: teamSeries, maxVal: Math.max(roundedMax, 40) };
-            }, [leaderboard, scores, episodes, eliminationOrder, winner, playerTeams, players]);
+            }, [leaderboard, scores, episodes, eliminationOrder, winner, playerTeams, players, draftState]);
 
             const width = 800;
             const height = 280;
@@ -1093,23 +1096,52 @@
                 };
             }, [activeLeagueId, activeSeasonId]);
             
+            // Helper: Resolve backfill episode for a player
+            const getBackfillEpisode = (playerId, dState) => {
+                const ds = dState || (typeof draftState !== 'undefined' ? draftState : null);
+                if (!ds || !ds.backfilledPlayers) return null;
+                const bf = ds.backfilledPlayers[playerId] || ds.backfilledPlayers[String(playerId)] || ds.backfilledPlayers[Number(playerId)];
+                if (!bf) return null;
+                if (typeof bf === 'number') return bf;
+                if (typeof bf === 'object' && bf !== null && bf.episode !== undefined) return parseInt(bf.episode);
+                return 1; // Default fallback for legacy boolean true
+            };
+
             // Calculate team scores
             const getTeamScore = (teamId) => {
                 const roster = players.filter(p => playerTeams[p.id] === teamId);
                 let total = 0;
                 
                 roster.forEach(player => {
-                    const playerScores = scores[player.id] || {};
-                    Object.values(playerScores).forEach(episodeScores => {
-                        Object.values(episodeScores).forEach(score => {
-                            total += score.points || 0;
+                    const bfEp = getBackfillEpisode(player.id, draftState);
+                    const playerScores = scores && (scores[player.id] || scores[String(player.id)]) ? (scores[player.id] || scores[String(player.id)]) : {};
+                    
+                    if (typeof playerScores === 'object' && playerScores !== null) {
+                        Object.keys(playerScores).forEach(ep => {
+                            const epNum = parseInt(ep);
+                            // Exclude points earned in episodes prior to or during the backfill episode
+                            if (bfEp !== null && epNum <= bfEp) return;
+                            
+                            const episodeScores = playerScores[ep] || {};
+                            if (typeof episodeScores === 'object' && episodeScores !== null) {
+                                Object.values(episodeScores).forEach(score => {
+                                    if (score && typeof score === 'object') {
+                                        total += (parseInt(score.points) || 0);
+                                    } else if (typeof score === 'number') {
+                                        total += score;
+                                    }
+                                });
+                            }
                         });
-                    });
+                    }
                     
                     // Add elimination bonus
-                    if (eliminationOrder[player.id]) {
-                        const episode = eliminationOrder[player.id];
-                        total += episode; // Points = episode number (rewards longevity)
+                    const elimEp = eliminationOrder && (eliminationOrder[player.id] || eliminationOrder[String(player.id)]);
+                    if (elimEp) {
+                        const episode = parseInt(elimEp) || 0;
+                        if (bfEp === null || episode > bfEp) {
+                            total += episode;
+                        }
                     }
                 });
                 
@@ -1211,11 +1243,16 @@
             
             const getPlayerScore = (playerId) => {
                 const pId = parseInt(playerId);
+                const bfEp = getBackfillEpisode(playerId, draftState);
                 const playerScores = scores && (scores[playerId] || scores[pId]) ? (scores[playerId] || scores[pId]) : {};
                 let total = 0;
                 
                 if (typeof playerScores === 'object' && playerScores !== null) {
-                    Object.values(playerScores).forEach(episodeScores => {
+                    Object.keys(playerScores).forEach(ep => {
+                        const epNum = parseInt(ep);
+                        if (bfEp !== null && epNum <= bfEp) return; // Exclude pre-backfill points from team score
+                        
+                        const episodeScores = playerScores[ep];
                         if (typeof episodeScores === 'object' && episodeScores !== null) {
                             Object.values(episodeScores).forEach(score => {
                                 if (score && typeof score === 'object') {
@@ -1232,7 +1269,9 @@
                 const elimEp = eliminationOrder && (eliminationOrder[playerId] || eliminationOrder[pId]);
                 if (elimEp) {
                     const episode = parseInt(elimEp) || 0;
-                    total += episode;
+                    if (bfEp === null || episode > bfEp) {
+                        total += episode;
+                    }
                 }
                 
                 return total;
@@ -1242,23 +1281,29 @@
 
             const getPlayerBreakdown = (playerId) => {
                 const pId = parseInt(playerId);
+                const bfEp = getBackfillEpisode(playerId, draftState);
                 const playerScores = scores && (scores[playerId] || scores[pId]) ? (scores[playerId] || scores[pId]) : {};
                 const breakdown = [];
                 
                 if (typeof playerScores === 'object' && playerScores !== null) {
                     Object.keys(playerScores).forEach(ep => {
+                        const epNum = parseInt(ep);
+                        const isPreBackfill = bfEp !== null && epNum <= bfEp;
                         const episodeScores = playerScores[ep] || {};
                         if (typeof episodeScores === 'object' && episodeScores !== null) {
                             Object.keys(episodeScores).forEach(scoreId => {
                                 const score = episodeScores[scoreId];
                                 if (score && typeof score === 'object') {
+                                    const pts = parseInt(score.points) || 0;
                                     breakdown.push({
-                                        episode: parseInt(ep) || 1,
+                                        episode: epNum,
                                         scoreId: scoreId,
                                         playerId: playerId,
                                         category: score.category || 'Points',
-                                        points: parseInt(score.points) || 0,
-                                        note: score.note || '',
+                                        points: isPreBackfill ? 0 : pts,
+                                        originalPoints: pts,
+                                        isPreBackfill: isPreBackfill,
+                                        note: (score.note || '') + (isPreBackfill ? ' (Earned prior to backfill - 0 pts for team)' : ''),
                                         canDelete: !isFinishedSeason
                                     });
                                 }
@@ -1289,12 +1334,15 @@
                 const elimEp = eliminationOrder && (eliminationOrder[playerId] || eliminationOrder[pId]);
                 if (elimEp) {
                     const episode = parseInt(elimEp) || 1;
+                    const isPreBackfill = bfEp !== null && episode <= bfEp;
                     const placement = Math.max(1, 25 - episode);
                     breakdown.push({
                         episode: episode,
                         category: 'Elimination Bonus',
-                        points: episode,
-                        note: `Placed ${placement}th (Episode ${episode})`
+                        points: isPreBackfill ? 0 : episode,
+                        originalPoints: episode,
+                        isPreBackfill: isPreBackfill,
+                        note: `Placed ${placement}th (Episode ${episode})` + (isPreBackfill ? ' (Earned prior to backfill)' : '')
                     });
                 }
                 
@@ -1417,7 +1465,8 @@
                         eliminationOrder: eliminationOrder,
                         winner: winner,
                         playerTeams: playerTeams,
-                        players: players
+                        players: players,
+                        draftState: draftState
                     }),
 
                     // Leaderboard
@@ -1494,7 +1543,8 @@
                                                     playerHeaderChildren.push(h('span', { key: 'elim', className: 'text-xs text-red-600 font-semibold' }, `(Eliminated E${isEliminated})`));
                                                 }
                                                 if (isBackfilled) {
-                                                    playerHeaderChildren.push(h('span', { key: 'backfill', className: 'text-[10px] bg-amber-400 text-amber-950 font-black px-1.5 py-0.5 rounded shadow-sm' }, '↩️ BACKFILLED'));
+                                                    const bfEp = getBackfillEpisode(player.id, draftState);
+                                                    playerHeaderChildren.push(h('span', { key: 'backfill', className: 'text-[10px] bg-amber-400 text-amber-950 font-black px-1.5 py-0.5 rounded shadow-sm' }, `↩️ BACKFILLED${bfEp ? ` (EP ${bfEp})` : ''}`));
                                                 }
 
                                                 return h('div', {
@@ -1897,7 +1947,11 @@
                                                                                     const backfillP = unassigned[0];
                                                                                     currentTeams[backfillP.id] = eliminatedTeamId;
                                                                                     ds.backfilledPlayers = ds.backfilledPlayers || {};
-                                                                                    ds.backfilledPlayers[backfillP.id] = true;
+                                                                                    ds.backfilledPlayers[backfillP.id] = {
+                                                                                        episode: parseInt(episode),
+                                                                                        replacedPlayerId: playerId,
+                                                                                        timestamp: Date.now()
+                                                                                    };
                                                                                     return Promise.all([
                                                                                         database.ref(`${baseRef}/teams`).set(currentTeams),
                                                                                         database.ref(`${baseRef}/draftState`).set(ds)
