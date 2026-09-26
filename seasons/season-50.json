@@ -20,7 +20,16 @@
       ],
       "threat": "Medium",
       "note": "Original Borneo castaway returning after 20+ years!",
-      "image": "https://www.fantasysurvivorgame.com/images/50/draftpics/jennaDFT.jpg"
+      "image": "https://www.fantasysurvivorgame.com/images/50/draftpics/jennaDFT.jpg",
+      "startingTribe": "Cila",
+      "tribeHistory": [
+        {
+          "episode": 1,
+          "tribe": "Cila",
+          "type": "starting",
+          "label": "Starting Tribe: Cila"
+        }
+      ]
     },
     {
       "id": 2,
@@ -40,7 +49,16 @@
       ],
       "threat": "EXTREMELY HIGH",
       "note": "5-time player! Best to never win",
-      "image": "https://www.fantasysurvivorgame.com/images/50/draftpics/cirieDFT.jpg"
+      "image": "https://www.fantasysurvivorgame.com/images/50/draftpics/cirieDFT.jpg",
+      "startingTribe": "Cila",
+      "tribeHistory": [
+        {
+          "episode": 1,
+          "tribe": "Cila",
+          "type": "starting",
+          "label": "Starting Tribe: Cila"
+        }
+      ]
     },
     {
       "id": 3,
@@ -60,7 +78,16 @@
       ],
       "threat": "EXTREMELY HIGH",
       "note": "5-time player! Challenge beast",
-      "image": "https://www.fantasysurvivorgame.com/images/50/draftpics/ozzyDFT.jpg"
+      "image": "https://www.fantasysurvivorgame.com/images/50/draftpics/ozzyDFT.jpg",
+      "startingTribe": "Cila",
+      "tribeHistory": [
+        {
+          "episode": 1,
+          "tribe": "Cila",
+          "type": "starting",
+          "label": "Starting Tribe: Cila"
+        }
+      ]
     },
     {
       "id": 4,
@@ -77,7 +104,16 @@
       ],
       "threat": "High",
       "note": "Robotics professor with algorithm brain",
-      "image": "https://www.fantasysurvivorgame.com/images/50/draftpics/christianDFT.jpg"
+      "image": "https://www.fantasysurvivorgame.com/images/50/draftpics/christianDFT.jpg",
+      "startingTribe": "Cila",
+      "tribeHistory": [
+        {
+          "episode": 1,
+          "tribe": "Cila",
+          "type": "starting",
+          "label": "Starting Tribe: Cila"
+        }
+      ]
     },
     {
       "id": 5,
@@ -94,7 +130,16 @@
       ],
       "threat": "High",
       "note": "News anchor comeback king",
-      "image": "https://www.fantasysurvivorgame.com/images/50/draftpics/rickDFT.jpg"
+      "image": "https://www.fantasysurvivorgame.com/images/50/draftpics/rickDFT.jpg",
+      "startingTribe": "Cila",
+      "tribeHistory": [
+        {
+          "episode": 1,
+          "tribe": "Cila",
+          "type": "starting",
+          "label": "Starting Tribe: Cila"
+        }
+      ]
     },
     {
       "id": 6,
@@ -111,7 +156,16 @@
       ],
       "threat": "Medium",
       "note": "Corporate strategist from S45",
-      "image": "https://www.fantasysurvivorgame.com/images/50/draftpics/emilyDFT.jpg"
+      "image": "https://www.fantasysurvivorgame.com/images/50/draftpics/emilyDFT.jpg",
+      "startingTribe": "Cila",
+      "tribeHistory": [
+        {
+          "episode": 1,
+          "tribe": "Cila",
+          "type": "starting",
+          "label": "Starting Tribe: Cila"
+        }
+      ]
     },
     {
       "id": 7,
@@ -128,7 +182,16 @@
       ],
       "threat": "Very High",
       "note": "Challenge competitor from S46",
-      "image": "https://www.fantasysurvivorgame.com/images/50/draftpics/joeDFT.jpg"
+      "image": "https://www.fantasysurvivorgame.com/images/50/draftpics/joeDFT.jpg",
+      "startingTribe": "Cila",
+      "tribeHistory": [
+        {
+          "episode": 1,
+          "tribe": "Cila",
+          "type": "starting",
+          "label": "Starting Tribe: Cila"
+        }
+      ]
     },
     {
       "id": 8,
@@ -145,7 +208,16 @@
       ],
       "threat": "EXTREMELY HIGH",
       "note": "Just won S49! Only 2 weeks between seasons",
-      "image": "https://www.fantasysurvivorgame.com/images/50/draftpics/savannahDFT.jpg"
+      "image": "https://www.fantasysurvivorgame.com/images/50/draftpics/savannahDFT.jpg",
+      "startingTribe": "Cila",
+      "tribeHistory": [
+        {
+          "episode": 1,
+          "tribe": "Cila",
+          "type": "starting",
+          "label": "Starting Tribe: Cila"
+        }
+      ]
     },
     {
       "id": 9,
@@ -164,7 +236,16 @@
       ],
       "threat": "High",
       "note": "The Dragon Slayer returns!",
-      "image": "https://www.fantasysurvivorgame.com/images/50/draftpics/coachDFT.jpg"
+      "image": "https://www.fantasysurvivorgame.com/images/50/draftpics/coachDFT.jpg",
+      "startingTribe": "Kalo",
+      "tribeHistory": [
+        {
+          "episode": 1,
+          "tribe": "Kalo",
+          "type": "starting",
+          "label": "Starting Tribe: Kalo"
+        }
+      ]
     },
     {
       "id": 10,
@@ -181,7 +262,16 @@
       ],
       "threat": "High",
       "note": "Actuary who nearly won S35",
-      "image": "https://www.fantasysurvivorgame.com/images/50/draftpics/chrissyDFT.jpg"
+      "image": "https://www.fantasysurvivorgame.com/images/50/draftpics/chrissyDFT.jpg",
+      "startingTribe": "Kalo",
+      "tribeHistory": [
+        {
+          "episode": 1,
+          "tribe": "Kalo",
+          "type": "starting",
+          "label": "Starting Tribe: Kalo"
+        }
+      ]
     },
     {
       "id": 11,
@@ -198,7 +288,16 @@
       ],
       "threat": "Very High",
       "note": "Hollywood screenwriter & School of Rock writer",
-      "image": "https://www.fantasysurvivorgame.com/images/50/draftpics/mikeDFT.jpg"
+      "image": "https://www.fantasysurvivorgame.com/images/50/draftpics/mikeDFT.jpg",
+      "startingTribe": "Kalo",
+      "tribeHistory": [
+        {
+          "episode": 1,
+          "tribe": "Kalo",
+          "type": "starting",
+          "label": "Starting Tribe: Kalo"
+        }
+      ]
     },
     {
       "id": 12,
@@ -215,7 +314,16 @@
       ],
       "threat": "VERY HIGH",
       "note": "Alabama strength coach. Absolute unit!",
-      "image": "https://www.fantasysurvivorgame.com/images/50/draftpics/jonathanDFT.jpg"
+      "image": "https://www.fantasysurvivorgame.com/images/50/draftpics/jonathanDFT.jpg",
+      "startingTribe": "Kalo",
+      "tribeHistory": [
+        {
+          "episode": 1,
+          "tribe": "Kalo",
+          "type": "starting",
+          "label": "Starting Tribe: Kalo"
+        }
+      ]
     },
     {
       "id": 13,
@@ -232,7 +340,16 @@
       ],
       "threat": "Very High",
       "note": "Law student who nearly won S46",
-      "image": "https://www.fantasysurvivorgame.com/images/50/draftpics/charlieDFT.jpg"
+      "image": "https://www.fantasysurvivorgame.com/images/50/draftpics/charlieDFT.jpg",
+      "startingTribe": "Kalo",
+      "tribeHistory": [
+        {
+          "episode": 1,
+          "tribe": "Kalo",
+          "type": "starting",
+          "label": "Starting Tribe: Kalo"
+        }
+      ]
     },
     {
       "id": 14,
@@ -249,7 +366,16 @@
       ],
       "threat": "Medium",
       "note": "Teacher from S46",
-      "image": "https://www.fantasysurvivorgame.com/images/50/draftpics/tiffanyDFT.jpg"
+      "image": "https://www.fantasysurvivorgame.com/images/50/draftpics/tiffanyDFT.jpg",
+      "startingTribe": "Kalo",
+      "tribeHistory": [
+        {
+          "episode": 1,
+          "tribe": "Kalo",
+          "type": "starting",
+          "label": "Starting Tribe: Kalo"
+        }
+      ]
     },
     {
       "id": 15,
@@ -266,7 +392,16 @@
       ],
       "threat": "High",
       "note": "Has history with Joe from S46",
-      "image": "https://www.fantasysurvivorgame.com/images/50/draftpics/kamillaDFT.jpg"
+      "image": "https://www.fantasysurvivorgame.com/images/50/draftpics/kamillaDFT.jpg",
+      "startingTribe": "Kalo",
+      "tribeHistory": [
+        {
+          "episode": 1,
+          "tribe": "Kalo",
+          "type": "starting",
+          "label": "Starting Tribe: Kalo"
+        }
+      ]
     },
     {
       "id": 16,
@@ -283,7 +418,16 @@
       ],
       "threat": "EXTREMELY HIGH",
       "note": "Winner of S45!",
-      "image": "https://www.fantasysurvivorgame.com/images/50/draftpics/deeDFT.jpg"
+      "image": "https://www.fantasysurvivorgame.com/images/50/draftpics/deeDFT.jpg",
+      "startingTribe": "Kalo",
+      "tribeHistory": [
+        {
+          "episode": 1,
+          "tribe": "Kalo",
+          "type": "starting",
+          "label": "Starting Tribe: Kalo"
+        }
+      ]
     },
     {
       "id": 17,
@@ -302,7 +446,16 @@
       ],
       "threat": "High",
       "note": "Original challenge beast from S2",
-      "image": "https://www.fantasysurvivorgame.com/images/50/draftpics/colbyDFT.jpg"
+      "image": "https://www.fantasysurvivorgame.com/images/50/draftpics/colbyDFT.jpg",
+      "startingTribe": "Vatu",
+      "tribeHistory": [
+        {
+          "episode": 1,
+          "tribe": "Vatu",
+          "type": "starting",
+          "label": "Starting Tribe: Vatu"
+        }
+      ]
     },
     {
       "id": 18,
@@ -321,7 +474,16 @@
       ],
       "threat": "High",
       "note": "Last woman standing in Palau!",
-      "image": "https://www.fantasysurvivorgame.com/images/50/draftpics/stephenieDFT.jpg"
+      "image": "https://www.fantasysurvivorgame.com/images/50/draftpics/stephenieDFT.jpg",
+      "startingTribe": "Vatu",
+      "tribeHistory": [
+        {
+          "episode": 1,
+          "tribe": "Vatu",
+          "type": "starting",
+          "label": "Starting Tribe: Vatu"
+        }
+      ]
     },
     {
       "id": 19,
@@ -340,7 +502,16 @@
       ],
       "threat": "Very High",
       "note": "Fan favorite strategic player",
-      "image": "https://www.fantasysurvivorgame.com/images/50/draftpics/aubryDFT.jpg"
+      "image": "https://www.fantasysurvivorgame.com/images/50/draftpics/aubryDFT.jpg",
+      "startingTribe": "Vatu",
+      "tribeHistory": [
+        {
+          "episode": 1,
+          "tribe": "Vatu",
+          "type": "starting",
+          "label": "Starting Tribe: Vatu"
+        }
+      ]
     },
     {
       "id": 20,
@@ -357,7 +528,16 @@
       ],
       "threat": "Medium-High",
       "note": "Can I have your jacket? Rice negotiator!",
-      "image": "https://www.fantasysurvivorgame.com/images/50/draftpics/angelinaDFT.jpg"
+      "image": "https://www.fantasysurvivorgame.com/images/50/draftpics/angelinaDFT.jpg",
+      "startingTribe": "Vatu",
+      "tribeHistory": [
+        {
+          "episode": 1,
+          "tribe": "Vatu",
+          "type": "starting",
+          "label": "Starting Tribe: Vatu"
+        }
+      ]
     },
     {
       "id": 21,
@@ -374,7 +554,16 @@
       ],
       "threat": "Very High",
       "note": "Canadian lawyer. Cutthroat player",
-      "image": "https://www.fantasysurvivorgame.com/images/50/draftpics/genevieveDFT.jpg"
+      "image": "https://www.fantasysurvivorgame.com/images/50/draftpics/genevieveDFT.jpg",
+      "startingTribe": "Vatu",
+      "tribeHistory": [
+        {
+          "episode": 1,
+          "tribe": "Vatu",
+          "type": "starting",
+          "label": "Starting Tribe: Vatu"
+        }
+      ]
     },
     {
       "id": 22,
@@ -391,7 +580,16 @@
       ],
       "threat": "Medium-High",
       "note": "Real estate agent from S46",
-      "image": "https://www.fantasysurvivorgame.com/images/50/draftpics/%22q%22DFT.jpg"
+      "image": "https://www.fantasysurvivorgame.com/images/50/draftpics/%22q%22DFT.jpg",
+      "startingTribe": "Vatu",
+      "tribeHistory": [
+        {
+          "episode": 1,
+          "tribe": "Vatu",
+          "type": "starting",
+          "label": "Starting Tribe: Vatu"
+        }
+      ]
     },
     {
       "id": 23,
@@ -408,7 +606,16 @@
       ],
       "threat": "Medium",
       "note": "Just finished S49 with Savannah!",
-      "image": "https://www.fantasysurvivorgame.com/images/50/draftpics/rizoDFT.jpg"
+      "image": "https://www.fantasysurvivorgame.com/images/50/draftpics/rizoDFT.jpg",
+      "startingTribe": "Vatu",
+      "tribeHistory": [
+        {
+          "episode": 1,
+          "tribe": "Vatu",
+          "type": "starting",
+          "label": "Starting Tribe: Vatu"
+        }
+      ]
     },
     {
       "id": 24,
@@ -425,7 +632,16 @@
       ],
       "threat": "EXTREMELY HIGH",
       "note": "Winner of S48!",
-      "image": "https://www.fantasysurvivorgame.com/images/50/draftpics/kyleDFT.jpg"
+      "image": "https://www.fantasysurvivorgame.com/images/50/draftpics/kyleDFT.jpg",
+      "startingTribe": "Vatu",
+      "tribeHistory": [
+        {
+          "episode": 1,
+          "tribe": "Vatu",
+          "type": "starting",
+          "label": "Starting Tribe: Vatu"
+        }
+      ]
     }
   ]
 }

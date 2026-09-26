@@ -1214,6 +1214,22 @@
                         });
                     });
                 });
+
+                // Add tribe swap & merge events
+                const playerObj = playerById[playerId];
+                if (playerObj) {
+                    const progression = getPlayerTribeProgression(playerObj);
+                    progression.forEach(th => {
+                        if (th.type === 'swap' || th.type === 'merge') {
+                            breakdown.push({
+                                episode: th.episode || 1,
+                                category: th.type === 'merge' ? `🏝️ Reached Merge (${th.tribe} Tribe)` : `🔄 Tribe Swap (${th.tribe} Tribe)`,
+                                points: 0,
+                                note: th.label || `Transferred to ${th.tribe}`
+                            });
+                        }
+                    });
+                }
                 
                 // Add elimination bonus if exists
                 if (eliminationOrder[playerId]) {
@@ -1408,10 +1424,17 @@
                                                     h('div', { className: 'flex justify-between items-start mb-2' },
                                                         h('div', { className: 'font-bold text-gray-900 flex items-center gap-1.5 flex-wrap' }, 
                                                             player.name,
-                                                            (player.tribe || player.startingTribe) && (player.tribe || player.startingTribe) !== 'Unassigned' && h('span', { className: `text-[10px] font-bold px-2 py-0.5 rounded-full ${getTribeBadgeColor(player.tribe || player.startingTribe)} shadow-sm` },
-                                                                getTribeIcon(player.tribe || player.startingTribe),
-                                                                player.tribe || player.startingTribe
-                                                            ),
+                                                            ...getPlayerTribeProgression(player).map((item, idx) => {
+                                                                const tName = item.tribe;
+                                                                return h('React.Fragment', { key: idx },
+                                                                    idx > 0 && h('span', { className: 'text-[10px] text-gray-400 font-black' }, '➔'),
+                                                                    h('span', { className: `text-[10px] font-bold px-2 py-0.5 rounded-full ${getTribeBadgeColor(tName)} shadow-sm flex items-center gap-1` },
+                                                                        getTribeIcon(tName),
+                                                                        tName,
+                                                                        item.type === 'merge' && h('span', { className: 'text-[9px] bg-emerald-700 text-emerald-100 font-black px-1 rounded ml-0.5' }, 'MERGE')
+                                                                    )
+                                                                );
+                                                            }),
                                                             isWinner && h('span', { className: 'text-xs text-yellow-600 font-bold' }, 
                                                                 '👑 SOLE SURVIVOR'
                                                             ),

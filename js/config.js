@@ -174,6 +174,99 @@ function getActiveSeasonId(leagueId) {
 }
 
 /**
+ * Helper: Resolve Tribe Progression Array for a Player
+ */
+function getPlayerTribeProgression(player) {
+    if (!player) return [];
+    if (player.tribeHistory && Array.isArray(player.tribeHistory) && player.tribeHistory.length > 0) {
+        return player.tribeHistory;
+    }
+    const start = player.startingTribe || player.tribe || 'Unassigned';
+    const curr = player.tribe || player.startingTribe || 'Unassigned';
+    if (start !== curr && curr !== 'Unassigned') {
+        return [
+            { episode: 1, tribe: start, type: 'starting', label: `Starting Tribe: ${start}` },
+            { episode: 2, tribe: curr, type: 'swap', label: `Swapped to ${curr}` }
+        ];
+    }
+    return [{ episode: 1, tribe: start, type: 'starting', label: `Starting Tribe: ${start}` }];
+}
+
+/**
+ * Helper: Compile Chronological Episode Timeline of Tribe Swaps & Scoring Events
+ */
+function getPlayerEventsTimeline(player, scores, eliminationOrder) {
+    if (!player) return [];
+    const timelineByEpisode = {};
+
+    // 1. Tribe events
+    const progression = getPlayerTribeProgression(player);
+    progression.forEach(th => {
+        const ep = th.episode || 1;
+        if (!timelineByEpisode[ep]) timelineByEpisode[ep] = [];
+        let icon = '🏝️';
+        if (th.tribe === 'Toka') icon = '☀️';
+        else if (th.tribe === 'Savu') icon = '🟣';
+        else if (th.tribe === 'Exile Island') icon = '🏝️';
+        else if (th.tribe === 'Cila') icon = '🔥';
+        else if (th.tribe === 'Kalo') icon = '🌊';
+        else if (th.tribe === 'Vatu') icon = '⚡';
+
+        let title = th.label || `Tribe: ${th.tribe}`;
+        if (th.type === 'starting') title = `Assigned to Starting Tribe: ${th.tribe}`;
+        else if (th.type === 'swap') title = `🔄 Tribe Swap: Transferred to ${th.tribe} Tribe`;
+        else if (th.type === 'merge') title = `🏝️ Made Merge: Joined ${th.tribe} Merge Tribe`;
+
+        timelineByEpisode[ep].push({
+            id: `tribe-${ep}-${th.tribe}`,
+            type: 'tribe',
+            icon: icon,
+            title: title,
+            tribe: th.tribe
+        });
+    });
+
+    // 2. Scoring events
+    const playerScores = scores && scores[player.id] ? scores[player.id] : {};
+    Object.entries(playerScores).forEach(([epStr, scoreObj]) => {
+        const ep = parseInt(epStr);
+        if (!timelineByEpisode[ep]) timelineByEpisode[ep] = [];
+        Object.entries(scoreObj || {}).forEach(([scoreId, item]) => {
+            timelineByEpisode[ep].push({
+                id: scoreId,
+                type: 'score',
+                icon: item.points >= 0 ? '🏆' : '⚠️',
+                title: item.category,
+                points: item.points,
+                note: item.note
+            });
+        });
+    });
+
+    // 3. Elimination event
+    if (eliminationOrder && eliminationOrder[player.id]) {
+        const ep = parseInt(eliminationOrder[player.id]);
+        if (!timelineByEpisode[ep]) timelineByEpisode[ep] = [];
+        timelineByEpisode[ep].push({
+            id: `elim-${ep}`,
+            type: 'elimination',
+            icon: '💀',
+            title: `Voted Out / Eliminated`,
+            points: -10
+        });
+    }
+
+    // Sort episodes chronologically
+    return Object.keys(timelineByEpisode)
+        .map(Number)
+        .sort((a, b) => a - b)
+        .map(ep => ({
+            episode: ep,
+            events: timelineByEpisode[ep]
+        }));
+}
+
+/**
  * Set active league AND season ID and update URL / localStorage
  */
 function setActiveLeagueAndSeason(leagueId, seasonId) {
@@ -186,3 +279,4 @@ function setActiveLeagueAndSeason(leagueId, seasonId) {
     url.searchParams.set('season', sId);
     window.location.href = url.toString();
 }
+
