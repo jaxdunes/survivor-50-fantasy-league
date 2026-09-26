@@ -816,7 +816,9 @@
 
             if (!isOpen) return null;
 
-            const shareUrl = "https://jaxdunes.github.io/survivor-fantasy-league/install.html";
+            const basePath = window.location.pathname.substring(0, window.location.pathname.lastIndexOf('/') + 1);
+            const shareUrl = window.location.origin + basePath + 'install.html';
+            const displayUrl = (window.location.hostname + basePath).replace(/\/$/, '');
 
             const handleCopyLink = () => {
                 if (navigator.clipboard && navigator.clipboard.writeText) {
@@ -851,7 +853,7 @@
                 {
                     num: 2,
                     title: "Go to Website URL",
-                    subtitle: "jaxdunes.github.io/survivor-fantasy-league",
+                    subtitle: displayUrl,
                     icon: "🔗",
                     highlight: "Already here? Perfect!"
                 },

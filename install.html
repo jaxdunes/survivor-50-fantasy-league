@@ -65,7 +65,7 @@
                         </div>
                         <div class="flex-1">
                             <h3 class="font-bold text-base text-white mb-1">Go to Website URL</h3>
-                            <p class="text-slate-300 text-xs sm:text-sm font-mono bg-slate-950/60 p-2 rounded-xl border border-slate-800 text-orange-300 select-all mb-2">jaxdunes.github.io/survivor-fantasy-league</p>
+                            <p id="step2Url" class="text-slate-300 text-xs sm:text-sm font-mono bg-slate-950/60 p-2 rounded-xl border border-slate-800 text-orange-300 select-all mb-2">jaxdunes.github.io/survivor-50-fantasy-league</p>
                             <p class="text-slate-400 text-xs">Already here? Excellent! Proceed to step 3.</p>
                         </div>
                     </div>
@@ -126,7 +126,11 @@
     </div>
     
     <script>
-    const shareUrl = "https://jaxdunes.github.io/survivor-fantasy-league/install.html";
+    const shareUrl = window.location.origin + window.location.pathname;
+    const displayUrl = (window.location.hostname + window.location.pathname).replace(/\/install\.html$/, '');
+    if (document.getElementById('step2Url')) {
+        document.getElementById('step2Url').textContent = displayUrl;
+    }
     const copyBtn = document.getElementById('copyShareBtn');
     const copyBtnText = document.getElementById('copyBtnText');
 
